@@ -26,7 +26,7 @@
 window.trackerConfig = {
   numberOfLogLines: 18,
   numberOfDownloaders: 18 - (<%= tracker["domains"].size %>) - 4,
-  numberOfDownloadersInGraph: 6,
+  numberOfDownloadersInGraph: 18 - (<%= tracker["domains"].size %>) - 4,
   statsPath: '/stats.json',
   logChannel: '<%= tracker["log_channel"] %>',
   logHost: '<%= tracker["log_host"] %>',
