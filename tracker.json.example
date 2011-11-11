@@ -1,0 +1,12 @@
+{
+  "title": "MeMac",
+  "domains": {
+    "public.me.com":    "public",
+    "web.me.com":       "web",
+    "homepage.mac.com": "homepage",
+    "gallery.me.com":   "gallery"
+  },
+  "redis_pubsub_channel": "tracker-log",
+  "log_channel": "memac-log",
+  "log_host": "atpub-at.dotcloud.com"
+}
