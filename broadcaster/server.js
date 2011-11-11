@@ -1,9 +1,6 @@
 var fs = require('fs');
 var env = JSON.parse(fs.readFileSync('/home/dotcloud/environment.json'));
 
-console.log(env);
-console.log(env['tracker_config']);
-
 var trackerConfig = JSON.parse(env['tracker_config']);
 
 var app = require('http').createServer(httpHandler),
