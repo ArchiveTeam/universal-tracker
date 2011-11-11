@@ -127,7 +127,7 @@
       var downloader = downloaders[i];
       var series = downloaderSeries[downloader];
       if (!series) {
-        downloaderSeries[downloader] = series = chart.addSeries({'name':downloader, 'marker':{'enabled':false}});
+        downloaderSeries[downloader] = series = chart.addSeries({'name':downloader, 'marker':{'enabled':false}, 'shadow':false});
         if (stats.downloader_chart[downloader]) {
           series.setData(stats.downloader_chart[downloader]);
         }
@@ -138,6 +138,7 @@
       }
       series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ]);
     }
+    chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ]);
   }
 
   function updateStats(msg) {
@@ -203,19 +204,36 @@
     });
   }
 
-  var chart = new Highcharts.Chart({
-    chart: {renderTo:'chart-container',zoomType:'xy'},
-    title:{text:null},
-    legend:{enabled:false},
-    credits:{enabled:false},
-    xAxis:{type:'datetime'},
-    yAxis:{min:0, title:{text:'gigabytes'}}
-  });
+  var chart = null;
+  function buildChart() {
+    chart = new Highcharts.Chart({
+      chart: {renderTo:'chart-container',zoomType:'xy'},
+      title:{text:null},
+      legend:{enabled:false},
+      credits:{enabled:false},
+      xAxis:{type:'datetime'},
+      yAxis:[ { min:0,
+                title:{text:'gigabytes per downloader'},
+                labels:{align:'left',x:0,y:-2} },
+              { min:0, title:{text:'users done'},
+                opposite:true,
+                labels:{align:'right',x:0, y:-2}} ],
+      series:[{ name:'users done',
+                type: 'area',
+                data: stats.users_done_chart,
+                color: '#aaa',
+                fillColor: '#eee',
+                shadow: false,
+                marker: {enabled: false},
+                yAxis: 1 }]
+    });
+  }
 
   var stats = null;
   jQuery.getJSON(trackerConfig.statsPath, function(newStats) {
     stats = newStats;
 
+    buildChart();
     redrawStats();
     updateChart();
 

@@ -48,6 +48,8 @@ class App < Sinatra::Base
                     "version"=>done_hash["version"].to_s,
                     "log_channel"=>settings.tracker["log_channel"] }
 
+            done_count_new = $redis.scard("done").to_i + 1
+
             $redis.pipelined do
               $redis.hdel("claims", user)
               $redis.sadd("done", user)
@@ -60,6 +62,9 @@ class App < Sinatra::Base
                 $redis.hincrby("downloader_bytes", downloader, total_bytes.to_i)
                 $redis.hincrby("downloader_count", downloader, 1)
                 $redis.append("downloader_chart:#{downloader}", bytes_str)
+                if done_count_new % 10 == 0
+                  $redis.append("users_done_chart", "[#{ Time.now.utc.to_i }000,#{ done_count_new }],")
+                end
               end
 
               $redis.publish(settings.tracker["redis_pubsub_channel"], JSON.dump(msg))
@@ -121,6 +126,7 @@ class App < Sinatra::Base
       $redis.hgetall("downloader_count")
       $redis.scard("done")
       $redis.scard("todo")
+      $redis.get("users_done_chart")
     end
 
     domain_bytes = Hash[*resp[0]]
@@ -128,6 +134,7 @@ class App < Sinatra::Base
     downloader_count = Hash[*resp[2]]
     total_users_done = resp[3]
     total_users = resp[3].to_i + resp[4].to_i
+    users_done_chart = resp[5] || ""
 
     downloaders = downloader_bytes.keys
     downloader_fields = downloaders.map{|d|"downloader_chart:#{ d }"}
@@ -149,12 +156,13 @@ class App < Sinatra::Base
       "downloader_bytes"=>Hash[downloader_bytes.map{ |k,v| [k, v.to_i] }],
       "downloader_count"=>Hash[downloader_count.map{ |k,v| [k, v.to_i] }],
       "downloader_chart"=>Hash[downloader_chart.map do |k,v|
-        total = 0
-        [k,
-         JSON.parse("["+v.gsub(/^,|,$/,"")+"]").map do |a|
-           [a[0], (total += a[1]).to_f/(1024*1024*1024)]
-         end]
+       total = 0
+       [k,
+        JSON.parse("["+v.gsub(/^,|,$/,"")+"]").map do |a|
+          [a[0], (total += a[1]).to_f/(1024*1024*1024)]
+        end]
       end],
+      "users_done_chart"=>JSON.parse("["+users_done_chart.gsub(/^,|,$/,"")+"]"),
       "downloaders"=>downloader_count.keys,
       "total_users_done"=>total_users_done.to_i,
       "total_users"=>total_users.to_i,
