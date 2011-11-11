@@ -1,11 +1,16 @@
-console.log(process.env['tracker_config']);
-var trackerConfig = JSON.parse(process.env['tracker_config']);
+var fs = require('fs');
+var env = JSON.parse(fs.readFileSync('/home/dotcloud/environment.json'
+
+console.log(env);
+console.log(env['tracker_config']);
+
+var trackerConfig = JSON.parse(env['tracker_config']);
 
 var app = require('http').createServer(httpHandler),
     io = require('socket.io').listen(app),
-    redis = require('redis').createClient(Number(process.env['redis_port'] || 6379),
-                                          process.env['redis_host'] || '127.0.0.1',
-                                          Number(process.env['redis_db'] || 0)),
+    redis = require('redis').createClient(Number(env['redis_port'] || 6379),
+                                          env['redis_host'] || '127.0.0.1',
+                                          Number(env['redis_db'] || 0)),
     numberOfClients = 0,
     recentMessages = {};
 
