@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title><%= tracker["title"] %> Rescue-Me</title>
+  <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
+  <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<div id="container">
+  <form method="post" action="/rescue-me">
+    <h1><%= "#{ new_usernames.size } username#{ new_usernames.size==1 ? "" : "s" }" %> added to the queue</h1>
+    <p>
+      Thanks for your help!
+    </p>
+  </form>
+</div>
+
+</body>
+
+</html>
+

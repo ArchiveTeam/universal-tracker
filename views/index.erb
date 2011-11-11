@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title><%= tracker["title"] %> Dashboard</title>
+  <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
+  <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<div id="container">
+  <div id="left"><p>Loading...</p></div>
+
+  <div class="log">
+    <table cellspacing="0">
+      <tbody id="log"></tbody>
+    </table>
+  </div>
+
+  <div id="chart-container"></div>
+</div>
+
+<script type="text/javascript">
+window.trackerConfig = {
+  numberOfLogLines: 18,
+  numberOfDownloaders: 18 - (<%= tracker["domains"].size %>) - 4,
+  numberOfDownloadersInGraph: 6,
+  statsPath: '/stats.json',
+  logChannel: '<%= tracker["log_channel"] %>',
+  logHost: '<%= tracker["log_host"] %>',
+  domains: <%= JSON.dump(tracker["domains"]) %>
+};
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+<script src="/js/highcharts.js?<%= version %>" type="text/javascript"></script>
+<script src="/js/socket.io.js?<%= version %>" type="text/javascript"></script>
+<script src="/js/dashboard.js?<%= version %>" type="text/javascript"></script>
+
+</body>
+
+</html>
+

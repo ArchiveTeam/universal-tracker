@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title><%= tracker["title"] %> Rescue-Me</title>
+  <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
+  <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<div id="container">
+  <form method="post" action="/rescue-me">
+    <h1>Don&#8217;t forget...</h1>
+    <p>
+      <textarea name="usernames" placeholder="Usernames you&#8217;d like to see saved (separated by spaces, newlines or tabs)"></textarea>
+    </p>
+    <p>
+      <input type="submit" value="Please?" name="submit_button" />
+    </p>
+    <p>
+      Have more than a few users?<br/>Please don&#8217;t use this form, but do mention it on IRC.
+    </p>
+  </form>
+</div>
+
+<script type="text/javascript">
+(function() {
+  document.forms[0].onsubmit = function(evt) {
+    var text = document.forms[0].usernames.value;
+    var count = text.match(/\S+/mg).length;
+    if (count > 100 || text.length > 100*100) {
+      alert('You\'re posting more than 100 usernames! Thanks.\n\nUnfortunately, the tracker can\'t handle this. Please split your list in batches of less than 100, if it is small enough, or upload it somewhere and post the link via IRC.');
+      return false;
+    } else {
+      document.forms[0].submit_button.value = 'Processing...';
+      return true;
+    }
+  }
+})();
+</script>
+
+</body>
+
+</html>
+
