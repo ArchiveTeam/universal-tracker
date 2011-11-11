@@ -1,3 +1,4 @@
+console.log(process.env['tracker_config']);
 var trackerConfig = JSON.parse(process.env['tracker_config']);
 
 var app = require('http').createServer(httpHandler),
