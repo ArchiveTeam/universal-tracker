@@ -93,8 +93,8 @@ io.sockets.on('connection', function(socket) {
 });
 
 
-if (process.env['redis_password']) {
-  redis.auth(process.env['redis_password']);
+if (env['redis_password']) {
+  redis.auth(env['redis_password']);
 }
 redis.subscribe(trackerConfig['redis_pubsub_channel'], redisHandler);
 
