@@ -16,7 +16,7 @@ redis.on("error", function (err) {
 
 function httpHandler(request, response) {
   var m;
-  if (m = request.url.match(/^\/recent\/(.+)/) {
+  if (m = request.url.match(/^\/recent\/(.+)/)) {
     var channel = m[1];
     response.writeHead(200, {"Content-Type": "text/plain; charset=UTF-8",
                              'Access-Control-Allow-Origin': '*',
