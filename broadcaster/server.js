@@ -20,6 +20,8 @@ redis.on("error", function (err) {
   console.log("Error " + err);
 });
 
+redis.on("message", redisHandler);
+
 function httpHandler(request, response) {
   var m;
   if (m = request.url.match(/^\/recent\/(.+)/)) {
@@ -38,7 +40,9 @@ function httpHandler(request, response) {
 }
 
 function redisHandler(pubsubChannel, message) {
+  console.log(message);
   var msgParsed = JSON.parse(message);
+  console.log(msgParsed);
   var channel = msgParsed['log_channel'];
   if (!recentMessages[channel]) {
     recentMessages[channel] = [];
@@ -96,5 +100,5 @@ io.sockets.on('connection', function(socket) {
 if (env['redis_password']) {
   redis.auth(env['redis_password']);
 }
-redis.subscribe(trackerConfig['redis_pubsub_channel'], redisHandler);
+redis.subscribe(trackerConfig['redis_pubsub_channel']);
 
