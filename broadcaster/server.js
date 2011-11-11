@@ -1,0 +1,94 @@
+var trackerConfig = JSON.parse(process.env['tracker_config']);
+
+var app = require('http').createServer(httpHandler),
+    io = require('socket.io').listen(app),
+    redis = require('redis').createClient(Number(process.env['redis_port'] || 6379),
+                                          process.env['redis_host'] || '127.0.0.1',
+                                          Number(process.env['redis_db'] || 0)),
+    numberOfClients = 0,
+    recentMessages = {};
+
+app.listen(8080);
+
+redis.on("error", function (err) {
+  console.log("Error " + err);
+});
+
+function httpHandler(request, response) {
+  var m;
+  if (m = request.url.match(/^\/recent\/(.+)/) {
+    var channel = m[1];
+    response.writeHead(200, {"Content-Type": "text/plain; charset=UTF-8",
+                             'Access-Control-Allow-Origin': '*',
+                             'Access-Control-Allow-Credentials': 'true'});
+    output = JSON.stringify(recentMessages[channel] || []);
+    response.end(output);
+
+  } else {
+    response.writeHead(200, {"Content-Type": "text/plain"});
+    output = "" + numberOfClients;
+    response.end(output);
+  }
+}
+
+function redisHandler(pubsubChannel, message) {
+  var msgParsed = JSON.parse(message);
+  var channel = msgParsed['log_channel'];
+  if (!recentMessages[channel]) {
+    recentMessages[channel] = [];
+  }
+  var msgList = recentMessages[channel];
+  msgList.push(msgParsed);
+  while (msgList.length > 20) {
+    msgList.shift();
+  }
+  io.sockets.emit(channel, message);
+}
+
+
+io.configure(function() {
+  io.set("transports", ["xhr-polling"]);
+  io.set("polling duration", 10);
+
+  var path = require('path');
+  var HTTPPolling = require(path.join(
+    path.dirname(require.resolve('socket.io')),'lib', 'transports','http-polling')
+  );
+  var XHRPolling = require(path.join(
+    path.dirname(require.resolve('socket.io')),'lib','transports','xhr-polling')
+  );
+
+  XHRPolling.prototype.doWrite = function(data) {
+    HTTPPolling.prototype.doWrite.call(this);
+
+    var headers = {
+      'Content-Type': 'text/plain; charset=UTF-8',
+      'Content-Length': (data && Buffer.byteLength(data)) || 0
+    };
+
+    if (this.req.headers.origin) {
+      headers['Access-Control-Allow-Origin'] = '*';
+      if (this.req.headers.cookie) {
+        headers['Access-Control-Allow-Credentials'] = 'true';
+      }
+    }
+
+    this.response.writeHead(200, headers);
+    this.response.write(data);
+    // this.log.debug(this.name + ' writing', data);
+  };
+});
+
+io.sockets.on('connection', function(socket) {
+  numberOfClients++;
+  socket.on('disconnect', function() {
+    numberOfClients--;
+  });
+});
+
+
+if (process.env['redis_password']) {
+  redis.auth(process.env['redis_password']);
+}
+redis.subscribe(trackerConfig['redis_pubsub_channel'], redisHandler);
+

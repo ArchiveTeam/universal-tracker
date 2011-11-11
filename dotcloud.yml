@@ -1,0 +1,4 @@
+www:
+  type: nodejs
+  approot: broadcaster
+
