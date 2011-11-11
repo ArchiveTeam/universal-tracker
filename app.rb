@@ -172,7 +172,7 @@ class App < Sinatra::Base
   end
 
   post "/rescue-me" do
-    usernames = params[:usernames].to_s.downcase.scan(/[-.a-z0-9]{3,50}/).uniq
+    usernames = params[:usernames].to_s.downcase.scan(Regex.new(settings.tracker["valid_usernames"])).uniq
     if usernames.size > 100
       "Too many usernames."
     else
