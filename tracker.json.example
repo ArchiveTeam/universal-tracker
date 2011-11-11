@@ -8,5 +8,6 @@
   },
   "redis_pubsub_channel": "tracker-log",
   "log_channel": "memac-log",
-  "log_host": "atpub-at.dotcloud.com"
+  "log_host": "atpub-at.dotcloud.com",
+  "valid_usernames": "([-_.A-Za-z0-9]{2,50})"
 }
