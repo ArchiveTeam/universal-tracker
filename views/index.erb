@@ -11,6 +11,7 @@
 <body>
 
 <div id="container">
+  <h1><%= tracker["title"] %></h1>
   <div id="left"><p>Loading...</p></div>
 
   <div class="log">
@@ -24,6 +25,7 @@
 
 <script type="text/javascript">
 window.trackerConfig = {
+  movingAverageInterval: <%= tracker["moving_average_interval"] %>,
   numberOfLogLines: 18,
   numberOfDownloaders: 18 - (<%= tracker["domains"].size %>) - 4,
   numberOfDownloadersInGraph: 18 - (<%= tracker["domains"].size %>) - 4,
@@ -35,6 +37,7 @@ window.trackerConfig = {
 </script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
 <script src="/js/highcharts.js?<%= version %>" type="text/javascript"></script>
+<script src="/js/highstock.js?<%= version %>" type="text/javascript"></script>
 <script src="/js/socket.io.js?<%= version %>" type="text/javascript"></script>
 <script src="/js/dashboard.js?<%= version %>" type="text/javascript"></script>
 

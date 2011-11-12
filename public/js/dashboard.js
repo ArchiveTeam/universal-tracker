@@ -1,4 +1,41 @@
 (function initDashboard(trackerConfig) {
+  function DifferenceSeries(periodDuration, unitDuration) {
+    this.periodDuration = periodDuration;
+    this.unitDuration = unitDuration;
+    this.startOfPeriodIndex = null;
+    this.data = [];
+    this.rateData = [];
+    this.series = null;
+  }
+  DifferenceSeries.prototype.addPoint = function(options, redraw, shift, animation) {
+    var idx = this.startOfPeriodIndex,
+        dur = this.periodDuration,
+        data = this.data, n = data.length;
+    if (idx != null && n > 1) {
+      while (idx < n && data[idx][0] < options[0] - dur) {
+        idx++;
+      }
+      idx = idx - 1;
+
+      if (idx >= 0) {
+        var prevPoint = data[idx];
+        var timeDiff = options[0] - prevPoint[0];
+        var valueDiff = options[1] - prevPoint[1];
+        var rate = valueDiff / (timeDiff / this.unitDuration);
+        if (this.series) {
+          this.series.addPoint([ options[0], rate ], redraw, shift, animation);
+        } else {
+          this.rateData.push([ options[0], rate ]);
+        }
+
+        this.startOfPeriodIndex = idx + 1;
+      }
+    } else {
+      this.startOfPeriodIndex = 0;
+    }
+    this.data.push(options);
+  };
+
   function makeEmpty(el) {
     while (el.firstChild) {
       el.removeChild(el.firstChild);
@@ -123,30 +160,44 @@
       return stats.downloader_bytes[b] - stats.downloader_bytes[a];
     });
 
+    chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ],
+                             false, false, false);
+    stats.users_done_rate.addPoint([ new Date() * 1, stats.total_users_done ],
+                                   false, false, false);
+    stats.bytes_download_rate.addPoint([ new Date() * 1, stats.total_bytes ],
+                                   false, false, false);
+
     for (var i=0; i<downloaders.length && i<trackerConfig.numberOfDownloadersInGraph; i++) {
       var downloader = downloaders[i];
       var series = downloaderSeries[downloader];
       if (!series) {
-        downloaderSeries[downloader] = series = chart.addSeries({'name':downloader, 'marker':{'enabled':false}, 'shadow':false},
-                                                                false, false);
+        var seriesData = [];
         if (stats.downloader_chart[downloader]) {
-          var seriesData = stats.downloader_chart[downloader];
+          seriesData = stats.downloader_chart[downloader];
           for (var j=seriesData.length-1; j>=0; j--) {
             seriesData[j][0] = seriesData[j][0] * 1000;
             seriesData[j][1] = seriesData[j][1] / (1024*1024*1024);
           }
-          series.setData(seriesData);
         }
+        seriesData.push([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ]);
+
+        downloaderSeries[downloader] = series = chart.addSeries({'name':downloader,
+                                                                 'marker':{'enabled':false},
+                                                                 'shadow':false,
+                                                                 'data':seriesData,
+                                                                 stickyTracing: false
+                                                                },
+                                                                false, false);
+
+        var span = document.getElementById('legend-'+downloader);
+        if (span) {
+          span.style.color = series.color;
+        }
+      } else {
+        series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ],
+                        false, false, false);
       }
-      var span = document.getElementById('legend-'+downloader);
-      if (span) {
-        span.style.color = series.color;
-      }
-      series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ],
-                      false, false, false);
     }
-    chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ],
-                             false, false, false);
     chart.redraw();
   }
 
@@ -232,18 +283,76 @@
     for (var j=seriesData.length-1; j>=0; j--) {
       seriesData[j][0] *= 1000;
     }
-    chart = new Highcharts.Chart({
-      chart: {renderTo:'chart-container',zoomType:'xy'},
+
+    // take the hourly rate based on a moving interval of 10 minutes
+    var diffSeries = new DifferenceSeries(trackerConfig.movingAverageInterval * 60000, 60 * 60000);
+    for (var j=0; j<seriesData.length; j++) {
+      diffSeries.addPoint(seriesData[j]);
+    }
+    stats.users_done_rate = diffSeries;
+
+    // count MB/s based on a moving interval of 10 minutes
+    diffSeries = new DifferenceSeries(trackerConfig.movingAverageInterval * 60000, 1000);
+    var perDownloaderData = [], perDownloaderIndex = [];
+    for (var i in stats.downloader_chart) {
+      perDownloaderData.push(stats.downloader_chart[i]);
+      perDownloaderIndex.push(0);
+    }
+    var sumBytes = 0;
+    while (perDownloaderData.length > 0) {
+      var minTime = null, minTimeIdx = null;
+      for (var j = perDownloaderData.length - 1; j>=0; j--) {
+        var thisTime = perDownloaderData[j][perDownloaderIndex[j]][0];
+        if (minTime == null || thisTime <= minTime) {
+          minTime = thisTime;
+          minTimeIdx = j;
+        }
+      }
+      if (minTimeIdx != null) {
+        if (perDownloaderIndex[minTimeIdx] > 0) {
+          sumBytes -= perDownloaderData[minTimeIdx][perDownloaderIndex[minTimeIdx] - 1][1];
+        }
+        sumBytes += perDownloaderData[minTimeIdx][perDownloaderIndex[minTimeIdx]][1];
+        diffSeries.addPoint([ minTime * 1000, sumBytes ]);
+        perDownloaderIndex[minTimeIdx]++;
+        if (perDownloaderIndex[minTimeIdx] >= perDownloaderData[minTimeIdx].length) {
+          perDownloaderIndex.splice(minTimeIdx, 1);
+          perDownloaderData.splice(minTimeIdx, 1);
+        }
+      }
+    }
+    stats.bytes_download_rate = diffSeries;
+
+    chart = new Highcharts.StockChart({
+      chart: {renderTo:'chart-container', zoomType:'x'},
       title:{text:null},
       legend:{enabled:false},
       credits:{enabled:false},
+      rangeSelector: {
+        buttons: [ {type:'day',  count:1,text: '1d'},
+                   {type:'week', count:1,text: '1w'},
+                   {type:'month',count:1,text: '1m'},
+                   {type:'all',          text: 'all'} ]
+      },
       xAxis:{type:'datetime'},
-      yAxis:[ { min:0,
-                title:{text:'gigabytes per downloader'},
-                labels:{align:'left',x:0,y:-2} },
-              { min:0, title:{text:'users done'},
+      yAxis:[ { min:0, maxPadding: 0,
+                title:{text:'GB done'},
+                labels:{align:'left',x:0,y:-2},
+                height: 200 },
+              { min:0, maxPadding: 0,
+                title:{text:'users', style:{color:'#aaa'}},
                 opposite:true,
-                labels:{align:'right',x:0, y:-2}} ],
+                labels:{align:'right',x:0, y:-2},
+                height: 200 },
+              { min:0, maxPadding: -0.5,
+                title:{text:'bytes/s', style:{color:'#000'}},
+                labels:{align:'left',x:0,y:-2},
+                height: 70, top: 260, offset: 0 },
+              { min:0, maxPadding: -0.5,
+                title:{text:'users/hour'},
+                opposite:true,
+                labels:{align:'right',x:0, y:-2},
+                height: 70, top: 260, offset: 0 } ],
       series:[{ name:'users done',
                 type: 'area',
                 data: seriesData,
@@ -251,8 +360,30 @@
                 fillColor: '#eee',
                 shadow: false,
                 marker: {enabled: false},
-                yAxis: 1 }]
+                yAxis: 1 },
+              { name:'users/hour',
+                type: 'spline',
+                data: stats.users_done_rate.rateData,
+                color: '#6D869F',
+                shadow: false,
+                marker: {enabled: false},
+                yAxis: 3 },
+              { name:'bytes/s',
+                type: 'spline',
+                data: stats.bytes_download_rate.rateData,
+                color: '#000',
+                shadow: false,
+                marker: {enabled: false},
+                yAxis: 2 }],
+      tooltip: {
+        crosshairs: false,
+        shared: false,
+        snap: 0
+      }
     });
+
+    stats.users_done_rate.series = chart.series[1];
+    stats.bytes_download_rate.series = chart.series[2];
   }
 
   var stats = null;
@@ -262,6 +393,7 @@
     buildChart();
     redrawStats();
     updateChart();
+    chart.
 
     initLog();
   });

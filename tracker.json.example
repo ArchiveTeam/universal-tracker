@@ -6,6 +6,7 @@
     "homepage.mac.com": "homepage",
     "gallery.me.com":   "gallery"
   },
+  "moving_average_interval": 60,
   "redis_pubsub_channel": "tracker-log",
   "history_length": 1000,
   "log_channel": "memac-log",

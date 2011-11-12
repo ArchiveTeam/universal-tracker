@@ -24,9 +24,10 @@ td {
   height: 32px;
 }
 h1 {
-  height: 32px;
-  margin: 24px 0 8px 0;
-  padding: 0;
+  margin: 0 20px 0 -7px;
+  padding: 0 0 4px 7px;
+  border-bottom: 1px solid #000;
+  font-weight: normal;
   font-size: 24px;
 }
 
@@ -70,7 +71,7 @@ tfoot td {
 #chart-container {
   margin-top: 15px;
   width: 950px;
-  height: 270px;
+  height: 440px;
   clear: both;
   background: #fee;
 }
