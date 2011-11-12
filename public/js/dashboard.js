@@ -141,9 +141,10 @@
       if (span) {
         span.style.color = series.color;
       }
-      series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ]);
+      series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ], false);
     }
     chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ]);
+    chart.redraw();
   }
 
   function updateStats(msg) {
