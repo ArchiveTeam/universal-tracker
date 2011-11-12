@@ -188,14 +188,14 @@
                                                                  stickyTracing: false
                                                                 },
                                                                 false, false);
-
-        var span = document.getElementById('legend-'+downloader);
-        if (span) {
-          span.style.color = series.color;
-        }
       } else {
         series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ],
                         false, false, false);
+      }
+
+      var span = document.getElementById('legend-'+downloader);
+      if (span) {
+        span.style.color = series.color;
       }
     }
     chart.redraw();
