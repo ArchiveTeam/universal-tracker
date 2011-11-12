@@ -393,7 +393,6 @@
     buildChart();
     redrawStats();
     updateChart();
-    chart.
 
     initLog();
   });
