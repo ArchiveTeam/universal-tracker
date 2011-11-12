@@ -1,5 +1,20 @@
 require "time"
 
+class Array
+  def sample_subset(n)
+    return self if empty? or n >= size or n <= 0
+    step = size / n
+    i = 0
+    result = []
+    while i < size
+      result.push(self[i])
+      i += step
+    end
+    result.push(self.last) if result.size < n
+    result
+  end
+end
+
 class App < Sinatra::Base
   def process_done(request, data)
     downloader = data["downloader"]
@@ -76,10 +91,8 @@ class App < Sinatra::Base
                 $redis.hincrby("downloader_bytes", downloader, total_bytes.to_i)
                 $redis.hincrby("downloader_count", downloader, 1)
                 $redis.rpush("downloader_chartdata:#{downloader}", "[#{ time_i },#{ downloader_bytes_new }]")
-                $redis.append("downloader_chart:#{downloader}", "[#{ time_i }000,#{ total_bytes }],")
                 if done_count_new % 10 == 0
                   $redis.rpush("users_done_chartdata", "[#{ time_i },#{ done_count_new }]")
-                  $redis.append("users_done_chart", "[#{ time_i }000,#{ done_count_new }],")
                 end
               end
 
@@ -142,7 +155,7 @@ class App < Sinatra::Base
       $redis.hgetall("downloader_count")
       $redis.scard("done")
       $redis.scard("todo")
-      $redis.get("users_done_chart")
+      $redis.lrange("users_done_chartdata", 0, -1)
     end
 
     domain_bytes = Hash[*resp[0]]
@@ -150,13 +163,23 @@ class App < Sinatra::Base
     downloader_count = Hash[*resp[2]]
     total_users_done = resp[3]
     total_users = resp[3].to_i + resp[4].to_i
-    users_done_chart = resp[5] || ""
+    users_done_chart = (resp[5] || []).sample_subset(settings.tracker["history_length"]).map do |item|
+      JSON.parse(item)
+    end
 
     downloaders = downloader_bytes.keys
-    downloader_fields = downloaders.map{|d|"downloader_chart:#{ d }"}
+    downloader_fields = downloaders.map{|d|"downloader_chartdata:#{ d }"}
 
     unless downloader_fields.empty?
-      resp = $redis.mget(*downloader_fields)
+      resp = $redis.pipelined do
+        downloader_fields.each do |fieldname|
+          $redis.lrange(fieldname, 0, -1)
+        end
+      end.map do |list|
+        (list || []).sample_subset(settings.tracker["history_length"]).map do |item|
+          JSON.parse(item)
+        end
+      end
       downloader_chart = Hash[downloaders.zip(resp)]
     else
       downloader_chart = {}
@@ -171,14 +194,8 @@ class App < Sinatra::Base
       "domain_bytes"=>Hash[domain_bytes.map{ |k,v| [k, v.to_i] }],
       "downloader_bytes"=>Hash[downloader_bytes.map{ |k,v| [k, v.to_i] }],
       "downloader_count"=>Hash[downloader_count.map{ |k,v| [k, v.to_i] }],
-      "downloader_chart"=>Hash[downloader_chart.map do |k,v|
-       total = 0
-       [k,
-        JSON.parse("["+v.gsub(/^,|,$/,"")+"]").map do |a|
-          [a[0], (total += a[1]).to_f/(1024*1024*1024)]
-        end]
-      end],
-      "users_done_chart"=>JSON.parse("["+users_done_chart.gsub(/^,|,$/,"")+"]"),
+      "downloader_chart"=>downloader_chart,
+      "users_done_chart"=>users_done_chart,
       "downloaders"=>downloader_count.keys,
       "total_users_done"=>total_users_done.to_i,
       "total_users"=>total_users.to_i,

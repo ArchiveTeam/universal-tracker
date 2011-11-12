@@ -129,7 +129,12 @@
       if (!series) {
         downloaderSeries[downloader] = series = chart.addSeries({'name':downloader, 'marker':{'enabled':false}, 'shadow':false});
         if (stats.downloader_chart[downloader]) {
-          series.setData(stats.downloader_chart[downloader]);
+          var seriesData = stats.downloader_chart[downloader];
+          for (var j=seriesData.length-1; j>=0; j--) {
+            seriesData[j][0] = seriesData[j][0] * 1000;
+            seriesData[j][1] = seriesData[j][1] / (1024*1024*1024);
+          }
+          series.setData(seriesData);
         }
       }
       var span = document.getElementById('legend-'+downloader);
@@ -206,6 +211,23 @@
 
   var chart = null;
   function buildChart() {
+    var maxMinTimestamp = 0;
+    if (stats.users_done_chart.length > 0) {
+      maxMinTimestamp = Math.max(maxMinTimestamp, stats.users_done_chart[0][0] * 1000);
+    }
+    for (var i in stats.downloader_chart) {
+      if (stats.downloader_chart[i].length > 0) {
+        maxMinTimestamp = Math.max(maxMinTimestamp, stats.downloader_chart[i][0][0] * 1000);
+      }
+    }
+    if (maxMinTimestamp == 0) {
+      maxMinTimestamp = null;
+    }
+
+    var seriesData = stats.users_done_chart;
+    for (var j=seriesData.length-1; j>=0; j--) {
+      seriesData[j][0] *= 1000;
+    }
     chart = new Highcharts.Chart({
       chart: {renderTo:'chart-container',zoomType:'xy'},
       title:{text:null},
@@ -220,7 +242,7 @@
                 labels:{align:'right',x:0, y:-2}} ],
       series:[{ name:'users done',
                 type: 'area',
-                data: stats.users_done_chart,
+                data: seriesData,
                 color: '#aaa',
                 fillColor: '#eee',
                 shadow: false,
