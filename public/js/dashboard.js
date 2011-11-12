@@ -127,7 +127,8 @@
       var downloader = downloaders[i];
       var series = downloaderSeries[downloader];
       if (!series) {
-        downloaderSeries[downloader] = series = chart.addSeries({'name':downloader, 'marker':{'enabled':false}, 'shadow':false});
+        downloaderSeries[downloader] = series = chart.addSeries({'name':downloader, 'marker':{'enabled':false}, 'shadow':false},
+                                                                false, false);
         if (stats.downloader_chart[downloader]) {
           var seriesData = stats.downloader_chart[downloader];
           for (var j=seriesData.length-1; j>=0; j--) {
@@ -141,9 +142,11 @@
       if (span) {
         span.style.color = series.color;
       }
-      series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ], false);
+      series.addPoint([ new Date() * 1, stats.downloader_bytes[downloader]/(1024*1024*1024) ],
+                      false, false, false);
     }
-    chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ]);
+    chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ],
+                             false, false, false);
     chart.redraw();
   }
 
