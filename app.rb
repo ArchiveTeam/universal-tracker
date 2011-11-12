@@ -35,11 +35,24 @@ class App < Sinatra::Base
           end
           "OK\n"
         else
-          done_before = $redis.sismember("done", user)
-          if $redis.zrem("out", user) or $redis.srem("todo", user) or done_before
+          resp = $redis.pipelined do
+            $redis.sismember("done", user)
+            $redis.zrem("out", user)
+            $redis.srem("todo", user)
+
+            $redis.scard("done")
+            $redis.hget("downloader_bytes", downloader)
+          end
+          done_before = resp[0].to_i==1
+          rem_from_out = resp[1].to_i==1
+          rem_from_todo = resp[2].to_i==1
+          done_count_cur = resp[3].to_i
+          downloader_bytes_cur = (resp[4] || 0).to_i
+
+          if rem_from_out or rem_from_todo or done_before
             total_bytes = 0
             bytes.values.each do |b| total_bytes += b.to_i end
-            bytes_str = "[#{ Time.now.utc.to_i }000,#{ total_bytes }],"
+            time_i = Time.now.utc.to_i
 
             msg = { "downloader"=>downloader,
                     "username"=>user,
@@ -48,7 +61,8 @@ class App < Sinatra::Base
                     "version"=>done_hash["version"].to_s,
                     "log_channel"=>settings.tracker["log_channel"] }
 
-            done_count_new = $redis.scard("done").to_i + 1
+            done_count_new = done_count_cur + 1
+            downloader_bytes_new = downloader_bytes_cur + total_bytes.to_i
 
             $redis.pipelined do
               $redis.hdel("claims", user)
@@ -61,9 +75,11 @@ class App < Sinatra::Base
                 end
                 $redis.hincrby("downloader_bytes", downloader, total_bytes.to_i)
                 $redis.hincrby("downloader_count", downloader, 1)
-                $redis.append("downloader_chart:#{downloader}", bytes_str)
+                $redis.rpush("downloader_chartdata:#{downloader}", "[#{ time_i },#{ downloader_bytes_new }]")
+                $redis.append("downloader_chart:#{downloader}", "[#{ time_i }000,#{ total_bytes }],")
                 if done_count_new % 10 == 0
-                  $redis.append("users_done_chart", "[#{ Time.now.utc.to_i }000,#{ done_count_new }],")
+                  $redis.rpush("users_done_chartdata", "[#{ time_i },#{ done_count_new }]")
+                  $redis.append("users_done_chart", "[#{ time_i }000,#{ done_count_new }],")
                 end
               end
 
