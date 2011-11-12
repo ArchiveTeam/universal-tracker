@@ -137,6 +137,8 @@
     for (var i=0; i<downloaders.length && i<trackerConfig.numberOfDownloaders; i++) {
       var downloader = downloaders[i];
       tr = document.createElement('tr');
+      tr.downloader = downloader;
+      tr.style.cursor = 'pointer';
       tr.appendChild(makeTD('legend', downloader));
       tr.appendChild(makeTD('num',
                             Math.round(stats.downloader_bytes[downloader]/(1024*1024*1024)),
@@ -196,9 +198,35 @@
       var span = document.getElementById('legend-'+downloader);
       if (span) {
         span.style.color = series.color;
+        span.style.visibility = series.visible ? 'visible' : 'hidden';
       }
     }
     chart.redraw();
+  }
+
+  function handleDownloaderClick(evt) {
+    var tr = evt.target;
+    while (tr && tr.nodeName!='TR' && tr.parentNode) {
+      tr = tr.parentNode;
+    }
+    if (tr && tr.nodeName=='TR' && tr.downloader) {
+      var downloader = tr.downloader;
+      if (downloaderSeries[downloader]) {
+        var series = downloaderSeries[downloader];
+        if (series.visible)
+          series.hide();
+        else
+          series.show();
+
+        var span = document.getElementById('legend-'+downloader);
+        if (span) {
+          span.style.visibility = series.visible ? 'visible' : 'hidden';
+        }
+
+        chart.series[0].hide();
+        chart.series[0].show();
+      }
+    }
   }
 
   function updateStats(msg) {
@@ -384,6 +412,8 @@
 
     stats.users_done_rate.series = chart.series[1];
     stats.bytes_download_rate.series = chart.series[2];
+
+    $(document.body).bind('click', handleDownloaderClick);
   }
 
   var stats = null;
