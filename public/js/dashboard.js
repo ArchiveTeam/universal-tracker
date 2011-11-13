@@ -249,6 +249,7 @@
       }
       stats.domain_bytes[domain] += bytes;
       stats.downloader_bytes[msg.downloader] += bytes;
+      stats.total_bytes += bytes;
     }
     redrawStats();
     updateChart();
