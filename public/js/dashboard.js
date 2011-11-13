@@ -156,6 +156,7 @@
     div.id = 'left';
   }
 
+  var lastRedrawn = null;
   var downloaderSeries = {};
   function updateChart() {
     var downloaders = stats.downloaders.sort(function(a, b) {
@@ -201,7 +202,11 @@
         span.style.visibility = series.visible ? 'visible' : 'hidden';
       }
     }
-    chart.redraw();
+
+    if (lastRedrawn == null || new Date() - lastRedrawn > 30*1000) {
+      lastRedrawn = new Date();
+      chart.redraw();
+    }
   }
 
   function handleDownloaderClick(evt) {
