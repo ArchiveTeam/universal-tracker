@@ -424,6 +424,32 @@
     $(document.body).bind('click', handleDownloaderClick);
   }
 
+  function refreshUpdateStatus() {
+    jQuery.getJSON(trackerConfig.updateStatusPath, function(data) {
+      if (data.current_version == null || data.current_version == '')
+        return;
+
+      var mustUpdate = [];
+      for (var d in data.downloader_version) {
+        if (data.downloader_version[d] < data.current_version) {
+          mustUpdate.push(d);
+        }
+      }
+
+      var p = document.getElementById("update-status");
+      p.style.display = 'none';
+      makeEmpty(p);
+
+      if (mustUpdate.length > 0) {
+        mustUpdate.sort();
+
+        var sentence = data.current_version_update_message + ": " + mustUpdate.join(", ");
+        p.appendChild(document.createTextNode(sentence));
+        p.style.display = 'block';
+      }
+    });
+  }
+
   var stats = null;
   jQuery.getJSON(trackerConfig.statsPath, function(newStats) {
     stats = newStats;
@@ -433,6 +459,10 @@
     updateChart();
 
     initLog();
+    refreshUpdateStatus();
+
+    window.setInterval(function() { refreshUpdateStatus(); }, 60000);
   });
+
 })(window.trackerConfig);
 

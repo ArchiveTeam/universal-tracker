@@ -31,6 +31,11 @@ h1 {
   font-size: 24px;
 }
 
+#update-status {
+  display: none;
+  color: #f00;
+}
+
 #left {
   float: left;
   clear: left;
@@ -87,14 +92,14 @@ form {
   width: 610px;
 }
 p {
-  margin: 0 0 10px 0;
+  margin: 10px 0 10px 0;
 }
 input[type=submit] {
   font-size: 24px;
   padding: 3px 8px;
 }
 textarea {
-  width: 600px;
+  width: 580px;
   height: 200px;
   padding: 3px 5px;
   margin: 0 0 0 -5px;

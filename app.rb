@@ -84,6 +84,7 @@ class App < Sinatra::Base
               $redis.hdel("claims", user)
               $redis.sadd("done", user)
               $redis.rpush("log", JSON.dump(done_hash))
+              $redis.hset("downloader_version", downloader, done_hash["version"].to_s)
               
               unless done_before
                 bytes.each do |domain, b|
@@ -206,6 +207,23 @@ class App < Sinatra::Base
     content_type :json
     expires 1, :public, :must_revalidate
     JSON.dump(stats)
+  end
+
+  get "/update-status.json" do
+    resp = $redis.pipelined do
+      $redis.hgetall("downloader_version")
+      $redis.get("current_version")
+      $redis.get("current_version_update_message")
+    end
+    data = {
+      "downloader_version"=>Hash[*(resp[0] || [])],
+      "current_version"=>resp[1],
+      "current_version_update_message"=>resp[2]
+    }
+
+    content_type :json
+    expires 60, :public, :must_revalidate
+    JSON.dump(data)
   end
 
   get "/rescue-me" do

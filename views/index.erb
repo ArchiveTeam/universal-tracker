@@ -12,6 +12,7 @@
 
 <div id="container">
   <h1><%= tracker["title"] %></h1>
+  <p id="update-status"></p>
   <div id="left"><p>Loading...</p></div>
 
   <div class="log">
@@ -30,6 +31,7 @@ window.trackerConfig = {
   numberOfDownloaders: 18 - (<%= tracker["domains"].size %>) - 4,
   numberOfDownloadersInGraph: 18 - (<%= tracker["domains"].size %>) - 4,
   statsPath: '/stats.json',
+  updateStatusPath: '/update-status.json',
   logChannel: '<%= tracker["log_channel"] %>',
   logHost: '<%= tracker["log_host"] %>',
   domains: <%= JSON.dump(tracker["domains"]) %>
