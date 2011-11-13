@@ -280,7 +280,9 @@
       var msg = JSON.parse(data);
       if (msg.downloader && msg.username && msg.megabytes) {
         addLog(msg);
-        updateStats(msg);
+        if (!msg.is_duplicate) {
+          updateStats(msg);
+        }
       }
     });
   }

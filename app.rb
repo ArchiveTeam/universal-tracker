@@ -74,7 +74,8 @@ class App < Sinatra::Base
                     "megabytes"=>(total_bytes.to_f / (1024*1024)),
                     "domain_bytes"=>bytes,
                     "version"=>done_hash["version"].to_s,
-                    "log_channel"=>settings.tracker["log_channel"] }
+                    "log_channel"=>settings.tracker["log_channel"],
+                    "is_duplicate"=>done_before }
 
             done_count_new = done_count_cur + 1
             downloader_bytes_new = downloader_bytes_cur + total_bytes.to_i
