@@ -49,7 +49,7 @@ function redisHandler(pubsubChannel, message) {
   while (msgList.length > 20) {
     msgList.shift();
   }
-  io.of('/'+channel).emit(channel, message);
+  io.of('/'+channel).emit('log_message', message);
 }
 
 
