@@ -277,7 +277,7 @@
 
   function startLogClient() {
     var socket = io.connect('http://'+trackerConfig.logHost+'/'+trackerConfig.logChannel);
-    socket.on(trackerConfig.logChannel, function(data) {
+    socket.on("log_message", function(data) {
       var msg = JSON.parse(data);
       if (msg.downloader && msg.username && msg.megabytes) {
         addLog(msg);
