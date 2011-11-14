@@ -49,7 +49,7 @@
       case 'legend':
         span = document.createElement('span');
         span2 = document.createElement('span');
-        span2.innerHTML = '&bullet;';
+        span2.innerHTML = '&#8226;';
         span2.id = 'legend-'+arguments[1];
         span.appendChild(span2);
         span.className = 'text';
