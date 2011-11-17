@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="robots" content="noindex,nofollow" />
-  <title><%= tracker_config.title %> Rescue-Me</title>
+  <title>Tracker admin - <%= request.host %></title>
   <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
   <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
 </head>
@@ -11,13 +11,13 @@
 <body>
 
 <div id="container">
-  <form method="post" action="/rescue-me">
-    <h1><%= "#{ new_usernames.size } username#{ new_usernames.size==1 ? "" : "s" }" %> added to the queue</h1>
-    <p>
-      Thanks for your help!
-    </p>
-  </form>
+  <h1>Tracker admin &mdash; <%= request.host %></h1>
+
+  <p>Settings saved. Restart the tracker to activate.</p>
 </div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+<script src="/js/admin.js?version=<%= version %>" type="text/javascript"></script>
 
 </body>
 

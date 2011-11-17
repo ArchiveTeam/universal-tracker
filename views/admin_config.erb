@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Tracker admin - <%= request.host %></title>
+  <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
+  <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<div id="container">
+  <h1>Tracker admin &mdash; <%= request.host %></h1>
+
+  <form method="post" action="/admin/config" id="tracker-config">
+  <dl>
+    <dt>Redis:</dt>
+    <dd><%= $redis.id %></dd>
+
+    <%
+    @tracker_config.each_field do |field|
+      case field[:type]
+      when :string, :integer, :regexp
+    -%>
+      <dt><label for="f-<%= field[:name] %>"><%= field[:label] %>:</label></dt>
+      <dd><input type="text" name="<%= field[:name] %>" id="f-<%= field[:name] %>" value="<%= field[:value] %>" /></dd>
+    <%
+
+      when :map
+    -%>
+      <dt><%= field[:label] %>:</dt>
+      <dd>
+        <table class="map" data-fieldname="<%= field[:name] %>">
+          <thead><tr><th>Key</th><th>Label</th></tr></thead>
+          <tbody>
+            <% field[:value].each_with_index do |key_value, index| -%>
+              <tr>
+                <td><input type="text" name="<%= field[:name] %>-<%= index %>-key" value="<%= key_value[0] %>" /></td>
+                <td><input type="text" name="<%= field[:name] %>-<%= index %>-value" value="<%= key_value[1] %>" /></td>
+              </tr>
+            <% end -%>
+          </tbody>
+        </table>
+      </dd>
+    <%
+      end
+    end
+    -%>
+  </dl>
+
+  <p><input type="submit" value="Save" /></p>
+  </form>
+
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+<script src="/js/admin.js?version=<%= version %>" type="text/javascript"></script>
+<script type="text/javascript">//<![CDATA[
+var configFormFields = <%== JSON.dump(TrackerConfig.config_fields.map do |field|
+  { "name"=>field[:name], "type"=>field[:type] }
+end) %>;
+//]]>
+</script>
+
+</body>
+
+</html>
+

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Tracker admin - <%= request.host %></title>
+  <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
+  <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+
+<div id="container">
+  <h1>Tracker admin &mdash; <%= request.host %></h1>
+
+  <p><%= $redis.keys("todo*").inspect %></p>
+
+  <p><%= $redis.hgetall("downloader_version").inspect %></p>
+
+  <p><%= $redis.hgetall("downloader_count").inspect %></p>
+
+  <p><%= $redis.hgetall("downloader_bytes").inspect %></p>
+
+  <p><%= $redis.zrange("out", 0, -1, :with_scores=>true).each_slice(2).to_a.inspect %></p>
+
+  <p><%= $redis.hgetall("claims").inspect %></p>
+
+  <p><%= $redis.llen("log") %></p>
+  <p><%= $redis.keys.inspect %></p>
+  <p><%= $redis.info["used_memory_human"] %></p>
+</div>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+
+</body>
+
+</html>
+

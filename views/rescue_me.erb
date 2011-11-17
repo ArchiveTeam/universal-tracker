@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="robots" content="noindex,nofollow" />
-  <title><%= tracker["title"] %> Rescue-Me</title>
+  <title><%= tracker_config.title %> Rescue-Me</title>
   <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
   <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
 </head>
@@ -11,7 +11,7 @@
 <body>
 
 <div id="container">
-  <form method="post" action="/rescue-me">
+  <form method="post" action="/rescue-me" class="rescue">
     <h1>Don&#8217;t forget...</h1>
     <p>
       <textarea name="usernames" placeholder="Usernames you&#8217;d like to see saved (separated by spaces, newlines or tabs)"></textarea>

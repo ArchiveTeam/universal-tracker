@@ -15,7 +15,107 @@ class Array
   end
 end
 
+class TrackerConfig
+  def self.config_field(name, options = {})
+    class_eval %{
+      def #{ name } ; @settings[:#{ name }] ; end
+    }
+    @@defaults ||= {}
+    @@defaults[name.to_sym] = options[:default]
+    (@@config_fields ||= []) << { :name=>name.to_sym }.merge(options)
+  end
+
+  def self.config_fields
+    @@config_fields
+  end
+
+  def self.load_from_redis
+    TrackerConfig.new(JSON.parse($redis.get("tracker_config") || "{}"))
+  end
+
+  def save_to_redis
+    $redis.set("tracker_config", JSON.dump(@settings))
+  end
+
+
+  config_field :title,
+               :type=>:string,
+               :label=>"Tracker title",
+               :default=>"My tracker"
+  config_field :item_type,
+               :type=>:string,
+               :label=>"Item tracked (users, profiles, things)",
+               :default=>"users"
+  config_field :domains,
+               :type=>:map,
+               :label=>"Domains",
+               :default=>{"data"=>"data"}
+  config_field :redis_pubsub_channel,
+               :type=>:string,
+               :label=>"Redis Pub/Sub channel",
+               :default=>"tracker-log"
+  config_field :live_log_host,
+               :type=>:string,
+               :label=>"Live logging host",
+               :default=>""
+  config_field :live_log_channel,
+               :type=>:string,
+               :label=>"Live logging channel",
+               :default=>""
+  config_field :valid_username_regexp,
+               :type=>:regexp,
+               :label=>"Valid username regexp",
+               :default=>"[-_.A-Za-z0-9]{2,50}"
+  config_field :moving_average_interval,
+               :type=>:integer,
+               :label=>"Moving average interval (minutes)",
+               :default=>120
+  config_field :history_length,
+               :type=>:integer,
+               :label=>"Number of historical data points",
+               :default=>1000
+
+  def initialize(settings = {})
+    @settings = @@defaults.clone.merge(Hash[settings.map{ |k,v| [ k.to_sym, v ] }])
+  end
+
+  def []=(a,b)
+    @settings[a] = b
+  end
+
+  def each_field
+    @@config_fields.each do |field|
+      yield({ :value=>send(field[:name]) }.merge(field))
+    end
+  end
+
+  def valid_username_regexp_object
+    @regexp ||= Regexp.new("(#{ @settings["valid_username_regexp"] })")
+  end
+end
+
 class App < Sinatra::Base
+  set :erb, :escape_html => true
+
+  helpers do
+    def tracker_config
+      settings.tracker_config
+    end
+
+    def protected!
+      unless authorized?
+        response['WWW-Authenticate'] = %(Basic realm="Tracker admin")
+        throw(:halt, [401, "Not authorized\n"])
+      end
+    end
+
+    def authorized?
+      admin_password = $redis.get("admin_password")
+      @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+      @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == ['admin', admin_password] && admin_password && !admin_password.empty?
+    end
+  end
+
   def process_done(request, data)
     downloader = data["downloader"]
     user = data["user"]
@@ -40,7 +140,7 @@ class App < Sinatra::Base
 
       tries = 3
       begin
-        if bytes.keys.sort != settings.tracker["domains"].keys.sort
+        if bytes.keys.sort != settings.tracker_config.domains.keys.sort
           p "Hey, strange data: #{ done_hash.inspect }"
           $redis.sadd("todo", user) if $redis.zrem("out", user)
           $redis.pipelined do
@@ -74,7 +174,7 @@ class App < Sinatra::Base
                     "megabytes"=>(total_bytes.to_f / (1024*1024)),
                     "domain_bytes"=>bytes,
                     "version"=>done_hash["version"].to_s,
-                    "log_channel"=>settings.tracker["log_channel"],
+                    "log_channel"=>settings.tracker_config.live_log_channel,
                     "is_duplicate"=>done_before }
 
             done_count_new = done_count_cur + 1
@@ -98,7 +198,7 @@ class App < Sinatra::Base
                 end
               end
 
-              $redis.publish(settings.tracker["redis_pubsub_channel"], JSON.dump(msg))
+              $redis.publish(settings.tracker_config.redis_pubsub_channel, JSON.dump(msg))
             end
 
             "OK\n"
@@ -146,8 +246,8 @@ class App < Sinatra::Base
   end
 
   get "/" do
-    erb :index, :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                           :tracker=>settings.tracker }
+    erb :index,
+        :locals=>{ :version=>File.mtime("./app.rb").to_i }
   end
 
   get "/stats.json" do
@@ -165,7 +265,7 @@ class App < Sinatra::Base
     downloader_count = Hash[*resp[2]]
     total_users_done = resp[3]
     total_users = resp[3].to_i + resp[4].to_i
-    users_done_chart = (resp[5] || []).sample_subset(settings.tracker["history_length"]).map do |item|
+    users_done_chart = (resp[5] || []).sample_subset(settings.tracker_config.history_length).map do |item|
       JSON.parse(item)
     end
 
@@ -178,7 +278,7 @@ class App < Sinatra::Base
           $redis.lrange(fieldname, 0, -1)
         end
       end.map do |list|
-        (list || []).sample_subset(settings.tracker["history_length"]).map do |item|
+        (list || []).sample_subset(settings.tracker_config.history_length).map do |item|
           JSON.parse(item)
         end
       end
@@ -227,12 +327,12 @@ class App < Sinatra::Base
   end
 
   get "/rescue-me" do
-    erb :rescue_me, :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                               :tracker=>settings.tracker }
+    erb :rescue_me,
+        :locals=>{ :version=>File.mtime("./app.rb").to_i }
   end
 
   post "/rescue-me" do
-    usernames = params[:usernames].to_s.downcase.scan(Regexp.new(settings.tracker["valid_usernames"])).map do |match|
+    usernames = params[:usernames].to_s.downcase.scan(settings.tracker_config.valid_username_regexp_object).map do |match|
       match[0]
     end.uniq
     if usernames.size > 100
@@ -265,9 +365,53 @@ class App < Sinatra::Base
       end
 
       erb :rescue_me_thanks, :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                                        :tracker=>settings.tracker,
                                         :new_usernames=>to_add }
     end
+  end
+
+  get "/admin" do
+    protected!
+    erb :admin_index,
+        :locals=>{ :version=>File.mtime("./app.rb").to_i,
+                   :request=>request }
+  end
+
+  get "/admin/config" do
+    protected!
+    @tracker_config = TrackerConfig.load_from_redis
+    erb :admin_config,
+        :locals=>{ :version=>File.mtime("./app.rb").to_i,
+                   :request=>request }
+  end
+
+  post "/admin/config" do
+    protected!
+    @tracker_config = TrackerConfig.load_from_redis
+    TrackerConfig.config_fields.each do |field|
+      case field[:type]
+      when :string, :regexp
+        @tracker_config[field[:name]] = params[field[:name]].strip if params[field[:name]]
+      when :integer
+        @tracker_config[field[:name]] = params[field[:name]].strip.to_i if params[field[:name]]
+      when :map
+        if params["#{ field[:name] }-0-key"]
+          i = 0
+          new_map = {}
+          while params["#{ field[:name] }-#{ i }-key"]
+            if not params["#{ field[:name] }-#{ i }-key"].strip.empty? and not params["#{ field[:name ]}-#{ i }-value"].strip.empty?
+              new_map[params["#{ field[:name] }-#{ i }-key"].strip] = params["#{ field[:name ]}-#{ i }-value"].strip
+            end
+            i += 1
+          end
+          @tracker_config[field[:name]] = new_map
+        end
+      end
+    end
+
+    @tracker_config.save_to_redis
+    erb :admin_config_thanks,
+        :locals=>{ :version=>File.mtime("./app.rb").to_i,
+                   :request=>request }
   end
 
   post "/request" do

@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="robots" content="noindex,nofollow" />
-  <title><%= tracker["title"] %> Dashboard</title>
+  <title><%= tracker_config.title %> Dashboard</title>
   <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
   <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
 </head>
@@ -11,7 +11,7 @@
 <body>
 
 <div id="container">
-  <h1><%= tracker["title"] %></h1>
+  <h1><%= tracker_config.title %></h1>
   <p id="update-status"></p>
   <div id="left"><p>Loading...</p></div>
 
@@ -26,15 +26,15 @@
 
 <script type="text/javascript">
 window.trackerConfig = {
-  movingAverageInterval: <%= tracker["moving_average_interval"] %>,
+  movingAverageInterval: <%= tracker_config.moving_average_interval %>,
   numberOfLogLines: 18,
-  numberOfDownloaders: 18 - (<%= tracker["domains"].size %>) - 4,
-  numberOfDownloadersInGraph: 18 - (<%= tracker["domains"].size %>) - 4,
+  numberOfDownloaders: 18 - (<%= tracker_config.domains.size %>) - 4,
+  numberOfDownloadersInGraph: 18 - (<%= tracker_config.domains.size %>) - 4,
   statsPath: '/stats.json',
   updateStatusPath: '/update-status.json',
-  logChannel: '<%= tracker["log_channel"] %>',
-  logHost: '<%= tracker["log_host"] %>',
-  domains: <%= JSON.dump(tracker["domains"]) %>
+  logChannel: '<%= tracker_config.live_log_channel %>',
+  logHost: '<%= tracker_config.live_log_host %>',
+  domains: <%== JSON.dump(tracker_config.domains) %>
 };
 </script>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>

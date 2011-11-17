@@ -17,20 +17,14 @@ else
   raise "No Redis config found."
 end
 
-if ENV["tracker_config"]
-  tracker_config = JSON.parse(ENV["tracker_config"])
-elsif File.exists?("./tracker.json")
-  tracker_config = JSON.parse(File.read("./tracker.json"))
-else
-  raise "No tracker config found."
-end
-
 require "./app"
+
+tracker_config = TrackerConfig.load_from_redis
 
 use Rack::Static,
   :urls=>["/css", "/js"],
   :root=>"public"
 
-App.set :tracker, tracker_config
+App.set :tracker_config, tracker_config
 run App
 
