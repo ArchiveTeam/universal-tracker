@@ -223,7 +223,7 @@ class App < Sinatra::Base
         p "Hey, blocked: #{ request.ip }"
         $redis.srandmember("todo")
       else
-        username = $redis.spop("todo")
+        username = $redis.spop("todo:#{ downloader }") || $redis.spop("todo")
 
         if username
           $redis.pipelined do
