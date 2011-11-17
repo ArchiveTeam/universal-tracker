@@ -5,7 +5,7 @@
   <meta name="robots" content="noindex,nofollow" />
   <title>Tracker admin - <%= request.host %></title>
   <link href="http://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
-  <link href="/css/dashboard.css?<%= version %>" rel="stylesheet" type="text/css" />
+  <link href="/css/admin.css?<%= version %>" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -13,20 +13,21 @@
 <div id="container">
   <h1>Tracker admin &mdash; <%= request.host %></h1>
 
-  <p><%= $redis.keys("todo*").inspect %></p>
+  <h2>Queues</h2>
+  <dl>
+    <% @tracker.queues.each do |queue| -%>
+      <dt><%= queue[:title] %></dt>
+      <dd><%= queue[:length] %> item<%= ("s" unless queue[:length]==1) %></dd>
+    <% end -%>
+  </dl>
 
-  <p><%= $redis.hgetall("downloader_version").inspect %></p>
+  <h2>Claims</h2>
+  <p><%= @tracker.number_of_claims %> &mdash; <a href="/admin/claims">manage</a></p>
 
-  <p><%= $redis.hgetall("downloader_count").inspect %></p>
-
-  <p><%= $redis.hgetall("downloader_bytes").inspect %></p>
-
-  <p><%= $redis.zrange("out", 0, -1, :with_scores=>true).each_slice(2).to_a.inspect %></p>
-
-  <p><%= $redis.hgetall("claims").inspect %></p>
-
+  <h2>Log length</h2>
   <p><%= $redis.llen("log") %></p>
-  <p><%= $redis.keys.inspect %></p>
+
+  <h2>Redis memory usage</h2>
   <p><%= $redis.info["used_memory_human"] %></p>
 </div>
 

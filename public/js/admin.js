@@ -19,4 +19,8 @@
     $(p).bind('click', addLineToMap);
   });
 
+  $('#claims').each(function(index, table) {
+    $(table).addClass('collapsed');
+  });
+
 })();

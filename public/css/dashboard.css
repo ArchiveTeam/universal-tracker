@@ -13,7 +13,7 @@ ul, li {
   list-style: none;
   font-size: 24px;
 }
-table, td {
+table, td, th {
   padding: 0;
   margin: 0;
   border-spacing: 0;
@@ -26,6 +26,9 @@ li, td {
 }
 td {
   height: 32px;
+}
+th {
+  text-align: left;
 }
 h1 {
   margin: 0 20px 0 -7px;
