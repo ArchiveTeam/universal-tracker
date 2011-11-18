@@ -278,6 +278,14 @@ class App < Sinatra::Base
       else
         username = $redis.spop("todo:d:#{ downloader }") || $redis.spop("todo")
 
+        if username.nil?
+          username = $redis.spop("todo:redo")
+          if username and $redis.hget("claims", username).to_s.split(" ").last==downloader
+            $redis.sadd("todo:redo", username)
+            username = nil
+          end
+        end
+
         if username
           $redis.pipelined do
             $redis.zadd("out", Time.now.to_i, username)
