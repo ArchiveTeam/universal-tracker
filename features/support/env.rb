@@ -2,6 +2,7 @@ require File.expand_path('../../../app', __FILE__)
 
 require 'rack/test'
 require 'redis'
+require 'rspec'
 
 REDIS_CONFIG_PATH = File.expand_path('../redis_conf.rb', __FILE__)
 
