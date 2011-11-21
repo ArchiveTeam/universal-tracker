@@ -3,10 +3,18 @@ require "active_support/ordered_hash"
 
 module UniversalTracker
   class Tracker
+    attr_accessor :redis
+    attr_accessor :config
+
+    def initialize(redis, config = nil)
+      @redis = redis
+      @config = config || TrackerConfig.load_from(redis)
+    end
+
     def queues
-      resp = $redis.pipelined do
-        $redis.keys("todo:d:*")
-        $redis.scard("todo")
+      resp = redis.pipelined do
+        redis.keys("todo:d:*")
+        redis.scard("todo")
       end
       
       queues = []
@@ -16,9 +24,9 @@ module UniversalTracker
 
       if resp[0].size > 0
         keys = resp[0].sort
-        resp = $redis.pipelined do
+        resp = redis.pipelined do
           keys.each do |queue|
-            $redis.scard(queue)
+            redis.scard(queue)
           end
         end.each_with_index do |length, index|
           if queue=~/^todo:d:(.+)$/
@@ -33,12 +41,12 @@ module UniversalTracker
     end
 
     def number_of_claims
-      $redis.zcard("out")
+      redis.zcard("out")
     end
 
     def claims_per_downloader
-      claims = $redis.hgetall("claims")
-      out = $redis.zrange("out", 0, -1, :with_scores=>true)
+      claims = redis.hgetall("claims")
+      out = redis.zrange("out", 0, -1, :with_scores=>true)
       claims_per_downloader = ActiveSupport::OrderedHash.new{ |h,k| h[k] = [] }
       out.each_slice(2) do |username, time|
         if claims[username]

@@ -13,12 +13,12 @@ module UniversalTracker
       @@config_fields
     end
 
-    def self.load_from_redis
-      TrackerConfig.new(JSON.parse($redis.get("tracker_config") || "{}"))
+    def self.load_from(redis)
+      TrackerConfig.new(JSON.parse(redis.get("tracker_config") || "{}"))
     end
 
-    def save_to_redis
-      $redis.set("tracker_config", JSON.dump(@settings))
+    def save_to(redis)
+      redis.set("tracker_config", JSON.dump(settings))
     end
 
 

@@ -19,12 +19,12 @@ end
 
 require "./app"
 
-tracker_config = UniversalTracker::TrackerConfig.load_from_redis
+tracker = UniversalTracker::Tracker.new($redis)
 
 use Rack::Static,
   :urls=>["/css", "/js"],
   :root=>"public"
 
-UniversalTracker::App.set :tracker_config, tracker_config
+UniversalTracker::App.set :tracker, tracker
 run UniversalTracker::App
 

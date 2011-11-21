@@ -8,9 +8,21 @@ module UniversalTracker
   class App < Sinatra::Base
     set :erb, :escape_html => true
 
+    def tracker
+      settings.tracker
+    end
+
+    def tracker_config
+      settings.tracker.config
+    end
+
     helpers do
+      def tracker
+        settings.tracker
+      end
+
       def tracker_config
-        settings.tracker_config
+        settings.tracker.config
       end
 
       def protected!
@@ -51,7 +63,7 @@ module UniversalTracker
 
         tries = 3
         begin
-          if bytes.keys.sort != settings.tracker_config.domains.keys.sort
+          if bytes.keys.sort != tracker_config.domains.keys.sort
             p "Hey, strange data: #{ done_hash.inspect }"
             $redis.sadd("todo", user) if $redis.zrem("out", user)
             $redis.pipelined do
@@ -85,7 +97,7 @@ module UniversalTracker
                       "megabytes"=>(total_bytes.to_f / (1024*1024)),
                       "domain_bytes"=>bytes,
                       "version"=>done_hash["version"].to_s,
-                      "log_channel"=>settings.tracker_config.live_log_channel,
+                      "log_channel"=>tracker_config.live_log_channel,
                       "is_duplicate"=>done_before }
 
               done_count_new = done_count_cur + 1
@@ -109,7 +121,7 @@ module UniversalTracker
                   end
                 end
 
-                $redis.publish(settings.tracker_config.redis_pubsub_channel, JSON.dump(msg))
+                $redis.publish(tracker_config.redis_pubsub_channel, JSON.dump(msg))
               end
 
               "OK\n"
@@ -184,7 +196,7 @@ module UniversalTracker
       downloader_count = Hash[*resp[2]]
       total_users_done = resp[3]
       total_users = resp[3].to_i + resp[4].to_i
-      users_done_chart = (resp[5] || []).systematic_sample(settings.tracker_config.history_length).map do |item|
+      users_done_chart = (resp[5] || []).systematic_sample(tracker_config.history_length).map do |item|
         JSON.parse(item)
       end
 
@@ -197,7 +209,7 @@ module UniversalTracker
             $redis.lrange(fieldname, 0, -1)
           end
         end.map do |list|
-          (list || []).systematic_sample(settings.tracker_config.history_length).map do |item|
+          (list || []).systematic_sample(tracker_config.history_length).map do |item|
             JSON.parse(item)
           end
         end
@@ -251,7 +263,7 @@ module UniversalTracker
     end
 
     post "/rescue-me" do
-      usernames = params[:usernames].to_s.downcase.scan(settings.tracker_config.valid_username_regexp_object).map do |match|
+      usernames = params[:usernames].to_s.downcase.scan(tracker_config.valid_username_regexp_object).map do |match|
         match[0]
       end.uniq
       if usernames.size > 100
@@ -290,7 +302,7 @@ module UniversalTracker
 
     get "/admin" do
       protected!
-      @tracker = Tracker.new
+      @tracker = Tracker.new($redis)
       erb :admin_index,
           :locals=>{ :version=>File.mtime("./app.rb").to_i,
                      :request=>request }
@@ -298,7 +310,7 @@ module UniversalTracker
 
     get "/admin/claims" do
       protected!
-      @tracker = Tracker.new
+      @tracker = Tracker.new($redis)
       erb :admin_claims,
           :locals=>{ :version=>File.mtime("./app.rb").to_i,
                      :request=>request }
@@ -306,8 +318,8 @@ module UniversalTracker
 
     get "/admin/config" do
       protected!
-      @tracker = Tracker.new
-      @tracker_config = TrackerConfig.load_from_redis
+      @tracker = Tracker.new($redis)
+      @tracker_config = @tracker.config
       erb :admin_config,
           :locals=>{ :version=>File.mtime("./app.rb").to_i,
                      :request=>request }
@@ -315,8 +327,8 @@ module UniversalTracker
 
     post "/admin/config" do
       protected!
-      @tracker = Tracker.new
-      @tracker_config = TrackerConfig.load_from_redis
+      @tracker = Tracker.new($redis)
+      @tracker_config = @tracker.config
       TrackerConfig.config_fields.each do |field|
         case field[:type]
         when :string, :regexp
@@ -338,7 +350,7 @@ module UniversalTracker
         end
       end
 
-      @tracker_config.save_to_redis
+      @tracker_config.save_to($redis)
       erb :admin_config_thanks,
           :locals=>{ :version=>File.mtime("./app.rb").to_i,
                      :request=>request }
