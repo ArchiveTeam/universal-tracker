@@ -1,7 +1,7 @@
 Running the integration tests
 =============================
 
-The integration tests assume a Redis server listening on localhist, port
+The integration tests assume a Redis server listening on localhost, port
 6379.  To change this, make a file in features/support named
 redis_conf.rb.  The contents of this file should be a configuration hash
 suitable for Redis.new.
