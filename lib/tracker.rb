@@ -18,6 +18,10 @@ module UniversalTracker
       @redis = redis
       @config = config || TrackerConfig.load_from(redis)
     end
+
+    def admin_password
+      redis.get("admin_password")
+    end
   end
 end
 

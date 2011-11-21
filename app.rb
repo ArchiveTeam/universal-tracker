@@ -33,9 +33,15 @@ module UniversalTracker
       end
 
       def authorized?
-        admin_password = $redis.get("admin_password")
+        admin_password = tracker.admin_password
         @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-        @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == ['admin', admin_password] && admin_password && !admin_password.empty?
+
+        admin_password &&
+        !admin_password.empty? &&
+        @auth.provided? &&
+        @auth.basic? &&
+        @auth.credentials &&
+        @auth.credentials == ['admin', admin_password]
       end
     end
 
