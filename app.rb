@@ -162,8 +162,7 @@ module UniversalTracker
 
     get "/admin/config" do
       protected!
-      @tracker = Tracker.new($redis)
-      @tracker_config = @tracker.config
+      @tracker_config = UniversalTracker::TrackerConfig.load_from(tracker.redis)
       erb :admin_config,
           :locals=>{ :version=>File.mtime("./app.rb").to_i,
                      :request=>request }
@@ -171,9 +170,8 @@ module UniversalTracker
 
     post "/admin/config" do
       protected!
-      @tracker = Tracker.new($redis)
-      @tracker_config = @tracker.config
-      TrackerConfig.config_fields.each do |field|
+      @tracker_config = UniversalTracker::TrackerConfig.load_from(tracker.redis)
+      UniversalTracker::TrackerConfig.config_fields.each do |field|
         case field[:type]
         when :string, :regexp
           @tracker_config[field[:name]] = params[field[:name]].strip if params[field[:name]]
@@ -194,7 +192,7 @@ module UniversalTracker
         end
       end
 
-      @tracker_config.save_to($redis)
+      @tracker_config.save_to(tracker.redis)
       erb :admin_config_thanks,
           :locals=>{ :version=>File.mtime("./app.rb").to_i,
                      :request=>request }
