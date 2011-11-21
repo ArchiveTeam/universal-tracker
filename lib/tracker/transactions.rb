@@ -35,6 +35,36 @@ module UniversalTracker
         end
       end
 
+      def add_items(items, request_ip=nil)
+        replies = redis.pipelined do
+          items.each do |item|
+            redis.sismember("todo", item)
+            redis.sismember("done", item)
+            redis.hexists("claims", item)
+          end
+        end
+
+        to_add = []
+        items.each_slice(3).each_with_index do |response, idx|
+          if response==[0,0,0]
+            to_add << item
+          end
+        end
+
+        unless to_add.empty?
+          redis.pipelined do
+            to_add.each do |item|
+              redis.sadd("todo", item)
+            end
+            if request_ip
+              redis.rpush("add-log", "#{ request_ip } #{ to_add.join(",") }")
+            end
+          end
+        end
+
+        to_add
+      end
+
       def request_item(request_ip, downloader)
         item = redis.spop("todo:d:#{ downloader }") || redis.spop("todo")
 

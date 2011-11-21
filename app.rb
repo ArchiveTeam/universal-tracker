@@ -138,34 +138,9 @@ module UniversalTracker
       if usernames.size > 100
         "Too many usernames."
       else
-        new_usernames = 0
+        new_usernames = tracker.add_items(usernames, request.ip)
 
-        replies = $redis.pipelined do
-          usernames.each do |username|
-            $redis.sismember("todo", username)
-            $redis.sismember("done", username)
-            $redis.hexists("claims", username)
-          end
-        end
-
-        to_add = []
-        usernames.each_with_index do |username, idx|
-          if replies[idx*3, 3]==[0,0,0]
-            to_add << username
-          end
-        end
-
-        unless to_add.empty?
-          $redis.pipelined do
-            to_add.each do |username|
-              $redis.sadd("todo", username)
-            end
-            $redis.rpush("add-log", "#{ request.ip } #{ to_add.join(",") }")
-          end
-        end
-
-        erb :rescue_me_thanks, :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                                          :new_usernames=>to_add }
+        erb :rescue_me_thanks, :locals=>{ :new_usernames=>new_usernames }
       end
     end
 
