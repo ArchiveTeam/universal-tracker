@@ -1,0 +1,17 @@
+Running the integration tests
+=============================
+
+The integration tests assume a Redis server listening on localhist, port
+6379.  To change this, make a file in features/support named
+redis_conf.rb.  The contents of this file should be a configuration hash
+suitable for Redis.new.
+
+For example, to connect to a Redis instance listening on the UNIX socket
+/tmp/redis.sock, put the following in features/support/redis_conf.rb:
+
+	{ :path => "/tmp/redis.sock" }
+
+By default, the integration tests run using database 1.  This can be
+specified via the db option in redis_conf.rb:
+
+	{ :path => "/tmp/redis.sock", :db => 10 }
