@@ -1,3 +1,4 @@
+require "sinatra"
 require "time"
 require "lib/array_systematic_sample"
 require "lib/tracker"
