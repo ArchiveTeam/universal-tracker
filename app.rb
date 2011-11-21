@@ -1,5 +1,6 @@
-require "time"
 require "active_support/ordered_hash"
+require "sinatra"
+require "time"
 
 class Array
   def sample_subset(n)
