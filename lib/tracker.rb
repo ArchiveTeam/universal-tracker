@@ -1,5 +1,6 @@
 require "time"
 require "active_support/ordered_hash"
+require File.join(File.dirname(__FILE__), "tracker_config")
 
 module UniversalTracker
   class Tracker
