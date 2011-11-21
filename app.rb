@@ -7,6 +7,7 @@ require "lib/tracker_config"
 module UniversalTracker
   class App < Sinatra::Base
     set :erb, :escape_html => true
+    set :assets_version, File.mtime(__FILE__).to_i
 
     def tracker
       settings.tracker
@@ -23,6 +24,10 @@ module UniversalTracker
 
       def tracker_config
         settings.tracker.config
+      end
+
+      def assets_version
+        settings.assets_version
       end
 
       def protected!
@@ -106,8 +111,7 @@ module UniversalTracker
     end
 
     get "/" do
-      erb :index,
-          :locals=>{ :version=>File.mtime("./app.rb").to_i }
+      erb :index
     end
 
     get "/stats.json" do
@@ -127,8 +131,7 @@ module UniversalTracker
     end
 
     get "/rescue-me" do
-      erb :rescue_me,
-          :locals=>{ :version=>File.mtime("./app.rb").to_i }
+      erb :rescue_me
     end
 
     post "/rescue-me" do
@@ -147,25 +150,19 @@ module UniversalTracker
     get "/admin" do
       protected!
       @tracker = Tracker.new($redis)
-      erb :admin_index,
-          :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                     :request=>request }
+      erb :admin_index
     end
 
     get "/admin/claims" do
       protected!
       @tracker = Tracker.new($redis)
-      erb :admin_claims,
-          :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                     :request=>request }
+      erb :admin_claims
     end
 
     get "/admin/config" do
       protected!
       @tracker_config = UniversalTracker::TrackerConfig.load_from(tracker.redis)
-      erb :admin_config,
-          :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                     :request=>request }
+      erb :admin_config
     end
 
     post "/admin/config" do
@@ -193,9 +190,7 @@ module UniversalTracker
       end
 
       @tracker_config.save_to(tracker.redis)
-      erb :admin_config_thanks,
-          :locals=>{ :version=>File.mtime("./app.rb").to_i,
-                     :request=>request }
+      erb :admin_config_thanks
     end
 
     post "/request" do
