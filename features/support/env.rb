@@ -17,12 +17,14 @@ World do
     def app
       UniversalTracker::App
     end
+
+    def tracker
+      $tracker
+    end
   end.new
 end
 
 AfterConfiguration do
-  UniversalTracker::App.enable :raise_errors
-
   redis_conf = if File.exists?(REDIS_CONFIG_PATH)
                  eval(File.read(REDIS_CONFIG_PATH))
                else
@@ -32,9 +34,10 @@ AfterConfiguration do
   $redis = Redis.new(redis_conf)
 
   config = UniversalTracker::TrackerConfig.new
-  tracker = UniversalTracker::Tracker.new($redis, config)
+  $tracker = UniversalTracker::Tracker.new($redis, config)
 
-  UniversalTracker::App.set :tracker, tracker
+  UniversalTracker::App.set :tracker, $tracker
+  UniversalTracker::App.enable :raise_errors
 end
 
 Before do

@@ -4,3 +4,8 @@ Given /^the tracker has the work items$/ do |table|
 
   items.each { |item| $redis.sadd("todo", item) }
 end
+
+Given /^ip ([.0-9]+) has been blocked$/ do |ip|
+  tracker.block_ip(ip)
+end
+
