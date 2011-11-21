@@ -14,3 +14,5 @@ namespace :cucumber do
   desc 'Run all features'
   task :all => ['cucumber:ok', 'cucumber:wip']
 end
+
+task :default => 'cucumber:all'
