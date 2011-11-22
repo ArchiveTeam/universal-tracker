@@ -49,9 +49,9 @@ module UniversalTracker
         end
 
         to_add = []
-        items.each_slice(3).each_with_index do |response, idx|
+        replies.each_slice(3).each_with_index do |response, idx|
           if response==[0,0,0]
-            to_add << item
+            to_add << items[idx]
           end
         end
 
