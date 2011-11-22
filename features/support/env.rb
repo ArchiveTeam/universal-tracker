@@ -37,7 +37,7 @@ AfterConfiguration do
 end
 
 Before do
-  $redis.flushall
+  $redis.flushdb
   self.available_items = []
 end
 
