@@ -15,11 +15,7 @@ module UniversalTracker
       end
 
       def log_added_items(items, request_ip)
-        redis.pipelined do
-          if request_ip
-            redis.rpush("add-log", "#{ request_ip } #{ items.join(",") }")
-          end
-        end
+        redis.rpush("add-log", "#{ request_ip } #{ items.join(",") }")
       end
 
       def block_ip(request_ip, invalid_done_hash=nil)
