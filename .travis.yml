@@ -1,6 +1,7 @@
 rvm:
+  - 1.8.7
   - 1.9.2
   - rbx
 env:
-  - REDIS_HOST=127.0.0.1
+  - redis_host=127.0.0.1
 
