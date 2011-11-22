@@ -1,3 +1,5 @@
+require "active_support/core_ext/hash"
+
 module UniversalTracker
   class TrackerConfig
     def self.config_field(name, options = {})
@@ -61,6 +63,7 @@ module UniversalTracker
 
     def initialize(settings = {})
       @settings = @@defaults.clone.merge(Hash[settings.map{ |k,v| [ k.to_sym, v ] }])
+      @settings.symbolize_keys!
     end
 
     def []=(a,b)
@@ -74,7 +77,7 @@ module UniversalTracker
     end
 
     def valid_item_regexp_object
-      @regexp ||= Regexp.new("(#{ @settings["valid_item_regexp"] })")
+      @regexp ||= Regexp.new("(#{ @settings[:valid_item_regexp] })")
     end
   end
 end
