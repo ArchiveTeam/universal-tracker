@@ -203,6 +203,13 @@ module UniversalTracker
           @tracker.item_done?("abc").should == true
         end
       end
+
+      context "when there is no such item" do
+        it "should do nothing" do
+          @tracker.mark_item_done("downloader", "def", { "data"=>123 }, {})
+          @tracker.item_done?("abc").should == false
+        end
+      end
     end
   end
 

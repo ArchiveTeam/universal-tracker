@@ -37,6 +37,27 @@ module UniversalTracker
         redis.srandmember("todo")
       end
 
+      def item_status(item)
+        replies = redis.pipelined do
+          redis.sismember("todo", item)
+          redis.hexists("claims", item)
+          redis.sismember("done", item)
+        end
+        if replies[0] == 1
+          :todo
+        elsif replies[1] == 1
+          :out
+        elsif replies[2] == 1
+          :done
+        else
+          nil
+        end
+      end
+
+      def item_known?(item)
+        not item_status.nil?
+      end
+
       def item_todo?(item)
         redis.sismember("todo", item)
       end
@@ -147,24 +168,9 @@ module UniversalTracker
       def mark_item_done(downloader, item, bytes, done_hash)
         tries_left = 3
 
-        resp = redis.pipelined do
-          redis.sismember("done", item)
-          redis.zrem("out", item)
-          redis.srem("todo", item)
-
-          redis.scard("done")
-          redis.hget("downloader_bytes", downloader)
-        end
-        done_before = resp[0].to_i==1
-        rem_from_out = resp[1].to_i==1
-        rem_from_todo = resp[2].to_i==1
-        done_count_cur = resp[3].to_i
-        downloader_bytes_cur = (resp[4] || 0).to_i
-
-        if rem_from_out or rem_from_todo or done_before
+        if prev_status = item_status(item)
           total_bytes = 0
           bytes.values.each do |b| total_bytes += b.to_i end
-          time_i = Time.now.utc.to_i
 
           msg = { "downloader"=>downloader,
                   "item"=>item,
@@ -172,30 +178,23 @@ module UniversalTracker
                   "domain_bytes"=>bytes,
                   "version"=>done_hash["version"].to_s,
                   "log_channel"=>config.live_log_channel,
-                  "is_duplicate"=>done_before }
-
-          done_count_new = done_count_cur + 1
-          downloader_bytes_new = downloader_bytes_cur + total_bytes.to_i
+                  "is_duplicate"=>(prev_status==:done) }
 
           redis.pipelined do
+            redis.srem("todo", item)
+            redis.zrem("out", item)
             redis.hdel("claims", item)
+
             redis.sadd("done", item)
             redis.rpush("log", JSON.dump(done_hash))
-            redis.hset("downloader_version", downloader, done_hash["version"].to_s)
-            
-            unless done_before
-              bytes.each do |domain, b|
-                redis.hincrby("domain_bytes", domain, b.to_i)
-              end
-              redis.hincrby("downloader_bytes", downloader, total_bytes.to_i)
-              redis.hincrby("downloader_count", downloader, 1)
-              redis.rpush("downloader_chartdata:#{downloader}", "[#{ time_i },#{ downloader_bytes_new }]")
-              if done_count_new % 10 == 0
-                redis.rpush("items_done_chartdata", "[#{ time_i },#{ done_count_new }]")
-              end
-            end
 
+            redis.hset("downloader_version", downloader, done_hash["version"].to_s)
             redis.publish(config.redis_pubsub_channel, JSON.dump(msg))
+          end
+          
+          # we don't count items twice
+          unless prev_status==:done
+            update_stats_when_done(downloader, bytes)
           end
 
           true
@@ -209,6 +208,36 @@ module UniversalTracker
           retry
         else
           raise $!
+        end
+      end
+
+      private
+
+      # After an item has been marked done, this function should be called
+      # to update the statistics.
+      def update_stats_when_done(downloader, bytes)
+        timestamp = Time.now.utc.to_i
+        total_bytes = bytes.values.inject(0) { |sum,b| sum + b }
+
+        resp = redis.pipelined do
+          redis.hincrby("downloader_bytes", downloader, total_bytes)
+          redis.hincrby("downloader_count", downloader, 1)
+          redis.scard("done")
+
+          bytes.each do |domain, b|
+            redis.hincrby("domain_bytes", domain, b.to_i)
+          end
+        end
+
+        downloader_bytes = resp[0]
+        downloader_count = resp[1]
+        done_count = resp[2]
+
+        redis.pipelined do
+          redis.rpush("downloader_chartdata", "[#{ timestamp },#{ downloader_bytes }]")
+          if done_count % 10 == 0
+            redis.rpush("items_done_chartdata", "[#{ timestamp },#{ done_count }]")
+          end
         end
       end
     end
