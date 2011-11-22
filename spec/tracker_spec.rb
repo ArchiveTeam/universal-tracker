@@ -102,6 +102,108 @@ module UniversalTracker
         end
       end
     end
+
+    describe "#release_item" do
+      context "when there is a claimed item" do
+        before do
+          @tracker.add_items(["abc"])
+          @tracker.request_item("127.0.0.1", "downloader")
+        end
+
+        it "should return that to the queue" do
+          answer = @tracker.release_item("abc")
+          answer.should == true
+          @tracker.item_todo?("abc").should == true
+          @tracker.item_claimed?("abc").should == false
+          @tracker.item_claimant("abc").should == nil
+        end
+      end
+
+      context "when there is no claimed item" do
+        it "should not return that item to the queue" do
+          answer = @tracker.release_item("abc")
+          answer.should == false
+          @tracker.item_todo?("abc").should == false
+        end
+      end
+    end
+
+    describe "#mark_item_done" do
+      before do
+        @tracker.add_items(["abc", "def", "ghi"])
+      end
+
+      it "should update the statistics" do
+        @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+        @tracker.stats["downloader_bytes"]["downloader"].should == 123
+        @tracker.stats["downloader_count"]["downloader"].should == 1
+        @tracker.stats["domain_bytes"]["data"].should == 123
+
+        @tracker.mark_item_done("downloader", "def", { "data"=>123 }, {})
+        @tracker.stats["downloader_bytes"]["downloader"].should == 123+123
+        @tracker.stats["downloader_count"]["downloader"].should == 2
+        @tracker.stats["domain_bytes"]["data"].should == 123+123
+      end
+
+      it "should not count resubmitted items" do
+        10.times do
+          @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+        end
+
+        @tracker.stats["downloader_bytes"]["downloader"].should == 123
+        @tracker.stats["downloader_count"]["downloader"].should == 1
+        @tracker.stats["domain_bytes"]["data"].should == 123
+      end
+
+      it "should send a pubsub message" do
+        @tracker.redis.should_receive(:publish) do |channel, message|
+          channel.should == @tracker.config.redis_pubsub_channel
+          message.should be_a(String)
+          msg = JSON.parse(message)
+          msg["log_channel"].should == @tracker.config.live_log_channel
+          msg["downloader"].should == "downloader"
+          msg["item"].should == "abc"
+          msg["is_duplicate"].should == false
+        end
+
+        @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+      end
+
+      it "should send a different pubsub message for duplicates" do
+        @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+
+        @tracker.redis.should_receive(:publish) do |channel, message|
+          msg = JSON.parse(message)
+          msg["is_duplicate"].should == true
+        end
+
+        @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+      end
+
+      context "when there is a todo item" do
+        it "should mark the item done" do
+          @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+          @tracker.item_todo?("abc").should == false
+          @tracker.item_claimed?("abc").should == false
+          @tracker.item_claimant("abc").should == nil
+          @tracker.item_done?("abc").should == true
+        end
+      end
+
+      context "when there is a claimed item" do
+        before do
+          @tracker.request_item("127.0.0.1", "downloader")
+        end
+
+        it "should mark the item done" do
+          @tracker.mark_item_done("downloader", "abc", { "data"=>123 }, {})
+          @tracker.item_todo?("abc").should == false
+          @tracker.item_claimed?("abc").should == false
+          @tracker.item_claimant("abc").should == nil
+          @tracker.item_done?("abc").should == true
+        end
+      end
+    end
   end
 
 end

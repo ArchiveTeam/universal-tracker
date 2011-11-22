@@ -167,7 +167,7 @@ module UniversalTracker
           time_i = Time.now.utc.to_i
 
           msg = { "downloader"=>downloader,
-                  "itemname"=>item,
+                  "item"=>item,
                   "megabytes"=>(total_bytes.to_f / (1024*1024)),
                   "domain_bytes"=>bytes,
                   "version"=>done_hash["version"].to_s,
