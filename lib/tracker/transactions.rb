@@ -166,8 +166,6 @@ module UniversalTracker
       end
 
       def mark_item_done(downloader, item, bytes, done_hash)
-        tries_left = 3
-
         if prev_status = item_status(item)
           total_bytes = 0
           bytes.values.each do |b| total_bytes += b.to_i end
@@ -200,14 +198,6 @@ module UniversalTracker
           true
         else
           false
-        end
-
-      rescue Timeout::Error
-        tries -= 1
-        if tries > 0
-          retry
-        else
-          raise $!
         end
       end
 
