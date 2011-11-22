@@ -220,6 +220,17 @@ module UniversalTracker
       process_done(request, data)
       process_request(request, data)
     end
+
+    get "/items/:item.json" do |item|
+      content_type :json
+      data = {
+        :status=>tracker.item_status(item)
+      }
+      if data[:status]==:out
+        data[:downloader] = tracker.item_claimant(item)
+      end
+      JSON.dump(data)
+    end
   end
 end
 

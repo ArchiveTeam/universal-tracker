@@ -20,27 +20,31 @@ Then /^the response has status (\d+)$/ do |status|
 end
 
 Then /^I receive a work item(?: "([^"]*)")?$/ do |item|
-  available_items.should include(last_response.body) and
+  available_items.should include(last_response.body)
   (item.nil? or item.should == last_response.body.strip)
 end
 
 Then /^the tracker knows that "([^"]*)" is done$/ do |item|
-  tracker.item_done?(item)
+  get "/items/#{ item }.json"
+  JSON.parse(last_response.body)["status"].should == "done"
 end
 
 Then /^the tracker knows that "([^"]*)" is claimed by "([^"]*)"$/ do |item, downloader|
-  tracker.item_claimed?(item) and
-  tracker.item_claimant(item).should == downloader
+  get "/items/#{ item }.json"
+  data = JSON.parse(last_response.body)
+  data["status"].should == "out"
+  data["downloader"].should == downloader
 end
 
 Then /^the tracker knows that "([^"]*)" is not claimed$/ do |item|
-  not tracker.item_claimed?(item)
+  get "/items/#{ item }.json"
+  JSON.parse(last_response.body)["status"].should_not == "done"
 end
 
 Then /^the tracker knows that "([^"]*)" has downloaded ([0-9]+) items? and ([0-9]+) bytes$/ do |downloader, count, bytes|
   get "/stats.json"
   stats = JSON.parse(last_response.body)
-  stats["downloader_count"][downloader].should == count.to_i and
+  stats["downloader_count"][downloader].should == count.to_i
   stats["downloader_bytes"][downloader].should == bytes.to_i
 end
 
