@@ -17,6 +17,10 @@ module UniversalTracker
         redis.sismember("blocked", request_ip)
       end
 
+      def ip_block_log
+        redis.lrange("blocked_log", 0, -1)
+      end
+
       def random_item
         redis.srandmember("todo")
       end

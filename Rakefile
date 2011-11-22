@@ -1,4 +1,5 @@
 require 'cucumber/rake/task'
+require 'rspec/core/rake_task'
 
 namespace :cucumber do
   desc 'Run features that should pass'
@@ -15,4 +16,7 @@ namespace :cucumber do
   task :all => ['cucumber:ok', 'cucumber:wip']
 end
 
-task :default => 'cucumber:all'
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => ['cucumber:all', 'spec']
+
