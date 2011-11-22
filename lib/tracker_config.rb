@@ -29,7 +29,7 @@ module UniversalTracker
     config_field :item_type,
                  :type=>:string,
                  :label=>"Item tracked (users, profiles, things)",
-                 :default=>"users"
+                 :default=>"items"
     config_field :domains,
                  :type=>:map,
                  :label=>"Domains",
@@ -46,9 +46,9 @@ module UniversalTracker
                  :type=>:string,
                  :label=>"Live logging channel",
                  :default=>""
-    config_field :valid_username_regexp,
+    config_field :valid_item_regexp,
                  :type=>:regexp,
-                 :label=>"Valid username regexp",
+                 :label=>"Valid item regexp",
                  :default=>"[-_.A-Za-z0-9]{2,50}"
     config_field :moving_average_interval,
                  :type=>:integer,
@@ -73,8 +73,8 @@ module UniversalTracker
       end
     end
 
-    def valid_username_regexp_object
-      @regexp ||= Regexp.new("(#{ @settings["valid_username_regexp"] })")
+    def valid_item_regexp_object
+      @regexp ||= Regexp.new("(#{ @settings["valid_item_regexp"] })")
     end
   end
 end

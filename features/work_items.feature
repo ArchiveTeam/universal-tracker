@@ -1,6 +1,6 @@
 Feature: Work items
   In order to coordinate work amongst downloaders
-  Downloaders must be able to check out names of users.
+  Downloaders must be able to check out names of items.
 
   Scenario: Requesting a work item
     Given the tracker has the work items

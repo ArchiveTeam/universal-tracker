@@ -43,13 +43,13 @@ module UniversalTracker
         claims = redis.hgetall("claims")
         out = redis.zrange("out", 0, -1, :with_scores=>true)
         claims_per_downloader = ActiveSupport::OrderedHash.new{ |h,k| h[k] = [] }
-        out.each_slice(2) do |username, time|
-          if claims[username]
-            ip, downloader = claims[username].split(" ", 2)
+        out.each_slice(2) do |item, time|
+          if claims[item]
+            ip, downloader = claims[item].split(" ", 2)
           else
             ip, downloader = "unknown", "unknown"
           end
-          claims_per_downloader[downloader] << { :username=>username,
+          claims_per_downloader[downloader] << { :item=>item,
                                                  :ip=>ip,
                                                  :since=>Time.at(time.to_i).utc }
         end
@@ -76,15 +76,15 @@ module UniversalTracker
           redis.hgetall("downloader_count")
           redis.scard("done")
           redis.scard("todo")
-          redis.lrange("users_done_chartdata", 0, -1)
+          redis.lrange("items_done_chartdata", 0, -1)
         end
 
         domain_bytes = Hash[*resp[0]]
         downloader_bytes = Hash[*resp[1]]
         downloader_count = Hash[*resp[2]]
-        total_users_done = resp[3]
-        total_users = resp[3].to_i + resp[4].to_i
-        users_done_chart = (resp[5] || []).systematic_sample(config.history_length).map do |item|
+        total_items_done = resp[3]
+        total_items = resp[3].to_i + resp[4].to_i
+        items_done_chart = (resp[5] || []).systematic_sample(config.history_length).map do |item|
           JSON.parse(item)
         end
 
@@ -116,10 +116,10 @@ module UniversalTracker
           "downloader_bytes"=>Hash[downloader_bytes.map{ |k,v| [k, v.to_i] }],
           "downloader_count"=>Hash[downloader_count.map{ |k,v| [k, v.to_i] }],
           "downloader_chart"=>downloader_chart,
-          "users_done_chart"=>users_done_chart,
+          "items_done_chart"=>items_done_chart,
           "downloaders"=>downloader_count.keys,
-          "total_users_done"=>total_users_done.to_i,
-          "total_users"=>total_users.to_i,
+          "total_items_done"=>total_items_done.to_i,
+          "total_items"=>total_items.to_i,
           "total_bytes"=>total_bytes
         }
       end

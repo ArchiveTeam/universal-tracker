@@ -11,5 +11,5 @@
   "history_length": 1000,
   "log_channel": "memac-log",
   "log_host": "atpub-at.dotcloud.com",
-  "valid_usernames": "([-_.A-Za-z0-9]{2,50})"
+  "valid_items": "([-_.A-Za-z0-9]{2,50})"
 }

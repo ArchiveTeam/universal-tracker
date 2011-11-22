@@ -67,7 +67,7 @@ end
             <th scope="row"><%= downloader %></th>
             <td><%= claim[:ip] %></th>
             <td><%= claim[:since].xmlschema %></th>
-            <td><%= claim[:username] %></th>
+            <td><%= claim[:item] %></th>
             <td scope="rowgroup">
               <form method="post" aciton="/admin/claims/release">
                 <input type="hidden" name="downloader" value="<%= downloader %>" />

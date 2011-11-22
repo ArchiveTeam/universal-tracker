@@ -53,15 +53,15 @@ module UniversalTracker
 
     def process_done(request, data)
       downloader = data["downloader"]
-      user = data["user"]
+      item = data["item"]
       bytes = data["bytes"]
 
       if downloader.is_a?(String) and
-         user.is_a?(String) and
+         item.is_a?(String) and
          bytes.is_a?(Hash) and
          bytes.all?{|k,v|k.is_a?(String) and v.is_a?(Fixnum)}
 
-        done_hash = { "user"=>user,
+        done_hash = { "item"=>item,
                       "by"=>downloader,
                       "ip"=>request.ip,
                       "at"=>Time.now.utc.xmlschema,
@@ -76,13 +76,13 @@ module UniversalTracker
         if bytes.keys.sort != tracker_config.domains.keys.sort
           p "Hey, strange data: #{ done_hash.inspect }"
           tracker.block_ip(request.ip, done_hash)
-          tracker.release_item(user)
+          tracker.release_item(item)
           "OK\n"
         else
-          if tracker.mark_item_done(downloader, user, bytes, done_hash)
+          if tracker.mark_item_done(downloader, item, bytes, done_hash)
             "OK\n"
           else
-            "Invalid user."
+            "Invalid item."
           end
         end
       else
@@ -136,16 +136,16 @@ module UniversalTracker
     end
 
     post "/rescue-me" do
-      usernames = params[:usernames].to_s.downcase.scan(tracker_config.valid_username_regexp_object).map do |match|
+      items = params[:items].to_s.downcase.scan(tracker_config.valid_item_regexp_object).map do |match|
         match[0]
       end.uniq
-      if usernames.size > 100
-        "Too many usernames."
+      if items.size > 100
+        "Too many items."
       else
-        new_usernames = tracker.add_items(usernames)
-        tracker.log_added_items(usernames, request.ip)
+        new_items = tracker.add_items(items)
+        tracker.log_added_items(items, request.ip)
 
-        erb :rescue_me_thanks, :locals=>{ :new_usernames=>new_usernames }
+        erb :rescue_me_thanks, :locals=>{ :new_items=>new_items }
       end
     end
 
@@ -202,10 +202,10 @@ module UniversalTracker
     post "/release" do
       content_type :text
       data = JSON.parse(request.body.read)
-      if tracker.release_user(data["user"])
+      if tracker.release_item(data["item"])
         "Released OK.\n"
       else
-        "Invalid user.\n"
+        "Invalid item.\n"
       end
     end
 

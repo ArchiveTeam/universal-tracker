@@ -87,12 +87,12 @@
     table = document.createElement('table');
     tbody = document.createElement('tbody');
     tr = document.createElement('tr');
-    tr.appendChild(makeTD('text', 'users'));
+    tr.appendChild(makeTD('text', 'items'));
     tr.appendChild(makeTD('num',
-                          stats.total_users_done,
+                          stats.total_items_done,
                           'done'));
     tr.appendChild(makeTD('num',
-                          stats.total_users - stats.total_users_done,
+                          stats.total_items - stats.total_items_done,
                           'to do'));
     tbody.appendChild(tr);
     table.appendChild(tbody);
@@ -108,7 +108,7 @@
                               Math.round(stats.domain_bytes[domain]/(1024*1024*1024)),
                               'GB'));
         tr.appendChild(makeTD('num',
-                              Math.round((stats.domain_bytes[domain]/stats.total_users_done)/(1024*1024)),
+                              Math.round((stats.domain_bytes[domain]/stats.total_items_done)/(1024*1024)),
                               'MB/u'));
         tbody.appendChild(tr);
       }
@@ -122,7 +122,7 @@
                           Math.round(stats.total_bytes/(1024*1024*1024)),
                           'GB'));
     tr.appendChild(makeTD('num',
-                          Math.round((stats.total_bytes/stats.total_users_done)/(1024*1024)),
+                          Math.round((stats.total_bytes/stats.total_items_done)/(1024*1024)),
                           'MB/u'));
     tfoot.appendChild(tr);
     table.appendChild(tfoot);
@@ -145,7 +145,7 @@
                             'GB'));
       tr.appendChild(makeTD('num',
                             stats.downloader_count[downloader],
-                            'users'));
+                            'items'));
       tbody.appendChild(tr);
     }
     table.appendChild(tbody);
@@ -163,9 +163,9 @@
       return stats.downloader_bytes[b] - stats.downloader_bytes[a];
     });
 
-    chart.series[0].addPoint([ new Date() * 1, stats.total_users_done ],
+    chart.series[0].addPoint([ new Date() * 1, stats.total_items_done ],
                              false, false, false);
-    stats.users_done_rate.addPoint([ new Date() * 1, stats.total_users_done ],
+    stats.items_done_rate.addPoint([ new Date() * 1, stats.total_items_done ],
                                    false, false, false);
     stats.bytes_download_rate.addPoint([ new Date() * 1, stats.total_bytes ],
                                    false, false, false);
@@ -235,7 +235,7 @@
   }
 
   function updateStats(msg) {
-    stats.total_users_done += 1;
+    stats.total_items_done += 1;
     if (!stats.downloader_bytes[msg.downloader]) {
       stats.downloader_bytes[msg.downloader] = 0;
       stats.downloader_count[msg.downloader] = 0;
@@ -261,7 +261,7 @@
 
     tr = document.createElement('tr');
     tr.appendChild(makeTD('text', msg.downloader));
-    tr.appendChild(makeTD('text', msg.username));
+    tr.appendChild(makeTD('text', msg.item));
     tr.appendChild(makeTD('num',  Math.round(msg.megabytes), 'MB'));
 
     if (msg.version) {
@@ -279,7 +279,7 @@
     var socket = io.connect('http://'+trackerConfig.logHost+'/'+trackerConfig.logChannel);
     socket.on("log_message", function(data) {
       var msg = JSON.parse(data);
-      if (msg.downloader && msg.username && msg.megabytes) {
+      if (msg.downloader && msg.item && msg.megabytes) {
         addLog(msg);
         if (!msg.is_duplicate) {
           updateStats(msg);
@@ -292,7 +292,7 @@
     jQuery.getJSON('http://'+(trackerConfig.logHost)+'/recent/'+(trackerConfig.logChannel), function(messages) {
       for (var i=0; i<messages.length; i++) {
         var msg = messages[i];
-        if (msg.downloader && msg.username && msg.megabytes) {
+        if (msg.downloader && msg.item && msg.megabytes) {
           addLog(msg);
         }
       }
@@ -303,8 +303,8 @@
   var chart = null;
   function buildChart() {
     var maxMinTimestamp = 0;
-    if (stats.users_done_chart.length > 0) {
-      maxMinTimestamp = Math.max(maxMinTimestamp, stats.users_done_chart[0][0] * 1000);
+    if (stats.items_done_chart.length > 0) {
+      maxMinTimestamp = Math.max(maxMinTimestamp, stats.items_done_chart[0][0] * 1000);
     }
     for (var i in stats.downloader_chart) {
       if (stats.downloader_chart[i].length > 0) {
@@ -315,7 +315,7 @@
       maxMinTimestamp = null;
     }
 
-    var seriesData = stats.users_done_chart;
+    var seriesData = stats.items_done_chart;
     for (var j=seriesData.length-1; j>=0; j--) {
       seriesData[j][0] *= 1000;
     }
@@ -325,7 +325,7 @@
     for (var j=0; j<seriesData.length; j++) {
       diffSeries.addPoint(seriesData[j]);
     }
-    stats.users_done_rate = diffSeries;
+    stats.items_done_rate = diffSeries;
 
     // count MB/s based on a moving interval of 10 minutes
     diffSeries = new DifferenceSeries(trackerConfig.movingAverageInterval * 60000, 1000);
@@ -376,7 +376,7 @@
                 labels:{align:'left',x:0,y:-2},
                 height: 200 },
               { min:0, maxPadding: 0,
-                title:{text:'users', style:{color:'#aaa'}},
+                title:{text:'items', style:{color:'#aaa'}},
                 opposite:true,
                 labels:{align:'right',x:0, y:-2},
                 height: 200 },
@@ -385,11 +385,11 @@
                 labels:{align:'left',x:0,y:-2},
                 height: 70, top: 260, offset: 0 },
               { min:0, maxPadding: -0.5,
-                title:{text:'users/hour'},
+                title:{text:'items/hour'},
                 opposite:true,
                 labels:{align:'right',x:0, y:-2},
                 height: 70, top: 260, offset: 0 } ],
-      series:[{ name:'users done',
+      series:[{ name:'items done',
                 type: 'area',
                 data: seriesData,
                 color: '#aaa',
@@ -397,9 +397,9 @@
                 shadow: false,
                 marker: {enabled: false},
                 yAxis: 1 },
-              { name:'users/hour',
+              { name:'items/hour',
                 type: 'spline',
-                data: stats.users_done_rate.rateData,
+                data: stats.items_done_rate.rateData,
                 color: '#6D869F',
                 shadow: false,
                 marker: {enabled: false},
@@ -418,7 +418,7 @@
       }
     });
 
-    stats.users_done_rate.series = chart.series[1];
+    stats.items_done_rate.series = chart.series[1];
     stats.bytes_download_rate.series = chart.series[2];
 
     $(document.body).bind('click', handleDownloaderClick);

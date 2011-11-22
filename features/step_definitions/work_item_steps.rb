@@ -10,7 +10,7 @@ end
 When /^downloader "([^"]*)" marks item "([^"]*)" done with ([0-9]+) bytes$/ do |downloader, item, bytes|
   post "/done",
        { "downloader" => downloader,
-         "user" => item,
+         "item" => item,
          "bytes" => { "data"=>bytes.to_i } }.to_json,
        { "Content-Type" => "application/json" }
 end
