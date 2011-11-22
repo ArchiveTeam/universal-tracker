@@ -7,7 +7,7 @@ module UniversalTracker
   class Tracker
     module Transactions
       def ip_block_log
-        redis.lrange("blocked_log", 0, -1)
+        redis.lrange("blocked-log", 0, -1)
       end
 
       def add_log
@@ -25,7 +25,7 @@ module UniversalTracker
       def block_ip(request_ip, invalid_done_hash=nil)
         redis.pipelined do
           redis.sadd("blocked", request_ip)
-          redis.rpush("blocked_log", JSON.dump(invalid_done_hash)) if invalid_done_hash
+          redis.rpush("blocked-log", JSON.dump(invalid_done_hash)) if invalid_done_hash
         end
       end
 
