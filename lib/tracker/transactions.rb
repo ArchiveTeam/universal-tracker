@@ -6,6 +6,22 @@ require File.join(File.dirname(__FILE__), "../array_systematic_sample")
 module UniversalTracker
   class Tracker
     module Transactions
+      def ip_block_log
+        redis.lrange("blocked_log", 0, -1)
+      end
+
+      def add_log
+        redis.lrange("add-log", 0, -1)
+      end
+
+      def log_added_items(items, request_ip)
+        redis.pipelined do
+          if request_ip
+            redis.rpush("add-log", "#{ request_ip } #{ items.join(",") }")
+          end
+        end
+      end
+
       def block_ip(request_ip, invalid_done_hash=nil)
         redis.pipelined do
           redis.sadd("blocked", request_ip)
@@ -17,12 +33,12 @@ module UniversalTracker
         redis.sismember("blocked", request_ip)
       end
 
-      def ip_block_log
-        redis.lrange("blocked_log", 0, -1)
-      end
-
       def random_item
         redis.srandmember("todo")
+      end
+
+      def item_todo?(item)
+        redis.sismember("todo", item)
       end
 
       def item_done?(item)
@@ -30,7 +46,7 @@ module UniversalTracker
       end
 
       def item_claimed?(item)
-        redis.zscore("out", item)
+        not redis.zscore("out", item).nil?
       end
 
       def item_claimant(item)
@@ -39,12 +55,12 @@ module UniversalTracker
         end
       end
 
-      def add_items(items, request_ip=nil)
+      def unknown_items(items)
         replies = redis.pipelined do
           items.each do |item|
             redis.sismember("todo", item)
-            redis.sismember("done", item)
             redis.hexists("claims", item)
+            redis.sismember("done", item)
           end
         end
 
@@ -54,19 +70,44 @@ module UniversalTracker
             to_add << items[idx]
           end
         end
+        to_add
+      end
 
-        unless to_add.empty?
-          redis.pipelined do
-            to_add.each do |item|
-              redis.sadd("todo", item)
-            end
-            if request_ip
-              redis.rpush("add-log", "#{ request_ip } #{ to_add.join(",") }")
-            end
+      # Add the items to the todo queue, after checking which items are
+      # already in the queue, claimed or done.
+      # Returns the items that have been added to the queue.
+      def add_items(items)
+        add_items!(unknown_items(items))
+      end
+
+      # Add the items to the todo queue, without checking if these
+      # items are already claimed or done.
+      def add_items!(items)
+        add_items_to_queue!(:todo, items)
+      end
+
+      def add_items_to_queue!(queue, items)
+        return [] if items.empty?
+
+        added = []
+        replies = redis.pipelined do
+          items.each do |item|
+            redis.sadd(queue, item)
           end
         end
+        replies.each_with_index do |reply, idx|
+          added << items[idx] if reply==1
+        end
+        added
+      end
+      private :add_items_to_queue!
 
-        to_add
+      def add_items_for_redoing!(items)
+        add_items_to_queue!("todo:redo", items)
+      end
+
+      def add_items_for_downloader!(downloader, items)
+        add_items_to_queue!("todo:d:#{ downloader }", items)
       end
 
       def request_item(request_ip, downloader)

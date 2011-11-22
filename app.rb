@@ -142,7 +142,8 @@ module UniversalTracker
       if usernames.size > 100
         "Too many usernames."
       else
-        new_usernames = tracker.add_items(usernames, request.ip)
+        new_usernames = tracker.add_items(usernames)
+        tracker.log_added_items(usernames, request.ip)
 
         erb :rescue_me_thanks, :locals=>{ :new_usernames=>new_usernames }
       end
