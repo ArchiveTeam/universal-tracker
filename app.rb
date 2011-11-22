@@ -1,6 +1,7 @@
 require "sinatra"
 require "time"
 require "lib/array_systematic_sample"
+require "lib/redis_connection"
 require "lib/tracker"
 require "lib/tracker_config"
 

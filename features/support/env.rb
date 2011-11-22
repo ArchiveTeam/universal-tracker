@@ -1,16 +1,16 @@
 $LOAD_PATH.unshift(File.expand_path('../../..', __FILE__))
 
+ENV['RACK_ENV'] = 'test'
+
 require 'app'
 
 require 'rack/test'
-require 'redis'
 require 'rspec'
-
-REDIS_CONFIG_PATH = File.expand_path('../redis_conf.rb', __FILE__)
 
 World do
   Class.new do
     include Rack::Test::Methods
+    set :environment, :test
 
     ##
     # Work items made available in setup steps.
@@ -27,13 +27,7 @@ World do
 end
 
 AfterConfiguration do
-  redis_conf = if File.exists?(REDIS_CONFIG_PATH)
-                 eval(File.read(REDIS_CONFIG_PATH))
-               else
-                 { :host => 'localhost', :port => 6379, :db => 1 }
-               end
-
-  $redis = Redis.new(redis_conf)
+  $redis = UniversalTracker::RedisConnection.connection
 
   config = UniversalTracker::TrackerConfig.new
   $tracker = UniversalTracker::Tracker.new($redis, config)
