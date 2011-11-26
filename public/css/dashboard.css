@@ -47,9 +47,6 @@ h1 {
   float: left;
   clear: left;
 }
-#left table {
-  margin-bottom: 32px;
-}
 .log {
   margin-left: 470px;
 }
@@ -72,6 +69,12 @@ span.unit {
   text-align: left;
   color: #aaa;
   font-size: 18px;
+}
+span.text {
+  display: inline-block;
+  text-align: right;
+  font-size: smaller;
+  overflow: hidden;
 }
 tfoot td {
   border-top: 1px solid #000;
