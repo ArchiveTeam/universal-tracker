@@ -1,6 +1,5 @@
 require "sinatra"
 require "time"
-require "extensions/kernel"
 
 module UniversalTracker
   class App < Sinatra::Base
@@ -13,8 +12,8 @@ module UniversalTracker
   end
 end
 
-require_relative "lib/init"
-require_relative "models/init"
-require_relative "helpers/init"
-require_relative "routes/init"
+require File.expand_path("../lib/init", __FILE__)
+require File.expand_path("../models/init", __FILE__)
+require File.expand_path("../helpers/init", __FILE__)
+require File.expand_path("../routes/init", __FILE__)
 

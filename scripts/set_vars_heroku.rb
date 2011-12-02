@@ -9,7 +9,7 @@ end
 
 environment = ARGV[1] || ENV["RACK_ENV"] || "production"
 
-REDIS_CONFIG_PATH = File.expand_path("../config/redis.json", __FILE__)
+REDIS_CONFIG_PATH = File.expand_path("../../config/redis.json", __FILE__)
 redis_conf = JSON.parse(File.read(REDIS_CONFIG_PATH))
 
 env_vars = {}

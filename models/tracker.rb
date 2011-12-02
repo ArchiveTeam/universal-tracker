@@ -1,10 +1,10 @@
 require "time"
 require "json"
 require "active_support/ordered_hash"
-require_relative "../lib/array_systematic_sample"
-require_relative "tracker_config"
-require_relative "tracker/statistics"
-require_relative "tracker/transactions"
+require File.expand_path("../../lib/array_systematic_sample", __FILE__)
+require File.expand_path("../tracker_config", __FILE__)
+require File.expand_path("../tracker/statistics", __FILE__)
+require File.expand_path("../tracker/transactions", __FILE__)
 
 module UniversalTracker
   class Tracker

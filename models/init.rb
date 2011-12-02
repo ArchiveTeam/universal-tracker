@@ -1,4 +1,4 @@
-require_relative "redis_connection"
-require_relative "tracker_config"
-require_relative "tracker"
+require File.expand_path("../redis_connection", __FILE__)
+require File.expand_path("../tracker_config", __FILE__)
+require File.expand_path("../tracker", __FILE__)
 

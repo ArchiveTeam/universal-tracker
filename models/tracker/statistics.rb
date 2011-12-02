@@ -1,7 +1,7 @@
 require "time"
 require "json"
 require "active_support/ordered_hash"
-require_relative "../../lib/array_systematic_sample"
+require File.expand_path("../../../lib/array_systematic_sample", __FILE__)
 
 module UniversalTracker
   class Tracker

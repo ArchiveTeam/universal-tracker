@@ -1,5 +1,4 @@
 source :rubygems
-gem "extensions"
 gem "sinatra"
 gem "json"
 gem "activesupport"
