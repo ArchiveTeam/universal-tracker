@@ -1,10 +1,10 @@
 require "time"
 require "json"
 require "active_support/ordered_hash"
-require File.join(File.dirname(__FILE__), "array_systematic_sample")
-require File.join(File.dirname(__FILE__), "tracker_config")
-require File.join(File.dirname(__FILE__), "tracker/statistics")
-require File.join(File.dirname(__FILE__), "tracker/transactions")
+require_relative "../lib/array_systematic_sample"
+require_relative "tracker_config"
+require_relative "tracker/statistics"
+require_relative "tracker/transactions"
 
 module UniversalTracker
   class Tracker
