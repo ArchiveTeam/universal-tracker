@@ -1,6 +1,0 @@
-{
-  "host":     "your redis host",
-  "port":     6379,
-  "db":       0,
-  "password": "your redis password"
-}
