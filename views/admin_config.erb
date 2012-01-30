@@ -57,7 +57,7 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
 <script src="/js/admin.js?<%= assets_version %>" type="text/javascript"></script>
 <script type="text/javascript">//<![CDATA[
-var configFormFields = <%== JSON.dump(TrackerConfig.config_fields.map do |field|
+var configFormFields = <%== JSON.dump(UniversalTracker::TrackerConfig.config_fields.map do |field|
   { "name"=>field[:name], "type"=>field[:type] }
 end) %>;
 //]]>
