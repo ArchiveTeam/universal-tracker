@@ -20,7 +20,7 @@ module UniversalTracker
     end
 
     def save_to(redis)
-      redis.set("tracker_config", JSON.dump(settings))
+      redis.set("tracker_config", JSON.dump(@settings))
     end
 
 
