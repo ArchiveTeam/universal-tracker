@@ -218,7 +218,7 @@ module UniversalTracker
         done_count = resp[2]
 
         redis.pipelined do
-          redis.rpush("downloader_chartdata", "[#{ timestamp },#{ downloader_bytes }]")
+          redis.rpush("downloader_chartdata:#{ downloader }", "[#{ timestamp },#{ downloader_bytes }]")
           if done_count % 10 == 0
             redis.rpush("items_done_chartdata", "[#{ timestamp },#{ done_count }]")
           end
