@@ -128,6 +128,38 @@ module UniversalTracker
       end
     end
 
+    describe "#release_stale" do
+      before do
+        @tracker.add_items(["abc","def"])
+        @tracker.request_item("127.0.0.1", "downloader")
+        @tracker.request_item("127.0.0.1", "downloader")
+        $redis.zadd("out", Time.now.to_i - 24 * 60 * 60, "abc")
+      end
+
+      it "should return the stale claims to the queue" do
+        answer = @tracker.release_stale(Time.now - 12 * 60 * 60)
+        answer.should == [ "abc" ]
+        @tracker.item_todo?("abc").should == true
+        @tracker.item_claimed?("def").should == true
+      end
+    end
+
+    describe "#release_by_downloader" do
+      before do
+        @tracker.add_items(["abc"])
+        @tracker.request_item("127.0.0.1", "downloader_a")
+        @tracker.add_items(["def"])
+        @tracker.request_item("127.0.0.1", "downloader_b")
+      end
+
+      it "should return the items claimed by the downloader" do
+        answer = @tracker.release_by_downloader("downloader_a")
+        answer.should == [ "abc" ]
+        @tracker.item_todo?("abc").should == true
+        @tracker.item_claimed?("def").should == true
+      end
+    end
+
     describe "#mark_item_done" do
       before do
         @tracker.add_items(["abc", "def", "ghi"])

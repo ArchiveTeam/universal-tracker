@@ -26,12 +26,12 @@ end
   <form method="post" action="/admin/claims/release">
     <p>
       Free items claimed on and before:
-      <select name="since">
+      <select name="before">
         <%==
         sum = 0
         claims_per_date.map do |date, n|
           sum += n
-          "<option value=\"#{ date }\">#{ date } (#{ sum } claims)</option>"
+          "<option value=\"#{ date }T23:59:59\">#{ date } (#{ sum } claims)</option>"
         end.join
         -%>
       </select>
@@ -56,7 +56,7 @@ end
           <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
           <th scope="rowgroup"><%= claims.size %></th>
           <th scope="rowgroup">
-            <form method="post" aciton="/admin/claims/release">
+            <form method="post" action="/admin/claims/release">
               <input type="hidden" name="downloader" value="<%= downloader %>" />
               <input type="submit" value="Release" />
             </form>
@@ -69,8 +69,8 @@ end
             <td><%= claim[:since].xmlschema %></th>
             <td><%= claim[:item] %></th>
             <td scope="rowgroup">
-              <form method="post" aciton="/admin/claims/release">
-                <input type="hidden" name="downloader" value="<%= downloader %>" />
+              <form method="post" action="/admin/claims/release">
+                <input type="hidden" name="item" value="<%= claim[:item] %>" />
                 <input type="submit" value="Release" />
               </form>
             </td>

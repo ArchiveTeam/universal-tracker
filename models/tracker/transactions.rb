@@ -146,17 +146,36 @@ module UniversalTracker
         item
       end
 
-      def release_item(item)
-        if redis.zscore("out", item) or redis.hexists("claims", item)
-          redis.pipelined do
+      def release_items!(items)
+        redis.pipelined do
+          items.each do |item|
             redis.sadd("todo", item)
             redis.zrem("out", item)
             redis.hdel("claims", item)
           end
+        end
+      end
+      private :release_items!
+
+      def release_item(item)
+        if redis.zscore("out", item) or redis.hexists("claims", item)
+          release_items!([item])
           true
         else
           false
         end
+      end
+
+      def release_stale(time)
+        out = redis.zrangebyscore("out", 0, time.to_i)
+        release_items!(out)
+        out
+      end
+
+      def release_by_downloader(downloader)
+        out = claims_per_downloader[downloader].map { |claim| claim[:item] }
+        release_items!(out)
+        out
       end
 
       def mark_item_done(downloader, item, bytes, done_hash)

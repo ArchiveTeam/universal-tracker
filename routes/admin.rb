@@ -1,3 +1,5 @@
+require "time"
+
 module UniversalTracker
   class App < Sinatra::Base
     get "/admin" do
@@ -10,6 +12,20 @@ module UniversalTracker
       protected!
       @tracker = Tracker.new($redis)
       erb :admin_claims
+    end
+
+    post "/admin/claims/release" do
+      protected!
+      @tracker = Tracker.new($redis)
+      if params[:before]
+        before = Time.xmlschema(params[:before])
+        @tracker.release_stale(before)
+      elsif params[:downloader]
+        @tracker.release_by_downloader(params[:downloader])
+      elsif params[:item]
+        @tracker.release_item(params[:item])
+      end
+      redirect "/admin/claims"
     end
 
     get "/admin/config" do
