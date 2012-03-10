@@ -4,6 +4,7 @@ require "bundler"
 Bundler.require
 
 require "./app"
+require "./lib/rack_parse_post"
 
 $redis = UniversalTracker::RedisConnection.connection
 tracker = UniversalTracker::Tracker.new($redis)
