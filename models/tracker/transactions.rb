@@ -34,14 +34,15 @@ module UniversalTracker
       def item_status(item)
         replies = redis.pipelined do
           redis.sismember("todo", item)
+          redis.sismember("todo:secondary", item)
           redis.hexists("claims", item)
           redis.sismember("done", item)
         end
-        if replies[0] == 1
+        if replies[0] == 1 or resp[1] == 1
           :todo
-        elsif replies[1] == 1
-          :out
         elsif replies[2] == 1
+          :out
+        elsif replies[3] == 1
           :done
         else
           nil
@@ -53,7 +54,7 @@ module UniversalTracker
       end
 
       def item_todo?(item)
-        redis.sismember("todo", item)
+        redis.sismember("todo", item) or redis.sismember("todo:secondary", item)
       end
 
       def item_done?(item)
@@ -74,14 +75,15 @@ module UniversalTracker
         replies = redis.pipelined do
           items.each do |item|
             redis.sismember("todo", item)
+            redis.sismember("todo:secondary", item)
             redis.hexists("claims", item)
             redis.sismember("done", item)
           end
         end
 
         to_add = []
-        replies.each_slice(3).each_with_index do |response, idx|
-          if response==[0,0,0]
+        replies.each_slice(4).each_with_index do |response, idx|
+          if response==[0,0,0,0]
             to_add << items[idx]
           end
         end
@@ -193,6 +195,7 @@ module UniversalTracker
 
           redis.pipelined do
             redis.srem("todo", item)
+            redis.srem("todo:secondary", item)
             redis.zrem("out", item)
             redis.hdel("claims", item)
 

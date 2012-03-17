@@ -10,12 +10,13 @@ module UniversalTracker
         resp = redis.pipelined do
           redis.keys("todo:d:*")
           redis.scard("todo")
+          redis.scard("todo:secondary")
         end
         
         queues = []
         queues << { :key=>"todo",
                     :title=>"Main queue",
-                    :length=>resp[1].to_i }
+                    :length=>(resp[1].to_i + resp[2].to_i) }
 
         if resp[0].size > 0
           keys = resp[0].sort
@@ -76,6 +77,7 @@ module UniversalTracker
           redis.hgetall("downloader_count")
           redis.scard("done")
           redis.scard("todo")
+          redis.scard("todo:secondary")
           redis.lrange("items_done_chartdata", 0, -1)
         end
 
@@ -83,8 +85,8 @@ module UniversalTracker
         downloader_bytes = Hash[*resp[1]]
         downloader_count = Hash[*resp[2]]
         total_items_done = resp[3]
-        total_items = resp[3].to_i + resp[4].to_i
-        items_done_chart = (resp[5] || []).systematic_sample(config.history_length).map do |item|
+        total_items = resp[3].to_i + resp[4].to_i + resp[5].to_i
+        items_done_chart = (resp[6] || []).systematic_sample(config.history_length).map do |item|
           JSON.parse(item)
         end
 
