@@ -126,7 +126,7 @@ module UniversalTracker
       end
 
       def request_item(request_ip, downloader)
-        item = redis.spop("todo:d:#{ downloader }") || redis.spop("todo")
+        item = redis.spop("todo:d:#{ downloader }") || redis.spop("todo") || redis.spop("todo:secondary")
 
         if item.nil?
           item = redis.spop("todo:redo")
