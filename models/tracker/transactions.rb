@@ -38,7 +38,7 @@ module UniversalTracker
           redis.hexists("claims", item)
           redis.sismember("done", item)
         end
-        if replies[0] == 1 or resp[1] == 1
+        if replies[0] == 1 or replies[1] == 1
           :todo
         elsif replies[2] == 1
           :out
