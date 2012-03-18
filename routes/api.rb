@@ -46,7 +46,7 @@ module UniversalTracker
         if tracker.ip_blocked?(request.ip)
 # TODO logging
 #         p "Hey, blocked: #{ request.ip }"
-          tracker.random_item
+          raise Sinatra::NotFound
         else
           tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
         end
