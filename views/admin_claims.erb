@@ -29,7 +29,7 @@ end
       <select name="before">
         <%==
         sum = 0
-        claims_per_date.map do |date, n|
+        claims_per_date.sort.map do |date, n|
           sum += n
           "<option value=\"#{ date }T23:59:59\">#{ date } (#{ sum } claims)</option>"
         end.join
@@ -51,7 +51,9 @@ end
     <% claims_per_downloader.each do |downloader, claims| -%>
       <tbody>
         <tr>
-          <th scope="rowgroup"><%= downloader %></th>
+          <th scope="rowgroup">
+            <a href="?downloader=<%= CGI::escape(downloader) %>"><%= downloader %></a>
+          </th>
           <th scope="rowgroup"><%== claims.map{|c|c[:ip]}.uniq.sort_by{|ip|ip.split(",").map{|i|i.to_i}}.join("<br/>") %></th>
           <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
           <th scope="rowgroup"><%= claims.size %></th>
@@ -77,10 +79,6 @@ end
               </td>
             </tr>
           <% end -%>
-        <% else -%>
-          <tr>
-            <th scope="row"><%= downloader %></th>
-            <td colspan="4"><a href="?downloader=<%= CGI::escape(downloader) %>">View all</a></th>
         <% end -%>
       </tbody>
     <% end -%>
