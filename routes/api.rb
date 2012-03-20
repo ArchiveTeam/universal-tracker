@@ -47,8 +47,11 @@ module UniversalTracker
 # TODO logging
 #         p "Hey, blocked: #{ request.ip }"
           raise Sinatra::NotFound
-        else
+        elsif tracker.check_request_rate
           tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
+        else
+          status 420
+          ""
         end
       else
         raise "Invalid input."

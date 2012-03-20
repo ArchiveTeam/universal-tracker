@@ -24,6 +24,9 @@
   <h2>Claims</h2>
   <p><%= @tracker.number_of_claims %> &mdash; <a href="/admin/claims">manage</a></p>
 
+  <h2>Requests per minute</h2>
+  <p><%= @tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= @tracker.requests_per_minute || "not set" %> &mdash; <a href="/admin/limits">manage</a></p>
+
   <h2>Log length</h2>
   <p><%= $redis.llen("log") %></p>
 

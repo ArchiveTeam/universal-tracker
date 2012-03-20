@@ -28,6 +28,23 @@ module UniversalTracker
       redirect "/admin/claims"
     end
 
+    get "/admin/limits" do
+      protected!
+      @tracker = Tracker.new($redis)
+      erb :admin_limits
+    end
+
+    post "/admin/limits" do
+      protected!
+      @tracker = Tracker.new($redis)
+      if params[:requests_per_minute].to_s=~/[0-9]+/
+        @tracker.requests_per_minute = params[:requests_per_minute].strip.to_i
+      else
+        @tracker.requests_per_minute = nil
+      end
+      redirect "/admin/limits"
+    end
+
     get "/admin/config" do
       protected!
       @tracker_config = UniversalTracker::TrackerConfig.load_from(tracker.redis)

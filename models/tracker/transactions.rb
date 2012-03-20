@@ -27,6 +27,28 @@ module UniversalTracker
         redis.sismember("blocked", request_ip)
       end
 
+      def requests_per_minute
+        redis.get("requests_per_minute")
+      end
+
+      def requests_per_minute=(r)
+        if r.nil?
+          redis.del("requests_per_minute")
+        else
+          redis.set("requests_per_minute", r)
+        end
+      end
+
+      def check_request_rate
+        key = "requests_processed:" + Time.now.strftime("%M")
+        replies = redis.pipelined do
+          redis.get("requests_per_minute")
+          redis.incr(key)
+          redis.expire(key, 300)
+        end
+        replies[0].nil? or (replies[0].to_i >= replies[1].to_i)
+      end
+
       def random_item
         redis.srandmember("todo")
       end

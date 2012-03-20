@@ -39,7 +39,5 @@ Feature: Work items
 
     When I request a work item as "foobar" from ip 192.0.0.1
 
-    Then the response has status 200
-    Then I receive a work item "abc123"
-     But the tracker knows that "abc123" is not claimed
+    Then the response has status 404
 
