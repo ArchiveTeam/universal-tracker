@@ -59,27 +59,27 @@ HTTP API
 
 The clients communicate with the tracker over HTTP. Payloads are in JSON format, so the client should add a "Content-Type: application/json" header.
 
-Requesting a new item:
+### Requesting a new item
 
-  POST /request
-  {"downloader":"#{ downloader_name }"}
+    POST /request
+    {"downloader":"#{ downloader_name }"}
 
 The tracker will respond with the name of the next item:
 
-  #{ item_name }
+    #{ item_name }
 
 Response 404 with an empty body indicates that no item is available. The client should wait for a while and try again. Similarly, response 420 with an empty body indicates that the rate limiting is active. The client should wait for a while and try again.
 
-Completing an item:
+### Completing an item
 
-  POST /done
-  {"downloader":"#{ downloader_name }","item":"#{ item_name }","bytes":{"#{ domain_a }":#{ bytes_a },"#{ domain_b }":#{ bytes_b }},"version":#{ script_version }","id":"#{ checksum }"}
+    POST /done
+    {"downloader":"#{ downloader_name }","item":"#{ item_name }","bytes":{"#{ domain_a }":#{ bytes_a },"#{ domain_b }":#{ bytes_b }},"version":#{ script_version }","id":"#{ checksum }"}
 
 The `bytes` field contains an entry with the number of bytes for each domain of the item. The `id` field can contain an arbitrary checksum; this value is stored in the log and can be used to check results.
 
 The tracker responds with HTTP status 200 and a body of two characters:
 
-  OK
+    OK
 
 If the tracker does not respond with 200 / OK, the client should wait for a little while and send the request again.
 
