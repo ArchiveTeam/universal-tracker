@@ -79,6 +79,7 @@
     return td;
   }
 
+  var showAllDownloaders = false;
   function redrawStats() {
     var div, table, tbody, tfoot, tr;
 
@@ -134,7 +135,10 @@
 
     table = document.createElement('table');
     tbody = document.createElement('tbody');
-    for (var i=0; i<downloaders.length && i<trackerConfig.numberOfDownloaders; i++) {
+    var visibleDownloaders = showAllDownloaders ? downloaders.length
+                                                : Math.min(downloaders.length,
+                                                           trackerConfig.numberOfDownloaders);
+    for (var i=0; i<visibleDownloaders; i++) {
       var downloader = downloaders[i];
       tr = document.createElement('tr');
       tr.downloader = downloader;
@@ -148,6 +152,13 @@
                             'items'));
       tbody.appendChild(tr);
     }
+    var lastrow = $("<tr>", { colspan: 3 }).append("<span>", { id: "more" }).text(showAllDownloaders ? "↑ Show fewer contributors"
+                                                                                                     : "↓ Show all contributors");
+    lastrow.click(function() {
+      showAllDownloaders = !showAllDownloaders;
+      redrawStats();
+    });
+    lastrow.appendTo(table);
     table.appendChild(tbody);
     div.appendChild(table);
 
