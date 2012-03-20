@@ -45,8 +45,24 @@ module UniversalTracker
         end
       end
 
+      def block_downloader(downloader)
+        redis.sadd("blocked", downloader)
+      end
+
       def ip_blocked?(request_ip)
         redis.sismember("blocked", request_ip)
+      end
+
+      def downloader_blocked?(downloader)
+        redis.sismember("blocked", downloader)
+      end
+
+      def blocked?(keys)
+        redis.pipelined do
+          keys.each do |key|
+            redis.sismember("blocked", key)
+          end
+        end.any?{|r|r.to_i==1}
       end
 
       def requests_per_minute

@@ -33,6 +33,13 @@ module UniversalTracker
       @tracker.ip_blocked?("192.0.0.2").should == true
 
       @tracker.ip_block_log.should == ['{"test":123}']
+      @tracker.blocked?(["192.0.0.1"])
+    end
+
+    it "should block downloaders" do
+      @tracker.block_downloader("someone")
+      @tracker.downloader_blocked?("someone").should == true
+      @tracker.blocked?(["someone"])
     end
 
     describe "#add_item" do
