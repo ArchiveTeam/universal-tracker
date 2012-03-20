@@ -1,6 +1,7 @@
 module UniversalTracker
   class App < Sinatra::Base
     get "/" do
+      expires 60, :public, :must_revalidate
       erb :index
     end
 
@@ -8,7 +9,7 @@ module UniversalTracker
       stats = tracker.stats
 
       content_type :json
-      expires 1, :public, :must_revalidate
+      expires 60, :public, :must_revalidate
       JSON.dump(stats)
     end
 
