@@ -1,5 +1,6 @@
 require "sinatra"
 require "time"
+require "cgi"
 
 module UniversalTracker
   class App < Sinatra::Base

@@ -62,19 +62,25 @@ end
             </form>
           </th>
         </tr>
-        <% claims.each do |claim| -%>
+        <% if params[:downloader]==downloader -%>
+          <% claims.each do |claim| -%>
+            <tr>
+              <th scope="row"><%= downloader %></th>
+              <td><%= claim[:ip] %></th>
+              <td><%= claim[:since].xmlschema %></th>
+              <td><%= claim[:item] %></th>
+              <td scope="rowgroup">
+                <form method="post" action="/admin/claims/release">
+                  <input type="hidden" name="item" value="<%= claim[:item] %>" />
+                  <input type="submit" value="Release" />
+                </form>
+              </td>
+            </tr>
+          <% end -%>
+        <% else -%>
           <tr>
             <th scope="row"><%= downloader %></th>
-            <td><%= claim[:ip] %></th>
-            <td><%= claim[:since].xmlschema %></th>
-            <td><%= claim[:item] %></th>
-            <td scope="rowgroup">
-              <form method="post" action="/admin/claims/release">
-                <input type="hidden" name="item" value="<%= claim[:item] %>" />
-                <input type="submit" value="Release" />
-              </form>
-            </td>
-          </tr>
+            <td colspan="4"><a href="?downloader=<%= CGI::escape(downloader) %>">View all</a></th>
         <% end -%>
       </tbody>
     <% end -%>
