@@ -16,6 +16,28 @@ module UniversalTracker
         redis.rpush("add-log", "#{ request_ip } #{ items.join(",") }")
       end
 
+      def log_upload(request_ip, uploader, item, server)
+        uploaded_hash = { "uploader"=>uploader,
+                          "user"=>item,
+                          "server"=>server,
+                          "ip"=>request_ip,
+                          "at"=>Time.now.utc.xmlschema }
+
+        tries = 10
+        begin
+          log_key = "upload_log_#{ server }"
+          $redis.rpush(log_key, JSON.dump(uploaded_hash))
+          true
+        rescue Timeout::Error
+          tries -= 1
+          if tries > 0
+            retry
+          else
+            raise Timeout::Error
+          end
+        end
+      end
+
       def block_ip(request_ip, invalid_done_hash=nil)
         redis.pipelined do
           redis.sadd("blocked", request_ip)

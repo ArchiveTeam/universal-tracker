@@ -58,6 +58,22 @@ module UniversalTracker
       end
     end
 
+    def process_uploaded(request, data)
+      uploader = data["uploader"]
+      item = data["item"] || data["user"]
+      server = data["server"]
+
+      if uploader.is_a?(String) and
+         item.is_a?(String) and
+         server.is_a?(String)
+        tracker.log_upload(request.ip, uploader, item, server)
+        "OK\n"
+      else
+        raise "Invalid input."
+      end
+    end
+
+
     post "/request" do
       process_request(request, JSON.parse(request.body.read))
     end
@@ -93,6 +109,11 @@ module UniversalTracker
         data[:downloader] = tracker.item_claimant(item)
       end
       JSON.dump(data)
+    end
+
+    post "/uploaded" do
+      content_type :text
+      process_uploaded(request, JSON.parse(request.body.read))
     end
   end
 end
