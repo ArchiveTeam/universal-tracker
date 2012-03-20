@@ -79,7 +79,21 @@
     return td;
   }
 
+  function toggleShowAll() {
+    var showAll = ((''+location.hash).match('show-all'));
+    if (showAll) {
+      location.hash = '#';
+    } else {
+      location.hash = '#show-all';
+    }
+    redrawStats();
+    updateChart();
+    return false;
+  }
+
   function redrawStats() {
+    var showAll = ((''+location.hash).match('show-all'));
+
     var div, table, tbody, tfoot, tr;
 
     var div = document.createElement('div');
@@ -134,7 +148,7 @@
 
     table = document.createElement('table');
     tbody = document.createElement('tbody');
-    for (var i=0; i<downloaders.length && i<trackerConfig.numberOfDownloaders; i++) {
+    for (var i=0; i<downloaders.length && (showAll || i<trackerConfig.numberOfDownloaders); i++) {
       var downloader = downloaders[i];
       tr = document.createElement('tr');
       tr.downloader = downloader;
@@ -150,6 +164,13 @@
     }
     table.appendChild(tbody);
     div.appendChild(table);
+
+    var a = document.createElement('a');
+    a.innerHTML = showAll ? '&ndash;' : '+';
+    a.id = 'show-all';
+    a.href = showAll ? '#' : '#show-all';
+    a.onclick = toggleShowAll;
+    div.appendChild(a);
 
     var left = document.getElementById('left');
     left.parentNode.replaceChild(div, left);

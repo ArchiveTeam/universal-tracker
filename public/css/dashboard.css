@@ -46,12 +46,32 @@ h1 {
 #left {
   float: left;
   clear: left;
+  position: relative;
 }
 #left table {
   margin-bottom: 32px;
 }
 .log {
   margin-left: 470px;
+}
+a#show-all {
+  position: absolute;
+  left: 16px;
+  bottom: 8px;
+  display: block;
+  padding: 0 25px 0 5px;
+  font-size: 15px;
+  font-family: sans-serif;
+  color: #777;
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  text-decoration: none;
+}
+a#show-all:active,
+a#show-all:hover {
+  color: #000;
+  background: #aaa;
 }
 td span {
   display: inline-block;
