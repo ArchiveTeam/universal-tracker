@@ -17,11 +17,12 @@ module UniversalTracker
     post "/admin/claims/release" do
       protected!
       @tracker = Tracker.new($redis)
+      regexp = params[:regexp] ? Regexp.new(params[:regexp]) : nil
       if params[:before]
         before = Time.xmlschema(params[:before])
-        @tracker.release_stale(before)
+        @tracker.release_stale(before, regexp)
       elsif params[:downloader]
-        @tracker.release_by_downloader(params[:downloader])
+        @tracker.release_by_downloader(params[:downloader], regexp)
       elsif params[:item]
         @tracker.release_item(params[:item])
       end

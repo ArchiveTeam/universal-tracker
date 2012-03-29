@@ -11,7 +11,9 @@
 <body>
 
 <%
-claims_per_downloader = @tracker.claims_per_downloader
+regexp = params[:regexp] ? Regexp.new(params[:regexp]) : nil
+
+claims_per_downloader = @tracker.claims_per_downloader(regexp)
 claims_per_date = ActiveSupport::OrderedHash.new(0)
 claims_per_downloader.each do |downloader, claims|
   claims.each do |claim|
@@ -35,7 +37,17 @@ end
         end.join
         -%>
       </select>
+      matching
+      <input type="text" name="regexp" value="<%= params[:regexp] %>" />
       <input type="submit" value="Add back to the queue" />
+    </p>
+  </form>
+
+  <form method="get" action="/admin/claims">
+    <p>
+      Only show items matching:
+      <input type="text" name="regexp" value="<%= params[:regexp] %>" />
+      <input type="submit" value="Filter" />
     </p>
   </form>
 
@@ -52,7 +64,7 @@ end
       <tbody>
         <tr>
           <th scope="rowgroup">
-            <a href="?downloader=<%= CGI::escape(downloader) %>"><%= downloader %></a>
+            <a href="?<%= ("regexp=#{ CGI::escape(params[:regexp]) }&" if params[:regexp]) %>downloader=<%= CGI::escape(downloader) %>"><%= downloader %></a>
           </th>
           <th scope="rowgroup"><%== claims.map{|c|c[:ip]}.uniq.sort_by{|ip|ip.split(",").map{|i|i.to_i}}.join("<br/>") %></th>
           <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
