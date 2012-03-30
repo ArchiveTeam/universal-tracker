@@ -228,14 +228,24 @@ module UniversalTracker
         end
       end
 
-      def release_stale(time)
+      def release_stale(time, regexp=nil)
         out = redis.zrangebyscore("out", 0, time.to_i)
+        if regexp
+          out = out.select do |item|
+            item=~regexp
+          end
+        end
         release_items!(out)
         out
       end
 
-      def release_by_downloader(downloader)
+      def release_by_downloader(downloader, regexp=nil)
         out = claims_per_downloader[downloader].map { |claim| claim[:item] }
+        if regexp
+          out = out.select do |item|
+            item=~regexp
+          end
+        end
         release_items!(out)
         out
       end

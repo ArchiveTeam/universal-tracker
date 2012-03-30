@@ -54,7 +54,7 @@ module UniversalTracker
         redis.zcard("out")
       end
 
-      def claims_per_downloader
+      def claims_per_downloader(regexp=nil)
         claims = redis.hgetall("claims")
         out = redis.zrange("out", 0, -1, :with_scores=>true)
         claims_per_downloader = ActiveSupport::OrderedHash.new{ |h,k| h[k] = [] }
@@ -64,9 +64,11 @@ module UniversalTracker
           else
             ip, downloader = "unknown", "unknown"
           end
-          claims_per_downloader[downloader] << { :item=>item,
-                                                 :ip=>ip,
-                                                 :since=>Time.at(time.to_i).utc }
+          if regexp.nil? or item=~regexp
+            claims_per_downloader[downloader] << { :item=>item,
+                                                   :ip=>ip,
+                                                   :since=>Time.at(time.to_i).utc }
+          end
         end
         claims_per_downloader
       end

@@ -11,7 +11,9 @@
 <body>
 
 <%
-claims_per_downloader = @tracker.claims_per_downloader
+regexp = params[:regexp] ? Regexp.new(params[:regexp]) : nil
+
+claims_per_downloader = @tracker.claims_per_downloader(regexp)
 claims_per_date = ActiveSupport::OrderedHash.new(0)
 claims_per_downloader.each do |downloader, claims|
   claims.each do |claim|
@@ -29,13 +31,23 @@ end
       <select name="before">
         <%==
         sum = 0
-        claims_per_date.map do |date, n|
+        claims_per_date.sort.map do |date, n|
           sum += n
           "<option value=\"#{ date }T23:59:59\">#{ date } (#{ sum } claims)</option>"
         end.join
         -%>
       </select>
+      matching
+      <input type="text" name="regexp" value="<%= params[:regexp] %>" />
       <input type="submit" value="Add back to the queue" />
+    </p>
+  </form>
+
+  <form method="get" action="/admin/claims">
+    <p>
+      Only show items matching:
+      <input type="text" name="regexp" value="<%= params[:regexp] %>" />
+      <input type="submit" value="Filter" />
     </p>
   </form>
 
@@ -51,7 +63,9 @@ end
     <% claims_per_downloader.each do |downloader, claims| -%>
       <tbody>
         <tr>
-          <th scope="rowgroup"><%= downloader %></th>
+          <th scope="rowgroup">
+            <a href="?<%= ("regexp=#{ CGI::escape(params[:regexp]) }&" if params[:regexp]) %>downloader=<%= CGI::escape(downloader) %>"><%= downloader %></a>
+          </th>
           <th scope="rowgroup"><%== claims.map{|c|c[:ip]}.uniq.sort_by{|ip|ip.split(",").map{|i|i.to_i}}.join("<br/>") %></th>
           <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
           <th scope="rowgroup"><%= claims.size %></th>
@@ -77,10 +91,6 @@ end
               </td>
             </tr>
           <% end -%>
-        <% else -%>
-          <tr>
-            <th scope="row"><%= downloader %></th>
-            <td colspan="4"><a href="?downloader=<%= CGI::escape(downloader) %>">View all</a></th>
         <% end -%>
       </tbody>
     <% end -%>
