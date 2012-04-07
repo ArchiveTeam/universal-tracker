@@ -26,7 +26,7 @@ module UniversalTracker
         tries = 10
         begin
           log_key = "upload_log_#{ server }"
-          $redis.rpush(log_key, JSON.dump(uploaded_hash))
+          redis.rpush(log_key, JSON.dump(uploaded_hash))
           true
         rescue Timeout::Error
           tries -= 1
