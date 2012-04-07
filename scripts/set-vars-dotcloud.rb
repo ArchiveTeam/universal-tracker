@@ -1,9 +1,16 @@
+# Sets the redis_* environment variables in Dotcloud,
+# based on config/redis.json.
+#
+# Example:
+#   ruby script/set-vars-heroku.rb APP ENV
+#
+
 require "rubygems"
 require "json"
 
-heroku_app = ARGV[0]
-if heroku_app.nil?
-  puts "Usage: set_vars_heroku.rb NAME-OF-HEROKU-APP [ENVIRONMENT]"
+dotcloud_app = ARGV[0]
+if dotcloud_app.nil?
+  puts "Usage: set-vars-dotcloud.rb NAME-OF-DOTCLOUD-APP [ENVIRONMENT]"
   exit
 end
 
@@ -17,6 +24,6 @@ redis_conf[environment].each do |key, value|
   env_vars["redis_#{ key }"] = value
 end
 
-system("heroku", "config:add", "--app", heroku_app,
+system("dotcloud", "var", "set", dotcloud_app,
        *env_vars.map{ |key,value| "#{key}=#{value}" })
 
