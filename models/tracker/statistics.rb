@@ -25,9 +25,9 @@ module UniversalTracker
               redis.scard(queue)
             end
           end.each_with_index do |length, index|
-            if queue=~/^todo:d:(.+)$/
+            if keys[index]=~/^todo:d:(.+)$/
               queues << { :key=>keys[index],
-                          :title=>"Queue for #{ keys[index] }",
+                          :title=>"Queue for #{ $1 }",
                           :length=>length.to_i }
             end
           end
