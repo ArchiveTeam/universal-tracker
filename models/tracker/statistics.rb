@@ -43,7 +43,7 @@ module UniversalTracker
             redis.get(key)
           end
         end
-        minutes.zip(replies).map do |minute, requests|
+        minutes.zip(replies || []).map do |minute, requests|
           [ minute[/[0-9]+/], requests ]
         end.sort_by do |minute, requests|
           minute.to_i
