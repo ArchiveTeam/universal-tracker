@@ -18,7 +18,7 @@ module UniversalTracker
         if data["version"].is_a?(String)
           done_hash["version"] = data["version"]
         end
-        if data["id"].is_a?(String)
+        if data["id"]
           done_hash["id"] = data["id"]
         end
 
