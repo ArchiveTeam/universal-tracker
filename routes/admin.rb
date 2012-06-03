@@ -5,13 +5,15 @@ module UniversalTracker
     get "/admin" do
       protected!
       @tracker = Tracker.new($redis)
-      erb :admin_index
+      @admin_page = "/admin"
+      erb :admin_index, :layout=>:admin_layout
     end
 
     get "/admin/claims" do
       protected!
       @tracker = Tracker.new($redis)
-      erb :admin_claims
+      @admin_page = "/admin/claims"
+      erb :admin_claims, :layout=>:admin_layout
     end
 
     post "/admin/claims/release" do
@@ -32,7 +34,8 @@ module UniversalTracker
     get "/admin/limits" do
       protected!
       @tracker = Tracker.new($redis)
-      erb :admin_limits
+      @admin_page = "/admin/limits"
+      erb :admin_limits, :layout=>:admin_layout
     end
 
     post "/admin/limits" do
@@ -49,7 +52,8 @@ module UniversalTracker
     get "/admin/config" do
       protected!
       @tracker_config = UniversalTracker::TrackerConfig.load_from(tracker.redis)
-      erb :admin_config
+      @admin_page = "/admin/config"
+      erb :admin_config, :layout=>:admin_layout
     end
 
     post "/admin/config" do
@@ -77,7 +81,8 @@ module UniversalTracker
       end
 
       @tracker_config.save_to(tracker.redis)
-      erb :admin_config_thanks
+      @admin_page = "/admin/config"
+      erb :admin_config_thanks, :layout=>:admin_layout
     end
   end
 end

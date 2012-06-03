@@ -1,42 +1,26 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="robots" content="noindex,nofollow" />
-  <title>Tracker admin - <%= request.host %></title>
-  <link href="https://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
-  <link href="/css/admin.css?<%= assets_version %>" rel="stylesheet" type="text/css" />
-</head>
+<h2>Overview</h2>
 
-<body>
+<h2>Queues</h2>
+<table>
+  <tbody>
+  <% @tracker.queues.each do |queue| -%>
+    <tr>
+      <th width="120"><%= queue[:title] %></th>
+      <td><%= queue[:length] %> item<%= ("s" unless queue[:length]==1) %></td>
+    </tr>
+  <% end -%>
+  </tbody>
+</table>
 
-<div id="container">
-  <h1>Tracker admin &mdash; <%= request.host %></h1>
+<h2>Claims</h2>
+<p><%= @tracker.number_of_claims %> &mdash; <a href="/admin/claims">manage</a></p>
 
-  <h2>Queues</h2>
-  <dl>
-    <% @tracker.queues.each do |queue| -%>
-      <dt><%= queue[:title] %></dt>
-      <dd><%= queue[:length] %> item<%= ("s" unless queue[:length]==1) %></dd>
-    <% end -%>
-  </dl>
+<h2>Requests per minute</h2>
+<p><%= @tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= @tracker.requests_per_minute || "not set" %> &mdash; <a href="/admin/limits">manage</a></p>
 
-  <h2>Claims</h2>
-  <p><%= @tracker.number_of_claims %> &mdash; <a href="/admin/claims">manage</a></p>
+<h2>Log length</h2>
+<p><%= $redis.llen("log") %></p>
 
-  <h2>Requests per minute</h2>
-  <p><%= @tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= @tracker.requests_per_minute || "not set" %> &mdash; <a href="/admin/limits">manage</a></p>
-
-  <h2>Log length</h2>
-  <p><%= $redis.llen("log") %></p>
-
-  <h2>Redis memory usage</h2>
-  <p><%= $redis.info["used_memory_human"] %></p>
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
-
-</body>
-
-</html>
+<h2>Redis memory usage</h2>
+<p><%= $redis.info["used_memory_human"] %></p>
 

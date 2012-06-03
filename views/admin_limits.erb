@@ -1,52 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="robots" content="noindex,nofollow" />
-  <title>Tracker admin - <%= request.host %></title>
-  <link href="https://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
-  <link href="/css/admin.css?<%= assets_version %>" rel="stylesheet" type="text/css" />
-</head>
-
-<body>
-
 <%
 requests_per_minute = @tracker.requests_per_minute
 history = @tracker.requests_per_minute_history
 %>
 
-<div id="container">
-  <h1>Tracker admin &mdash; <%= request.host %></h1>
+<h2>Limits</h2>
 
-  <form method="post" action="/admin/limits">
-    <p>
-      Requests per minute:
-      <input type="text" name="requests_per_minute" size="5" value="<%= requests_per_minute %>" />
-      <input type="submit" value="Update" />
-    </p>
-  </form>
+<form method="post" action="/admin/limits">
+  <p>
+    Requests per minute:
+    <input type="text" name="requests_per_minute" size="5" value="<%= requests_per_minute %>" />
+    <input type="submit" value="Update" />
+  </p>
+</form>
 
-  <table id="limits">
-    <thead>
-      <tr>
-        <th scope="col">Minute</th>
-        <th scope="col">Requests</th>
-      </tr>
-    </thead>
+<table id="limits">
+  <thead>
+    <tr>
+      <th scope="col">Minute</th>
+      <th scope="col">Requests</th>
+    </tr>
+  </thead>
 
-    <tbody>
-      <% history.reverse.each do |minute, requests| -%>
-        <tr><td><%= minute %></td><td><%= requests %></tr>
-      <% end -%>
-    </tbody>
-  </table>
-
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
-<script src="/js/admin.js?<%= assets_version %>" type="text/javascript"></script>
-
-</body>
-
-</html>
+  <tbody>
+    <% history.reverse.each do |minute, requests| -%>
+      <tr><td><%= minute %></td><td><%= requests %></tr>
+    <% end -%>
+  </tbody>
+</table>
 

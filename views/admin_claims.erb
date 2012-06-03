@@ -1,15 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="robots" content="noindex,nofollow" />
-  <title>Tracker admin - <%= request.host %></title>
-  <link href="https://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
-  <link href="/css/admin.css?<%= assets_version %>" rel="stylesheet" type="text/css" />
-</head>
-
-<body>
-
 <%
 regexp = params[:regexp] ? Regexp.new(params[:regexp]) : nil
 
@@ -22,86 +10,79 @@ claims_per_downloader.each do |downloader, claims|
 end
 %>
 
-<div id="container">
-  <h1>Tracker admin &mdash; <%= request.host %></h1>
+<h2>Claims</h2>
 
-  <form method="post" action="/admin/claims/release">
-    <p>
-      Free items claimed on and before:
-      <select name="before">
-        <%==
-        sum = 0
-        claims_per_date.sort.map do |date, n|
-          sum += n
-          "<option value=\"#{ date }T23:59:59\">#{ date } (#{ sum } claims)</option>"
-        end.join
-        -%>
-      </select>
-      matching
-      <input type="text" name="regexp" value="<%= params[:regexp] %>" />
-      <input type="submit" value="Add back to the queue" />
-    </p>
-  </form>
+<form method="post" action="/admin/claims/release">
+  <p>
+    Free items claimed on and before:
+    <select name="before">
+      <%==
+      sum = 0
+      claims_per_date.sort.map do |date, n|
+        sum += n
+        "<option value=\"#{ date }T23:59:59\">#{ date } (#{ sum } claims)</option>"
+      end.join
+      -%>
+    </select>
+    matching
+    <input type="text" name="regexp" value="<%= params[:regexp] %>" />
+    <input type="submit" value="Add back to the queue" />
+  </p>
+</form>
 
-  <form method="get" action="/admin/claims">
-    <p>
-      Only show items matching:
-      <input type="text" name="regexp" value="<%= params[:regexp] %>" />
-      <input type="submit" value="Filter" />
-    </p>
-  </form>
+<form method="get" action="/admin/claims">
+  <p>
+    Only show items matching:
+    <input type="text" name="regexp" value="<%= params[:regexp] %>" />
+    <input type="submit" value="Filter" />
+  </p>
+</form>
 
-  <table id="claims">
-    <thead>
+<table id="claims">
+  <thead>
+    <tr>
+      <th scope="col">Downloader</th>
+      <th scope="col">IP</th>
+      <th scope="col">Claimed at</th>
+      <th scope="col" colspan="2">Claims</th>
+    </tr>
+  </thead>
+  <% claims_per_downloader.each do |downloader, claims| -%>
+    <tbody>
       <tr>
-        <th scope="col">Downloader</th>
-        <th scope="col">IP</th>
-        <th scope="col">Claimed at</th>
-        <th scope="col">Claims</th>
+        <th scope="rowgroup">
+          <a href="?<%= ("regexp=#{ CGI::escape(params[:regexp]) }&" if params[:regexp]) %>downloader=<%= CGI::escape(downloader) %>"><%= downloader %></a>
+        </th>
+        <th scope="rowgroup"><%==
+          ids = claims.map{|c|c[:ip]}.uniq.sort_by{|ip|ip.split(",").map{|i|i.to_i}}
+          ids[0,3].join("<br/>") + (ids.size > 3 ? "<br/>(+ #{ ids.size - 3 } not shown)": "")
+        %></th>
+        <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
+        <th scope="rowgroup"><%= claims.size %></th>
+        <th scope="rowgroup">
+          <form method="post" action="/admin/claims/release">
+            <input type="hidden" name="downloader" value="<%= downloader %>" />
+            <input type="submit" value="Release" />
+          </form>
+        </th>
       </tr>
-    </thead>
-    <% claims_per_downloader.each do |downloader, claims| -%>
-      <tbody>
-        <tr>
-          <th scope="rowgroup">
-            <a href="?<%= ("regexp=#{ CGI::escape(params[:regexp]) }&" if params[:regexp]) %>downloader=<%= CGI::escape(downloader) %>"><%= downloader %></a>
-          </th>
-          <th scope="rowgroup"><%== claims.map{|c|c[:ip]}.uniq.sort_by{|ip|ip.split(",").map{|i|i.to_i}}.join("<br/>") %></th>
-          <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
-          <th scope="rowgroup"><%= claims.size %></th>
-          <th scope="rowgroup">
-            <form method="post" action="/admin/claims/release">
-              <input type="hidden" name="downloader" value="<%= downloader %>" />
-              <input type="submit" value="Release" />
-            </form>
-          </th>
-        </tr>
-        <% if params[:downloader]==downloader -%>
-          <% claims.each do |claim| -%>
-            <tr>
-              <th scope="row"><%= downloader %></th>
-              <td><%= claim[:ip] %></th>
-              <td><%= claim[:since].xmlschema %></th>
-              <td><%= claim[:item] %></th>
-              <td scope="rowgroup">
-                <form method="post" action="/admin/claims/release">
-                  <input type="hidden" name="item" value="<%= claim[:item] %>" />
-                  <input type="submit" value="Release" />
-                </form>
-              </td>
-            </tr>
-          <% end -%>
+      <% if params[:downloader]==downloader -%>
+        <% claims.each do |claim| -%>
+          <tr>
+            <th scope="row"><%= downloader %></th>
+            <td><%= claim[:ip] %></th>
+            <td><%= claim[:since].xmlschema %></th>
+            <td><%= claim[:item] %></th>
+            <td scope="rowgroup">
+              <form method="post" action="/admin/claims/release">
+                <input type="hidden" name="item" value="<%= claim[:item] %>" />
+                <input type="submit" value="Release" />
+              </form>
+            </td>
+          </tr>
         <% end -%>
-      </tbody>
-    <% end -%>
-  </table>
-
-</div>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
-<script src="/js/admin.js?<%= assets_version %>" type="text/javascript"></script>
-
-</body>
-
-</html>
+      <% end -%>
+    </tbody>
+  <% end -%>
+</table>
 

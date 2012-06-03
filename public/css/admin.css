@@ -1,0 +1,157 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+
+body {
+  font: normal 14px/1.5em "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: #777;
+}
+
+#header {
+  height: 50px;
+  background: #000;
+  color: #ddd;
+}
+#header-content {
+  position: relative;
+  width: 900px;
+  margin: 0 auto 0 auto;
+}
+#header h1 {
+  font-size: 200%;
+  padding: 15px 0 0 0;
+}
+
+#container {
+  position: relative;
+  width: 900px;
+  margin: 20px auto 20px auto;
+}
+
+#menu {
+  position: absolute;
+  width: 150px;
+}
+#menu ul {
+}
+#menu ul li {
+  background: #aaa;
+  margin-bottom: 5px;
+}
+#menu ul li a {
+  display: block;
+  color: #000;
+  text-decoration: none;
+  padding: 2px 2px 2px 6px;
+}
+#menu ul li a:active,
+#menu ul li a:hover {
+  background: #ddd;
+}
+#menu ul li.active {
+  background: #fff;
+}
+
+#content {
+  position: relative;
+  background: #fff;
+  margin-left: 170px;
+  padding: 10px;
+}
+#content h2 {
+  margin: 32px 0 7px 0;
+  padding: 2px 2px 2px 6px;
+  padding: 7px;
+  background: #aaa;
+  font-size: 120%;
+}
+#content h2:first-child {
+  margin-top: 0;
+}
+#content p {
+  margin: 7px;
+  clear: both;
+}
+#content dl {
+  margin: 7px;
+  border-bottom: 1px solid #ccc;
+}
+#content dt {
+  border-top: 1px solid #ccc;
+  padding-top: 5px;
+  clear: left;
+  float: left;
+  width: 20%;
+}
+#content dd {
+  border-top: 1px solid #eee;
+  padding-top: 5px;
+  float: left;
+  clear: right;
+  width: 75%;
+}
+#content table {
+  border-collapse: border;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+}
+#content th,
+#content td {
+  padding: 5px 7px 5px 7px;
+  border-top: 1px solid #ccc;
+  text-align: left;
+}
+#content form table.map {
+  margin: -5px -7px -5px -7px;
+}
+#content form table.map thead th {
+  border: none;
+  background: #aaa;
+}
+
