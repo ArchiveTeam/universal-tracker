@@ -87,6 +87,26 @@ module UniversalTracker
         replies[0].nil? or (replies[0].to_i >= replies[1].to_i)
       end
 
+      def check_not_blocked_and_request_rate_ok(request_ip, downloader)
+        key = "requests_processed:" + Time.now.strftime("%M")
+        replies = redis.pipelined do
+          redis.sismember("blocked", request_ip)
+          redis.sismember("blocked", downloader)
+
+          redis.get("requests_per_minute")
+          redis.incr(key)
+          redis.expire(key, 300)
+        end
+        if replies[0] == 1 or replies[1] == 1
+          redis.decr(key)
+          :blocked
+        elsif replies[2] and replies[2].to_i < replies[3].to_i
+          :rate_limit
+        else
+          :ok
+        end
+      end
+
       def random_item
         redis.srandmember("todo")
       end
@@ -188,7 +208,18 @@ module UniversalTracker
       end
 
       def request_item(request_ip, downloader)
-        item = redis.spop("todo:d:#{ downloader }") || redis.spop("todo") || redis.spop("todo:secondary")
+        replies = redis.pipelined do
+          redis.spop("todo:d:#{ downloader }")
+          redis.spop("todo")
+        end
+
+        downloader_item = replies[0]
+        todo_item = replies[1]
+        item = downloader_item || todo_item
+        
+        if item.nil?
+          item = redis.spop("todo:secondary")
+        end
 
         if item.nil?
           item = redis.spop("todo:redo")
@@ -200,6 +231,7 @@ module UniversalTracker
 
         if item
           redis.pipelined do
+            redis.sadd("todo", todo_item) if downloader_item and todo_item
             redis.zadd("out", Time.now.to_i, item)
             redis.hset("claims", item, "#{ request_ip } #{ downloader }")
           end

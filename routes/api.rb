@@ -43,15 +43,16 @@ module UniversalTracker
       downloader = data["downloader"]
 
       if downloader.is_a?(String)
-        if tracker.ip_blocked?(request.ip)
+        case tracker.check_not_blocked_and_request_rate_ok(request.ip, downloader)
+        when :blocked
 # TODO logging
 #         p "Hey, blocked: #{ request.ip }"
           raise Sinatra::NotFound
-        elsif tracker.check_request_rate
-          tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
-        else
+        when :rate_limit
           status 420
           ""
+        else
+          tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
         end
       else
         raise "Invalid input."
