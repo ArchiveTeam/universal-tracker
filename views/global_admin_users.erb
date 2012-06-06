@@ -1,0 +1,69 @@
+<h2>Users</h2>
+
+<table cellspacing="0">
+  <tbody>
+    <%
+      admins = tracker_manager.admins
+      tracker_manager.users.each do |username| -%>
+      <tr>
+        <th><%= username %></th>
+        <td>
+          <form method="post" action="/global-admin/users/update-admin">
+            <input type="hidden" name="username" value="<%= username %>" />
+            <% if admins.include?(username) %>
+              <input type="submit" value="Remove global admin rights" />
+            <% else -%>
+              <input type="hidden" name="admin" value="1" />
+              <input type="submit" value="Make global admin" />
+            <% end -%>
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/global-admin/users/update-password">
+            <input type="hidden" name="username" value="<%= username %>" />
+            <input type="password" name="password" value="" placeholder="New password" />
+            <input type="submit" value="Update" />
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/global-admin/users/destroy">
+            <input type="hidden" name="username" value="<%= username %>" />
+            <input type="checkbox" name="confirm" value="1" />
+            Yes
+            <input type="submit" value="Destroy" />
+          </form>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
+
+<h3>Create new user</h3>
+<form method="post" action="/global-admin/users">
+  <table>
+    <tbody>
+      <tr>
+        <th width="120"><label for="f-username">Username</label></th>
+        <td><input type="text" name="username" id="f-username" /> (lowercase letters, numbers and -)</td>
+      </tr>
+      <tr>
+        <th width="120"><label for="f-password">Password</label></th>
+        <td><input type="password" name="password" id="f-password" /></td>
+      </tr>
+      <tr>
+        <th width="120">&nbsp;</th>
+        <td>
+          <label for="f-admin">
+            <input type="checkbox" name="admin" id="f-admin" value="1" />
+            Make global admin
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <th width="120">&nbsp;</th>
+        <td><input type="submit" value="Create" /></td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+

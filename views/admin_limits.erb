@@ -1,11 +1,11 @@
 <%
-requests_per_minute = @tracker.requests_per_minute
-history = @tracker.requests_per_minute_history
+requests_per_minute = tracker.requests_per_minute
+history = tracker.requests_per_minute_history
 %>
 
 <h2>Limits</h2>
 
-<form method="post" action="/admin/limits">
+<form method="post" action="/<%= tracker.slug %>/admin/limits">
   <p>
     Requests per minute:
     <input type="text" name="requests_per_minute" size="5" value="<%= requests_per_minute %>" />

@@ -67,6 +67,20 @@ body {
   font-size: 200%;
   padding: 15px 0 0 0;
 }
+#header .global-admin-link {
+  display: block;
+  position: absolute;
+  right: 4px;
+  top: 10px;
+  color: #888;
+  text-decoration: none;
+  padding: 6px 12px 6px 12px;
+}
+#header .global-admin-link:active,
+#header .global-admin-link:hover {
+  color: #000;
+  background: #444;
+}
 
 #container {
   position: relative;
@@ -106,13 +120,20 @@ body {
 }
 #content h2 {
   margin: 32px 0 7px 0;
-  padding: 2px 2px 2px 6px;
   padding: 7px;
   background: #aaa;
   font-size: 120%;
 }
 #content h2:first-child {
   margin-top: 0;
+}
+#content h3 {
+  margin: 21px 0 7px 0;
+  padding: 7px;
+  background: #ddd;
+}
+#content h2 + h3 {
+  margin-top: 7px;
 }
 #content p {
   margin: 7px;
@@ -147,11 +168,12 @@ body {
   border-top: 1px solid #ccc;
   text-align: left;
 }
+#content thead th {
+  background: #ddd;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
 #content form table.map {
   margin: -5px -7px -5px -7px;
-}
-#content form table.map thead th {
-  border: none;
-  background: #aaa;
 }
 

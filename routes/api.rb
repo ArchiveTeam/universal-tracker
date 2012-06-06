@@ -75,11 +75,11 @@ module UniversalTracker
     end
 
 
-    post "/request" do
+    post "/:slug/request" do
       process_request(request, JSON.parse(request.body.read))
     end
 
-    post "/release" do
+    post "/:slug/release" do
       content_type :text
       data = JSON.parse(request.body.read)
       if tracker.release_item(data["item"])
@@ -89,19 +89,19 @@ module UniversalTracker
       end
     end
 
-    post "/done" do
+    post "/:slug/done" do
       content_type :text
       process_done(request, JSON.parse(request.body.read))
     end
 
-    post "/done+request" do
+    post "/:slug/done+request" do
       content_type :text
       data = JSON.parse(request.body.read)
       process_done(request, data)
       process_request(request, data)
     end
 
-    get "/items/:item.json" do |item|
+    get "/:slug/items/:item.json" do |item|
       content_type :json
       data = {
         :status=>tracker.item_status(item)
@@ -112,7 +112,7 @@ module UniversalTracker
       JSON.dump(data)
     end
 
-    post "/uploaded" do
+    post "/:slug/uploaded" do
       content_type :text
       process_uploaded(request, JSON.parse(request.body.read))
     end

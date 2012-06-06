@@ -1,7 +1,7 @@
 <%
 regexp = params[:regexp] ? Regexp.new(params[:regexp]) : nil
 
-claims_per_downloader = @tracker.claims_per_downloader(regexp)
+claims_per_downloader = tracker.claims_per_downloader(regexp)
 claims_per_date = ActiveSupport::OrderedHash.new(0)
 claims_per_downloader.each do |downloader, claims|
   claims.each do |claim|
@@ -12,7 +12,7 @@ end
 
 <h2>Claims</h2>
 
-<form method="post" action="/admin/claims/release">
+<form method="post" action="/<%= tracker.slug %>/admin/claims/release">
   <p>
     Free items claimed on and before:
     <select name="before">
@@ -30,7 +30,7 @@ end
   </p>
 </form>
 
-<form method="get" action="/admin/claims">
+<form method="get" action="/<%= tracker.slug %>/admin/claims">
   <p>
     Only show items matching:
     <input type="text" name="regexp" value="<%= params[:regexp] %>" />
@@ -60,7 +60,7 @@ end
         <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
         <th scope="rowgroup"><%= claims.size %></th>
         <th scope="rowgroup">
-          <form method="post" action="/admin/claims/release">
+          <form method="post" action="/<%= tracker.slug %>/admin/claims/release">
             <input type="hidden" name="downloader" value="<%= downloader %>" />
             <input type="submit" value="Release" />
           </form>
@@ -74,7 +74,7 @@ end
             <td><%= claim[:since].xmlschema %></th>
             <td><%= claim[:item] %></th>
             <td scope="rowgroup">
-              <form method="post" action="/admin/claims/release">
+              <form method="post" action="/<%= tracker.slug %>/admin/claims/release">
                 <input type="hidden" name="item" value="<%= claim[:item] %>" />
                 <input type="submit" value="Release" />
               </form>

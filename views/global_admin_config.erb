@@ -1,20 +1,19 @@
 <h2>Configuration</h2>
 
-<form method="post" action="/<%= tracker.slug %>/admin/config" id="tracker-config">
+<form method="post" action="/global-admin/config" id="tracker-config">
   <table cellspacing="0">
-  <tbody>
-    <tr>
-      <th>Tracker name:</th>
-      <td><%= tracker.slug %></td>
-    </tr>
-
+    <tbody>
+      <tr>
+        <th width="160">Redis</th>
+        <td><%= redis.id %></td>
+      </tr>
     <%
-    tracker.config.each_field do |field|
+    tracker_manager.config.each_field do |field|
       case field[:type]
       when :string, :integer, :regexp
     -%>
       <tr>
-        <th><label for="f-<%= field[:name] %>"><%= field[:label] %>:</label></th>
+        <th width="160"><label for="f-<%= field[:name] %>"><%= field[:label] %>:</label></th>
         <td><input type="text" name="<%= field[:name] %>" id="f-<%= field[:name] %>" value="<%= field[:value] %>" /></td>
       </tr>
     <%
@@ -48,7 +47,7 @@
 </form>
 
 <script type="text/javascript">//<![CDATA[
-var configFormFields = <%== JSON.dump(UniversalTracker::TrackerConfig.config_fields.map do |field|
+var configFormFields = <%== JSON.dump(UniversalTracker::TrackerManagerConfig.config_fields.map do |field|
   { "name"=>field[:name], "type"=>field[:type] }
 end) %>;
 //]]>

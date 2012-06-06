@@ -8,13 +8,13 @@ module UniversalTracker
     module Statistics
       def queues
         resp = redis.pipelined do
-          redis.keys("todo:d:*")
-          redis.scard("todo")
-          redis.scard("todo:secondary")
+          redis.keys("#{ prefix }todo:d:*")
+          redis.scard("#{ prefix }todo")
+          redis.scard("#{ prefix }todo:secondary")
         end
         
         queues = []
-        queues << { :key=>"todo",
+        queues << { :key=>"#{ prefix }todo",
                     :title=>"Main queue",
                     :length=>(resp[1].to_i + resp[2].to_i) }
 
@@ -25,7 +25,7 @@ module UniversalTracker
               redis.scard(queue)
             end
           end.each_with_index do |length, index|
-            if keys[index]=~/^todo:d:(.+)$/
+            if keys[index]=~/^#{ prefix }todo:d:(.+)$/
               queues << { :key=>keys[index],
                           :title=>"Queue for #{ $1 }",
                           :length=>length.to_i }
@@ -37,26 +37,26 @@ module UniversalTracker
       end
 
       def requests_per_minute_history
-        minutes = redis.keys("requests_processed:*")
+        minutes = redis.keys("#{ prefix }requests_processed:*")
         replies = redis.pipelined do
           minutes.each do |key|
             redis.get(key)
           end
         end
         minutes.zip(replies || []).map do |minute, requests|
-          [ minute[/[0-9]+/], requests ]
+          [ minute[/[0-9]+$/], requests ]
         end.sort_by do |minute, requests|
           minute.to_i
         end
       end
 
       def number_of_claims
-        redis.zcard("out")
+        redis.zcard("#{ prefix }out")
       end
 
       def claims_per_downloader(regexp=nil)
-        claims = redis.hgetall("claims")
-        out = redis.zrange("out", 0, -1, :with_scores=>true)
+        claims = redis.hgetall("#{ prefix }claims")
+        out = redis.zrange("#{ prefix }out", 0, -1, :with_scores=>true)
         claims_per_downloader = ActiveSupport::OrderedHash.new{ |h,k| h[k] = [] }
         out.each_slice(2) do |item, time|
           if claims[item]
@@ -75,9 +75,9 @@ module UniversalTracker
 
       def downloader_update_status
         resp = redis.pipelined do
-          redis.hgetall("downloader_version")
-          redis.get("current_version")
-          redis.get("current_version_update_message")
+          redis.hgetall("#{ prefix }downloader_version")
+          redis.get("#{ prefix }current_version")
+          redis.get("#{ prefix }current_version_update_message")
         end
         data = {
           "downloader_version"=>Hash[*(resp[0] || [])],
@@ -88,13 +88,13 @@ module UniversalTracker
 
       def stats
         resp = redis.pipelined do
-          redis.hgetall("domain_bytes")
-          redis.hgetall("downloader_bytes")
-          redis.hgetall("downloader_count")
-          redis.scard("done")
-          redis.scard("todo")
-          redis.scard("todo:secondary")
-          redis.lrange("items_done_chartdata", 0, -1)
+          redis.hgetall("#{ prefix }domain_bytes")
+          redis.hgetall("#{ prefix }downloader_bytes")
+          redis.hgetall("#{ prefix }downloader_count")
+          redis.scard("#{ prefix }done")
+          redis.scard("#{ prefix }todo")
+          redis.scard("#{ prefix }todo:secondary")
+          redis.lrange("#{ prefix }items_done_chartdata", 0, -1)
         end
 
         domain_bytes = Hash[*resp[0]]
@@ -107,7 +107,7 @@ module UniversalTracker
         end
 
         downloaders = downloader_bytes.keys
-        downloader_fields = downloaders.map{|d|"downloader_chartdata:#{ d }"}
+        downloader_fields = downloaders.map{|d|"#{ prefix }downloader_chartdata:#{ d }"}
 
         unless downloader_fields.empty?
           resp = redis.pipelined do
@@ -140,6 +140,10 @@ module UniversalTracker
           "total_items"=>total_items.to_i,
           "total_bytes"=>total_bytes
         }
+      end
+
+      def log_length
+        redis.llen("#{ prefix }log")
       end
     end
   end

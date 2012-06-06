@@ -15,12 +15,16 @@ module UniversalTracker
       @@config_fields
     end
 
-    def self.load_from(redis)
-      TrackerConfig.new(JSON.parse(redis.get("tracker_config") || "{}"))
+    def self.load_from(redis, slug)
+      if config_str = redis.hget("trackers", slug)
+        TrackerConfig.new(slug, JSON.parse(config_str))
+      else
+        nil
+      end
     end
 
     def save_to(redis)
-      redis.set("tracker_config", JSON.dump(@settings))
+      redis.hset("trackers", @slug, JSON.dump(@settings))
     end
 
 
@@ -36,14 +40,6 @@ module UniversalTracker
                  :type=>:map,
                  :label=>"Domains",
                  :default=>{"data"=>"data"}
-    config_field :redis_pubsub_channel,
-                 :type=>:string,
-                 :label=>"Redis Pub/Sub channel",
-                 :default=>"tracker-log"
-    config_field :live_log_host,
-                 :type=>:string,
-                 :label=>"Live logging host",
-                 :default=>""
     config_field :live_log_channel,
                  :type=>:string,
                  :label=>"Live logging channel",
@@ -61,9 +57,14 @@ module UniversalTracker
                  :label=>"Number of historical data points",
                  :default=>1000
 
-    def initialize(settings = {})
-      @settings = @@defaults.clone.merge(Hash[settings.map{ |k,v| [ k.to_sym, v ] }])
+    def initialize(slug, settings = {})
+      @slug = slug
+      @settings = @@defaults.clone.merge(:title=>"#{ slug.capitalize } tracker").merge(Hash[settings.map{ |k,v| [ k.to_sym, v ] }])
       @settings.symbolize_keys!
+    end
+
+    def slug
+      @slug
     end
 
     def []=(a,b)

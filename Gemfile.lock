@@ -4,6 +4,7 @@ GEM
     activesupport (3.2.5)
       i18n (~> 0.6)
       multi_json (~> 1.0)
+    bcrypt-ruby (3.0.1)
     builder (3.0.0)
     cucumber (1.2.0)
       builder (>= 2.1.2)
@@ -46,6 +47,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
+  bcrypt-ruby
   cucumber
   erubis
   hiredis (~> 0.3.1)

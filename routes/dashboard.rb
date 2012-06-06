@@ -1,11 +1,15 @@
 module UniversalTracker
   class App < Sinatra::Base
-    get "/" do
+    get "/:slug" do |slug|
+      redirect "/#{ slug }/"
+    end
+
+    get "/:slug/" do
       expires 60, :public, :must_revalidate
       erb :index
     end
 
-    get "/stats.json" do
+    get "/:slug/stats.json" do
       stats = tracker.stats
 
       content_type :json
@@ -13,7 +17,7 @@ module UniversalTracker
       JSON.dump(stats)
     end
 
-    get "/update-status.json" do
+    get "/:slug/update-status.json" do
       data = tracker.downloader_update_status
 
       content_type :json
@@ -21,11 +25,11 @@ module UniversalTracker
       JSON.dump(data)
     end
 
-    get "/rescue-me" do
+    get "/:slug/rescue-me" do
       erb :rescue_me
     end
 
-    post "/rescue-me" do
+    post "/:slug/rescue-me" do
       items = params[:items].to_s.downcase.scan(tracker_config.valid_item_regexp_object).map do |match|
         match[0]
       end.uniq

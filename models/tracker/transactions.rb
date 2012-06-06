@@ -5,15 +5,15 @@ module UniversalTracker
   class Tracker
     module Transactions
       def ip_block_log
-        redis.lrange("blocked-log", 0, -1)
+        redis.lrange("#{ prefix }blocked-log", 0, -1)
       end
 
       def add_log
-        redis.lrange("add-log", 0, -1)
+        redis.lrange("#{ prefix }add-log", 0, -1)
       end
 
       def log_added_items(items, request_ip)
-        redis.rpush("add-log", "#{ request_ip } #{ items.join(",") }")
+        redis.rpush("#{ prefix }add-log", "#{ request_ip } #{ items.join(",") }")
       end
 
       def log_upload(request_ip, uploader, item, server)
@@ -25,7 +25,7 @@ module UniversalTracker
 
         tries = 10
         begin
-          log_key = "upload_log_#{ server }"
+          log_key = "#{ prefix }upload_log_#{ server }"
           redis.rpush(log_key, JSON.dump(uploaded_hash))
           true
         rescue Timeout::Error
@@ -40,47 +40,47 @@ module UniversalTracker
 
       def block_ip(request_ip, invalid_done_hash=nil)
         redis.pipelined do
-          redis.sadd("blocked", request_ip)
-          redis.rpush("blocked-log", JSON.dump(invalid_done_hash)) if invalid_done_hash
+          redis.sadd("#{ prefix }blocked", request_ip)
+          redis.rpush("#{ prefix }blocked-log", JSON.dump(invalid_done_hash)) if invalid_done_hash
         end
       end
 
       def block_downloader(downloader)
-        redis.sadd("blocked", downloader)
+        redis.sadd("#{ prefix }blocked", downloader)
       end
 
       def ip_blocked?(request_ip)
-        redis.sismember("blocked", request_ip)
+        redis.sismember("#{ prefix }blocked", request_ip)
       end
 
       def downloader_blocked?(downloader)
-        redis.sismember("blocked", downloader)
+        redis.sismember("#{ prefix }blocked", downloader)
       end
 
       def blocked?(keys)
         redis.pipelined do
           keys.each do |key|
-            redis.sismember("blocked", key)
+            redis.sismember("#{ prefix }blocked", key)
           end
         end.any?{|r|r.to_i==1}
       end
 
       def requests_per_minute
-        redis.get("requests_per_minute")
+        redis.get("#{ prefix }requests_per_minute")
       end
 
       def requests_per_minute=(r)
         if r.nil?
-          redis.del("requests_per_minute")
+          redis.del("#{ prefix }requests_per_minute")
         else
-          redis.set("requests_per_minute", r)
+          redis.set("#{ prefix }requests_per_minute", r)
         end
       end
 
       def check_request_rate
-        key = "requests_processed:" + Time.now.strftime("%M")
+        key = "#{ prefix }requests_processed:" + Time.now.strftime("%M")
         replies = redis.pipelined do
-          redis.get("requests_per_minute")
+          redis.get("#{ prefix }requests_per_minute")
           redis.incr(key)
           redis.expire(key, 300)
         end
@@ -88,12 +88,12 @@ module UniversalTracker
       end
 
       def check_not_blocked_and_request_rate_ok(request_ip, downloader)
-        key = "requests_processed:" + Time.now.strftime("%M")
+        key = "#{ prefix }requests_processed:" + Time.now.strftime("%M")
         replies = redis.pipelined do
-          redis.sismember("blocked", request_ip)
-          redis.sismember("blocked", downloader)
+          redis.sismember("#{ prefix }blocked", request_ip)
+          redis.sismember("#{ prefix }blocked", downloader)
 
-          redis.get("requests_per_minute")
+          redis.get("#{ prefix }requests_per_minute")
           redis.incr(key)
           redis.expire(key, 300)
         end
@@ -108,15 +108,15 @@ module UniversalTracker
       end
 
       def random_item
-        redis.srandmember("todo")
+        redis.srandmember("#{ prefix }todo")
       end
 
       def item_status(item)
         replies = redis.pipelined do
-          redis.sismember("todo", item)
-          redis.sismember("todo:secondary", item)
-          redis.hexists("claims", item)
-          redis.sismember("done", item)
+          redis.sismember("#{ prefix }todo", item)
+          redis.sismember("#{ prefix }todo:secondary", item)
+          redis.hexists("#{ prefix }claims", item)
+          redis.sismember("#{ prefix }done", item)
         end
         if replies[0] == 1 or replies[1] == 1
           :todo
@@ -134,19 +134,19 @@ module UniversalTracker
       end
 
       def item_todo?(item)
-        redis.sismember("todo", item) or redis.sismember("todo:secondary", item)
+        redis.sismember("#{ prefix }todo", item) or redis.sismember("#{ prefix }todo:secondary", item)
       end
 
       def item_done?(item)
-        redis.sismember("done", item)
+        redis.sismember("#{ prefix }done", item)
       end
 
       def item_claimed?(item)
-        not redis.zscore("out", item).nil?
+        not redis.zscore("#{ prefix }out", item).nil?
       end
 
       def item_claimant(item)
-        if ip_downloader = redis.hget("claims", item)
+        if ip_downloader = redis.hget("#{ prefix }claims", item)
           ip_downloader.split(" ")[1]
         end
       end
@@ -154,10 +154,10 @@ module UniversalTracker
       def unknown_items(items)
         replies = redis.pipelined do
           items.each do |item|
-            redis.sismember("todo", item)
-            redis.sismember("todo:secondary", item)
-            redis.hexists("claims", item)
-            redis.sismember("done", item)
+            redis.sismember("#{ prefix }todo", item)
+            redis.sismember("#{ prefix }todo:secondary", item)
+            redis.hexists("#{ prefix }claims", item)
+            redis.sismember("#{ prefix }done", item)
           end
         end
 
@@ -187,9 +187,10 @@ module UniversalTracker
         return [] if items.empty?
 
         added = []
+        queue_key = "#{ prefix }#{ queue }"
         replies = redis.pipelined do
           items.each do |item|
-            redis.sadd(queue, item)
+            redis.sadd(queue_key, item)
           end
         end
         replies.each_with_index do |reply, idx|
@@ -209,8 +210,8 @@ module UniversalTracker
 
       def request_item(request_ip, downloader)
         replies = redis.pipelined do
-          redis.spop("todo:d:#{ downloader }")
-          redis.spop("todo")
+          redis.spop("#{ prefix }todo:d:#{ downloader }")
+          redis.spop("#{ prefix }todo")
         end
 
         downloader_item = replies[0]
@@ -218,22 +219,22 @@ module UniversalTracker
         item = downloader_item || todo_item
         
         if item.nil?
-          item = redis.spop("todo:secondary")
+          item = redis.spop("#{ prefix }todo:secondary")
         end
 
         if item.nil?
-          item = redis.spop("todo:redo")
-          if item and redis.hget("claims", item).to_s.split(" ").last==downloader
-            redis.sadd("todo:redo", item)
+          item = redis.spop("#{ prefix }todo:redo")
+          if item and redis.hget("#{ prefix }claims", item).to_s.split(" ").last==downloader
+            redis.sadd("#{ prefix }todo:redo", item)
             item = nil
           end
         end
 
         if item
           redis.pipelined do
-            redis.sadd("todo", todo_item) if downloader_item and todo_item
-            redis.zadd("out", Time.now.to_i, item)
-            redis.hset("claims", item, "#{ request_ip } #{ downloader }")
+            redis.sadd("#{ prefix }todo", todo_item) if downloader_item and todo_item
+            redis.zadd("#{ prefix }out", Time.now.to_i, item)
+            redis.hset("#{ prefix }claims", item, "#{ request_ip } #{ downloader }")
           end
         end
 
@@ -243,16 +244,16 @@ module UniversalTracker
       def release_items!(items)
         redis.pipelined do
           items.each do |item|
-            redis.sadd("todo", item)
-            redis.zrem("out", item)
-            redis.hdel("claims", item)
+            redis.sadd("#{ prefix }todo", item)
+            redis.zrem("#{ prefix }out", item)
+            redis.hdel("#{ prefix }claims", item)
           end
         end
       end
       private :release_items!
 
       def release_item(item)
-        if redis.zscore("out", item) or redis.hexists("claims", item)
+        if redis.zscore("#{ prefix }out", item) or redis.hexists("#{ prefix }claims", item)
           release_items!([item])
           true
         else
@@ -261,7 +262,7 @@ module UniversalTracker
       end
 
       def release_stale(time, regexp=nil)
-        out = redis.zrangebyscore("out", 0, time.to_i)
+        out = redis.zrangebyscore("#{ prefix }out", 0, time.to_i)
         if regexp
           out = out.select do |item|
             item=~regexp
@@ -296,16 +297,16 @@ module UniversalTracker
                   "is_duplicate"=>(prev_status==:done) }
 
           redis.pipelined do
-            redis.srem("todo", item)
-            redis.srem("todo:secondary", item)
-            redis.zrem("out", item)
-            redis.hdel("claims", item)
+            redis.srem("#{ prefix }todo", item)
+            redis.srem("#{ prefix }todo:secondary", item)
+            redis.zrem("#{ prefix }out", item)
+            redis.hdel("#{ prefix }claims", item)
 
-            redis.sadd("done", item)
-            redis.rpush("log", JSON.dump(done_hash))
+            redis.sadd("#{ prefix }done", item)
+            redis.rpush("#{ prefix }log", JSON.dump(done_hash))
 
-            redis.hset("downloader_version", downloader, done_hash["version"].to_s)
-            redis.publish(config.redis_pubsub_channel, JSON.dump(msg))
+            redis.hset("#{ prefix }downloader_version", downloader, done_hash["version"].to_s)
+            redis.publish(tracker_manager.config.redis_pubsub_channel, JSON.dump(msg))
           end
           
           # we don't count items twice
@@ -328,12 +329,12 @@ module UniversalTracker
         total_bytes = bytes.values.inject(0) { |sum,b| sum + b }
 
         resp = redis.pipelined do
-          redis.hincrby("downloader_bytes", downloader, total_bytes)
-          redis.hincrby("downloader_count", downloader, 1)
-          redis.scard("done")
+          redis.hincrby("#{ prefix }downloader_bytes", downloader, total_bytes)
+          redis.hincrby("#{ prefix }downloader_count", downloader, 1)
+          redis.scard("#{ prefix }done")
 
           bytes.each do |domain, b|
-            redis.hincrby("domain_bytes", domain, b.to_i)
+            redis.hincrby("#{ prefix }domain_bytes", domain, b.to_i)
           end
         end
 
@@ -342,9 +343,9 @@ module UniversalTracker
         done_count = resp[2]
 
         redis.pipelined do
-          redis.rpush("downloader_chartdata:#{ downloader }", "[#{ timestamp },#{ downloader_bytes }]")
+          redis.rpush("#{ prefix }downloader_chartdata:#{ downloader }", "[#{ timestamp },#{ downloader_bytes }]")
           if done_count % 10 == 0
-            redis.rpush("items_done_chartdata", "[#{ timestamp },#{ done_count }]")
+            redis.rpush("#{ prefix }items_done_chartdata", "[#{ timestamp },#{ done_count }]")
           end
         end
       end

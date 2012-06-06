@@ -1,0 +1,18 @@
+<h2>Overview</h2>
+
+<h3>Trackers</h3>
+<table>
+  <tbody>
+  <% tracker_manager.trackers.each do |tracker| -%>
+    <tr>
+      <th width="120"><a href="/<%= tracker.config.slug %>"><%= tracker.config.slug %></a></th>
+      <td width="120"><a href="/<%= tracker.config.slug %>/admin/">Admin</a></th>
+      <td><%= tracker.config.title %></td>
+    </tr>
+  <% end -%>
+  </tbody>
+</table>
+
+<h3>Redis memory usage</h3>
+<p><%= redis.info["used_memory_human"] %></p>
+

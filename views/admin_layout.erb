@@ -12,23 +12,44 @@
 
   <div id="header">
     <div id="header-content">
-      <h1>Tracker admin &mdash; <%= request.host %></h1>
+      <% if tracker -%>
+        <h1>Tracker admin &mdash; <%= request.host %>/<%= tracker.slug %></h1>
+        <% if user_is_global_admin? %>
+          <a href="/global-admin/" class="global-admin-link">Global admin</a>
+        <% end -%>
+      <% else -%>
+        <h1>Global tracker admin &mdash; <%= request.host %></h1>
+      <% end -%>
     </div>
   </div>
 
   <div id="container">
     <div id="menu">
-      <ul>
-        <%
-          [ [ "/admin", "Overview" ],
-            [ "/admin/config", "Configuration" ],
-            [ "/admin/claims", "Claims" ],
-            [ "/admin/limits", "Limits" ]
-          ].each do |path, title|
-        %>
-          <li <% if @admin_page==path %>class="active"<% end %>><a href="<%= path %>"><%= title %></a></li>
-        <% end %>
-      </ul>
+      <% if tracker -%>
+        <ul>
+          <%
+            [ [ "/admin/", "Overview" ],
+              [ "/admin/config", "Configuration" ],
+              [ "/admin/claims", "Claims" ],
+              [ "/admin/limits", "Limits" ]
+            ].each do |path, title|
+          %>
+            <li <% if @admin_page==path %>class="active"<% end %>><a href="<%= "/#{ tracker.slug }#{ path } " %>"><%= title %></a></li>
+          <% end %>
+        </ul>
+      <% else -%>
+        <ul>
+          <%
+            [ [ "/global-admin/", "Overview" ],
+              [ "/global-admin/config", "Configuration" ],
+              [ "/global-admin/trackers", "Trackers" ],
+              [ "/global-admin/users", "Users" ]
+            ].each do |path, title|
+          %>
+            <li <% if @global_admin_page==path %>class="active"<% end %>><a href="<%= path %>"><%= title %></a></li>
+          <% end %>
+        </ul>
+      <% end -%>
     </div>
 
     <div id="content">

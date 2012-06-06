@@ -29,10 +29,7 @@ end
 AfterConfiguration do
   $redis = UniversalTracker::RedisConnection.connection
 
-  config = UniversalTracker::TrackerConfig.new
-  $tracker = UniversalTracker::Tracker.new($redis, config)
-
-  UniversalTracker::App.set :tracker, $tracker
+  UniversalTracker::App.set :redis, $redis
   UniversalTracker::App.enable :raise_errors
 end
 

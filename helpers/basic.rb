@@ -1,20 +1,36 @@
 module UniversalTracker
   class App < Sinatra::Base
+    def redis
+      settings.redis
+    end
+
+    def tracker_manager
+      settings.tracker_manager
+    end
+
     def tracker
-      settings.tracker
+      @tracker
     end
 
     def tracker_config
-      settings.tracker.config
+      tracker.config
+    end
+
+    def tracker_manager_config
+      tracker_manager.config
     end
 
     helpers do
       def tracker
-        settings.tracker
+        @tracker
       end
 
       def tracker_config
-        settings.tracker.config
+        tracker.config
+      end
+
+      def tracker_manager_config
+        tracker_manager.config
       end
 
       def assets_version

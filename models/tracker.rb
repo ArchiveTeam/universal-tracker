@@ -12,15 +12,51 @@ module UniversalTracker
     include Transactions
 
     attr_accessor :redis
+    attr_accessor :tracker_manager
     attr_accessor :config
 
-    def initialize(redis, config = nil)
+    def initialize(redis, tracker_manager, config = nil)
       @redis = redis
-      @config = config || TrackerConfig.load_from(redis)
+      @tracker_manager = tracker_manager
+      @config = config
     end
 
-    def admin_password
-      redis.get("admin_password")
+    def slug
+      @config.slug
+    end
+
+    def prefix
+      slug == "picplz" ? "" : "#{ slug }:"
+    end
+
+    def admins
+      redis.smembers("#{ prefix }tracker_admins")
+    end
+
+    def admins=(new_admins)
+      redis.del("#{ prefix }tracker_admins")
+      new_admins.each do |username|
+        add_admin(username)
+      end
+    end
+
+    def add_admin(username)
+      redis.sadd("#{ prefix }tracker_admins", username)
+    end
+
+    def remove_admin(username)
+      redis.srem("#{ prefix }tracker_admins", username)
+    end
+
+    def destroy
+      keys = %w{ tracker_admins log out downloader_count todo done blocked items_done_chartdata claims downloader_version downloader_bytes }.map{|k| "#{ prefix }#{ k }" }
+      %w{ downloader_chartdata:* log:* todo:* requests_processed:* }.map do |k|
+        keys.push(*redis.keys("#{ prefix }#{ k }"))
+      end
+      keys.each do |key|
+        redis.del(key)
+      end
+      redis.hdel("trackers", slug)
     end
   end
 end

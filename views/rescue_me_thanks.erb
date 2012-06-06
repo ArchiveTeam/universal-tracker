@@ -11,7 +11,7 @@
 <body>
 
 <div id="container">
-  <form method="post" action="/rescue-me">
+  <form method="post" action="/<%= tracker.slug %>/rescue-me">
     <h1><%= "#{ new_items.size } item#{ new_items.size==1 ? "" : "s" }" %> added to the queue</h1>
     <p>
       Thanks for your help!

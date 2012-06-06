@@ -1,9 +1,9 @@
 <h2>Overview</h2>
 
-<h2>Queues</h2>
+<h3>Queues</h3>
 <table>
   <tbody>
-  <% @tracker.queues.each do |queue| -%>
+  <% tracker.queues.each do |queue| -%>
     <tr>
       <th width="120"><%= queue[:title] %></th>
       <td><%= queue[:length] %> item<%= ("s" unless queue[:length]==1) %></td>
@@ -12,15 +12,15 @@
   </tbody>
 </table>
 
-<h2>Claims</h2>
-<p><%= @tracker.number_of_claims %> &mdash; <a href="/admin/claims">manage</a></p>
+<h3>Claims</h3>
+<p><%= tracker.number_of_claims %> &mdash; <a href="/<%= tracker.slug %>/admin/claims">manage</a></p>
 
-<h2>Requests per minute</h2>
-<p><%= @tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= @tracker.requests_per_minute || "not set" %> &mdash; <a href="/admin/limits">manage</a></p>
+<h3>Requests per minute</h3>
+<p><%= tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= tracker.requests_per_minute || "not set" %> &mdash; <a href="/<%= tracker.slug %>/admin/limits">manage</a></p>
 
-<h2>Log length</h2>
-<p><%= $redis.llen("log") %></p>
+<h3>Log length</h3>
+<p><%= tracker.log_length %></p>
 
-<h2>Redis memory usage</h2>
-<p><%= $redis.info["used_memory_human"] %></p>
+<h3>Redis memory usage</h3>
+<p><%= redis.info["used_memory_human"] %></p>
 

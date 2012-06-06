@@ -1,0 +1,75 @@
+<h2>Trackers</h2>
+
+<% tracker_manager.trackers.each do |tracker| -%>
+  <h3><%= tracker.config.slug %> &mdash; <%= tracker.config.title %></h3>
+  <table>
+    <tbody>
+      <tr>
+        <th width="120">Tracker name</th>
+        <td><%= tracker.config.slug %></td>
+      </tr>
+      <tr>
+        <th width="120">Live stats URL</th>
+        <td><a href="/<%= tracker.config.slug %>"><%= request.host %>/<%= tracker.config.slug %></a></td>
+      </tr>
+      <tr>
+        <th width="120">Admin URL</th>
+        <td><a href="/<%= tracker.config.slug %>/admin/"><%= request.host %>/<%= tracker.config.slug %>/admin/</a></td>
+      </tr>
+      <tr>
+        <th width="120">Admin users</th>
+        <td>
+          <form method="post" action="/global-admin/trackers/<%= tracker.config.slug %>/update-admins">
+            <%
+              tracker_admins = tracker.admins
+              tracker_manager.users.each do |username| -%>
+              <label for="f-<%= tracker.config.slug %>-admin-<%= username %>">
+                <input type="checkbox" name="admin[<%= username %>]" value="<%= username %>" id="f-<%= tracker.config.slug %>-admin-<%= username %>" <% if tracker_admins.include?(username) %>checked="checked"<% end %> />
+                <%= username %>
+              </label>
+            <% end -%>
+            <input type="submit" value="Update" />
+          </form>
+        </td>
+      </tr>
+      <tr>
+        <th width="120">&nbsp;</th>
+        <td>
+          <form method="post" action="/global-admin/trackers/<%= tracker.config.slug %>/destroy">
+            <input type="checkbox" name="confirm" value="1" /> Yes, I am sure I want to
+            <input type="submit" value="Destroy this tracker" />
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+<% end -%>
+
+<h3>Create new tracker</h3>
+<form method="post" action="/global-admin/trackers">
+  <table>
+    <tbody>
+      <tr>
+        <th width="120"><label for="f-slug">Tracker name</label></th>
+        <td><input type="text" name="slug" id="f-slug" /> (lowercase letters, numbers and -)</td>
+      </tr>
+      <tr>
+        <th width="120">Admin users</th>
+        <td>
+          <%
+            tracker_manager.users.each do |username| -%>
+            <label for="f-admin-<%= username %>">
+              <input type="checkbox" name="admin[<%= username %>]" value="<%= username %>" id="f-admin-<%= username %>" />
+              <%= username %>
+            </label>
+          <% end -%>
+        </td>
+      </tr>
+      <tr>
+        <th width="120">&nbsp;</th>
+        <td><input type="submit" value="Create" /></td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+
