@@ -64,6 +64,26 @@ module UniversalTracker
       redirect "/#{ tracker.slug }/admin/blocked"
     end
 
+    get "/:slug/admin/logs" do
+      @admin_page = "/admin/logs"
+      erb :admin_logs, :layout=>:admin_layout
+    end
+
+    post "/:slug/admin/logs/archive" do
+      if params[:destroy_id]
+        tracker.destroy_log(params[:destroy_id]) if params[:confirm]
+      else
+        tracker.archive_log
+      end
+      redirect "/#{ tracker.slug }/admin/logs"
+    end
+
+    get "/:slug/admin/logs/:timestamp" do
+      content_type "text/plain"
+      attachment "log-#{ tracker.slug }-#{ params[:timestamp] }.log"
+      tracker.log_to_str(params[:timestamp]=="current" ? nil : params[:timestamp])
+    end
+
     get "/:slug/admin/config" do
       @admin_page = "/admin/config"
       erb :admin_config, :layout=>:admin_layout

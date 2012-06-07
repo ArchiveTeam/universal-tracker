@@ -29,10 +29,12 @@
         <ul>
           <%
             [ [ "/admin/", "Overview" ],
-              [ "/admin/config", "Configuration" ],
+              [ "/admin/queues", "Queues" ],
               [ "/admin/claims", "Claims" ],
+              [ "/admin/logs", "Logs" ],
               [ "/admin/blocked", "Blocked" ],
-              [ "/admin/limits", "Limits" ]
+              [ "/admin/limits", "Limits" ],
+              [ "/admin/config", "Configuration" ]
             ].each do |path, title|
           %>
             <li <% if @admin_page==path %>class="active"<% end %>><a href="<%= "/#{ tracker.slug }#{ path } " %>"><%= title %></a></li>

@@ -149,6 +149,29 @@ module UniversalTracker
       def log_length
         redis.llen("#{ prefix }log")
       end
+
+      def logs
+        log_keys = ["#{ prefix }log"] + redis.keys("#{ prefix }log:*")
+        replies = redis.pipelined do
+          log_keys.each do |log_key|
+            redis.llen(log_key)
+          end
+        end
+        Hash[log_keys.map{|key|key[prefix.size,1000]}.zip(replies)]
+      end
+
+      def archive_log
+        redis.rename("#{ prefix }log", "#{ prefix }log:#{ Time.now.utc.xmlschema }")
+      end
+
+      def destroy_log(timestamp)
+        redis.del("#{ prefix }log:#{ timestamp }")
+      end
+
+      def log_to_str(timestamp=nil)
+        log_key = timestamp ? "#{ prefix }log:#{ timestamp }" : "#{ prefix }log"
+        redis.lrange(log_key, 0, -1).join("\n")
+      end
     end
   end
 end

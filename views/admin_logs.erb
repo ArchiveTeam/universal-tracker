@@ -1,0 +1,36 @@
+<h2>Logs</h2>
+
+<p>To cycle the log without losing data:<br/>1. archive the current log, 2. download the archive, 3. remove it from the server.</p>
+
+<table id="blocked">
+  <tbody>
+    <% tracker.logs.sort_by{|log,length|log}.each do |log, length| -%>
+      <tr>
+        <th scope="row">
+          <%= log=="log" ? "Current log" : "Archived #{ log.gsub(/^log:/, "") }" %>
+        </th>
+        <td><%= length.to_i %> items</td>
+        <td>
+          <a href="/<%= tracker.slug %>/admin/logs/<%= log=="log" ? "current" : log.gsub(/^log:/, "") %>">Download</a>
+        </td>
+        <td>
+          <% if log=="log" -%>
+            <form method="post" action="/<%= tracker.slug %>/admin/logs/archive">
+              <input type="submit" value="Archive" />
+            </form>
+          <% else -%>
+            <form method="post" action="/<%= tracker.slug %>/admin/logs/archive">
+              <input type="hidden" name="destroy_id" value="<%= log.gsub(/^log:/, "") %>" />
+              <input type="submit" value="Destroy" />
+              <label for="f-confirm-<%= log %>">
+                <input type="checkbox" id="f-confirm-<%= log %>" name="confirm" value="1" />
+                Confirm
+              </label>
+            </form>
+          <% end -%>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
+
