@@ -40,10 +40,6 @@ module UniversalTracker
                  :type=>:map,
                  :label=>"Domains",
                  :default=>{"data"=>"data"}
-    config_field :live_log_channel,
-                 :type=>:string,
-                 :label=>"Live logging channel",
-                 :default=>""
     config_field :valid_item_regexp,
                  :type=>:regexp,
                  :label=>"Valid item regexp",
@@ -79,6 +75,10 @@ module UniversalTracker
 
     def valid_item_regexp_object
       @regexp ||= Regexp.new("(#{ @settings[:valid_item_regexp] })")
+    end
+
+    def live_log_channel
+      "#{ @slug }-log"
     end
   end
 end
