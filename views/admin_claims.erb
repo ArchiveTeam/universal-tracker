@@ -1,6 +1,8 @@
 <%
 regexp = params[:regexp] ? Regexp.new(params[:regexp]) : nil
 
+done_per_downloader = tracker.done_per_downloader
+
 claims_per_downloader = tracker.claims_per_downloader(regexp)
 claims_per_date = ActiveSupport::OrderedHash.new(0)
 claims_per_downloader.each do |downloader, claims|
@@ -44,6 +46,7 @@ end
       <th scope="col">Downloader</th>
       <th scope="col">IP</th>
       <th scope="col">Claimed at</th>
+      <th scope="col">Done</th>
       <th scope="col" colspan="2">Claims</th>
     </tr>
   </thead>
@@ -58,6 +61,7 @@ end
           ids[0,3].join("<br/>") + (ids.size > 3 ? "<br/>(+ #{ ids.size - 3 } not shown)": "")
         %></th>
         <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
+        <th scope="rowgroup"><%= done_per_downloader[downloader] %></th>
         <th scope="rowgroup"><%= claims.size %></th>
         <th scope="rowgroup">
           <form method="post" action="/<%= tracker.slug %>/admin/claims/release">
@@ -66,13 +70,13 @@ end
           </form>
         </th>
       </tr>
-      <% if params[:downloader]==downloader -%>
+      <% if params[:downloader]==downloader or not params[:regexp].to_s.strip.empty? -%>
         <% claims.each do |claim| -%>
           <tr>
             <th scope="row"><%= downloader %></th>
-            <td><%= claim[:ip] %></th>
-            <td><%= claim[:since].xmlschema %></th>
-            <td><%= claim[:item] %></th>
+            <td><%= claim[:ip] %></td>
+            <td><%= claim[:since].xmlschema %></td>
+            <td colspan="2"><%= claim[:item] %></td>
             <td scope="rowgroup">
               <form method="post" action="/<%= tracker.slug %>/admin/claims/release">
                 <input type="hidden" name="item" value="<%= claim[:item] %>" />
