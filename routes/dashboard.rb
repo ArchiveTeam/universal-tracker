@@ -10,19 +10,31 @@ module UniversalTracker
     end
 
     get "/:slug/stats.json" do
-      stats = tracker.stats
-
       content_type :json
       expires 60, :public, :must_revalidate
-      JSON.dump(stats)
+
+      cache_key = "cache:#{ tracker.slug }:stats.json"
+      cached = redis.get(cache_key)
+      if cached.nil?
+        cached = JSON.dump(tracker.stats)
+        redis.set(cache_key, cached)
+        redis.expire(cache_key, 60)
+      end
+      cached
     end
 
     get "/:slug/update-status.json" do
-      data = tracker.downloader_update_status
-
       content_type :json
       expires 60, :public, :must_revalidate
-      JSON.dump(data)
+
+      cache_key = "cache:#{ tracker.slug }:update-status.json"
+      cached = redis.get(cache_key)
+      if cached.nil?
+        cached = JSON.dump(tracker.downloader_update_status)
+        redis.set(cache_key, cached)
+        redis.expire(cache_key, 60)
+      end
+      cached
     end
 
     get "/:slug/rescue-me" do
