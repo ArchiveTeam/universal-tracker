@@ -1,0 +1,80 @@
+<h2>Queues</h2>
+
+<% if params[:add_result] -%>
+  <p class="flash"><%= params[:add_result] -%></p>
+<% end -%>
+
+<table>
+  <tbody>
+  <% tracker.queues.each do |queue| -%>
+    <tr>
+      <th width="160"><%= queue[:title] %></th>
+      <td><%= queue[:length] %> item<%= ("s" unless queue[:length]==1) %></td>
+      <td>
+        <form method="post" action="/<%= tracker.slug %>/admin/queues/destroy">
+          <input type="hidden" name="destroy_id" value="<%= queue[:key] %>" />
+          <input type="submit" value="Destroy" />
+          <label for="f-confirm-<%= queue[:key] %>">
+            <input type="checkbox" id="f-confirm-<%= queue[:key] %>" name="confirm" value="1" />
+            Confirm
+          </label>
+        </form>
+      </td>
+    </tr>
+  <% end -%>
+  </tbody>
+</table>
+
+<h3>Add items</h3>
+<form method="post" action="/<%= tracker.slug %>/admin/queues" enctype="multipart/form-data">
+<table>
+  <tbody>
+    <tr>
+      <th width="160">Add to queue</th>
+      <td>
+        <label for="f-queue-todo">
+          <input type="radio" name="queue" id="f-queue-todo" value="todo" checked="checked" />
+          Main queue
+        </label><br />
+
+        <label for="f-queue-downloader">
+          <input type="radio" name="queue" id="f-queue-downloader" value="downloader" />
+          Downloader:
+          <input type="text" name="downloader" value="" placeholder="Downloader name" />
+        </label><br />
+      </td>
+    </tr>
+    <tr>
+      <th width="160">Check for duplicates everywhere?</th>
+      <td>
+        <label for="f-check-no">
+          <input type="radio" name="check" id="f-check-no" value="no" checked="checked" />
+          No, just add to the queue (faster)
+        </label><br />
+
+        <label for="f-check-yes">
+          <input type="radio" name="check" id="f-check-yes" value="yes" />
+          Check in claimed and done lists (slower)
+        </label><br />
+      </td>
+    </tr>
+    <tr>
+      <th width="160" style="vertical-align: top"><label for="f-items">Items<br/>(whitespace-separated):</label></th>
+      <td>
+        <textarea name="items" id="f-items" rows="5" cols="50"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <th width="160" style="vertical-align: top"><label for="f-items-file">Items:</label></th>
+      <td>
+        <input type="file" name="items-file" id="f-items-file" />
+      </td>
+    </tr>
+    <tr>
+      <td width="160">&nbsp;</td>
+      <td><input type="submit" value="Add items" /></td>
+    </tr>
+  </tbody>
+</table>
+</form>
+

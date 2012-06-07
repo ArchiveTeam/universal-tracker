@@ -15,6 +15,46 @@ module UniversalTracker
       erb :admin_index, :layout=>:admin_layout
     end
 
+    get "/:slug/admin/queues" do
+      @admin_page = "/admin/queues"
+      erb :admin_queues, :layout=>:admin_layout
+    end
+
+    post "/:slug/admin/queues" do
+      if params["items-file"] and params["items-file"][:tempfile]
+        items_from_file = params["items-file"][:tempfile].read
+      else
+        items_from_file = ""
+      end
+      items_from_form = params["items"].to_s
+      items = items_from_file.scan(/\S+/) + items_from_form.scan(/\S+/)
+
+      if params[:check] == "yes"
+        items = tracker.unknown_items(items)
+      end
+
+      if params[:queue] == "todo"
+        added_items = tracker.add_items!(items)
+        result = "Processed items: #{ items.size }, added to main queue: #{ added_items.size }"
+      elsif not params[:downloader].to_s.strip.empty?
+        downloader = params[:downloader].to_s.strip
+        added_items = tracker.add_items_for_downloader!(downloader, items)
+        result = "Processed items: #{ items.size }, added for #{ downloader }: #{ added_items.size }"
+      else
+        queue = nil
+        result = "Invalid queue."
+      end
+
+      redirect "/#{ tracker.slug }/admin/queues?add_result=#{ CGI::escape(result) }"
+    end
+
+    post "/:slug/admin/queues/destroy" do
+      if params[:destroy_id] and params[:confirm]
+        tracker.destroy_queue(params[:destroy_id])
+      end
+      redirect "/#{ tracker.slug }/admin/queues"
+    end
+
     get "/:slug/admin/claims" do
       @admin_page = "/admin/claims"
       erb :admin_claims, :layout=>:admin_layout

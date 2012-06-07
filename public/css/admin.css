@@ -139,6 +139,11 @@ body {
   margin: 7px;
   clear: both;
 }
+#content p.flash {
+  background: #ffa;
+  margin: 7px 0 7px 0;
+  padding: 7px;
+}
 #content dl {
   margin: 7px;
   border-bottom: 1px solid #ccc;

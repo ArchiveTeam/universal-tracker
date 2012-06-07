@@ -26,7 +26,7 @@ module UniversalTracker
             end
           end.each_with_index do |length, index|
             if keys[index]=~/^#{ prefix }todo:d:(.+)$/
-              queues << { :key=>keys[index],
+              queues << { :key=>keys[index][prefix.size, 10000],
                           :title=>"Queue for #{ $1 }",
                           :length=>length.to_i }
             end

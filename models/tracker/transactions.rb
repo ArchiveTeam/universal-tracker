@@ -216,6 +216,10 @@ module UniversalTracker
         add_items_to_queue!("todo:d:#{ downloader }", items)
       end
 
+      def destroy_queue(queue)
+        redis.del("#{ prefix }#{ queue }") if queue=~/^todo/
+      end
+
       def request_item(request_ip, downloader)
         replies = redis.pipelined do
           redis.spop("#{ prefix }todo:d:#{ downloader }")
