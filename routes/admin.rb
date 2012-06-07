@@ -47,6 +47,23 @@ module UniversalTracker
       redirect "/#{ tracker.slug }/admin/limits"
     end
 
+    get "/:slug/admin/blocked" do
+      @admin_page = "/admin/blocked"
+      erb :admin_blocked, :layout=>:admin_layout
+    end
+
+    post "/:slug/admin/blocked" do
+      id = params[:id].to_s.strip
+      tracker.block_downloader(id) unless id.empty?
+      redirect "/#{ tracker.slug }/admin/blocked"
+    end
+
+    post "/:slug/admin/blocked/remove" do
+      id = params[:id].to_s.strip
+      tracker.unblock_downloader(id) unless id.empty?
+      redirect "/#{ tracker.slug }/admin/blocked"
+    end
+
     get "/:slug/admin/config" do
       @admin_page = "/admin/config"
       erb :admin_config, :layout=>:admin_layout
