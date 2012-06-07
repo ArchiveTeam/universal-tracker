@@ -1,4 +1,4 @@
-A configurable tracker with dashboard.  [![Build Status](https://secure.travis-ci.org/ArchiveTeam/universal-tracker.png)](http://travis-ci.org/ArchiveTeam/universal-tracker)
+A configurable multi-project tracker with dashboards.  [![Build Status](https://secure.travis-ci.org/ArchiveTeam/universal-tracker.png)](http://travis-ci.org/ArchiveTeam/universal-tracker)
 
 Can run on Heroku, with a Redis server somewhere.
 
@@ -10,6 +10,31 @@ Terminology
 - `items`: users, members or another type of unit that is to be saved. Each item is identified by a unique string, e.g., the username.
 - `domains`: identify parts of an item (e.g., mobileme is is divided in web, gallery, public.me.com and homepage.mac.com). This is only used for statistics.
 
+Multiple trackers with one instance
+===================================
+
+One instance can manage trackers for multiple projects. In the Redis database, the keys of each tracker are prefixed with "#{ slug }:".
+
+Setting up
+==========
+
+To start running trackers:
+
+1. Install a recent version of Redis.
+2. Install the tracker web app.
+3. Copy `config/redis.json.example` and set the Redis parameters.
+
+You'll now have an empty application. The admin pages are accessible to anyone without logging in.
+
+Create a user account and make yourself a global admin:
+
+4. Go to http://yourtracker/global-admin/
+5. Go to Users.
+6. Create a new account with global admin powers.
+
+From now on, you'll have to log in to access the admin pages.
+
+If you ever forget your password, remove the `admins` key from the Redis database to reopen access and create a new user account.
 
 Basics / Redis structure
 ========================
@@ -61,7 +86,7 @@ The clients communicate with the tracker over HTTP. Payloads are in JSON format,
 
 ### Requesting a new item
 
-    POST /request
+    POST /:slug/request
     {"downloader":"#{ downloader_name }"}
 
 The tracker will respond with the name of the next item:
@@ -72,7 +97,7 @@ Response 404 with an empty body indicates that no item is available. The client 
 
 ### Completing an item
 
-    POST /done
+    POST /:slug/done
     {"downloader":"#{ downloader_name }","item":"#{ item_name }","bytes":{"#{ domain_a }":#{ bytes_a },"#{ domain_b }":#{ bytes_b }},"version":#{ script_version }","id":"#{ checksum }"}
 
 The `bytes` field contains an entry with the number of bytes for each domain of the item. The `id` field can contain an arbitrary checksum; this value is stored in the log and can be used to check results.
