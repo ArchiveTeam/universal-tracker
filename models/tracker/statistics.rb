@@ -14,7 +14,7 @@ module UniversalTracker
         end
         
         queues = []
-        queues << { :key=>"#{ prefix }todo",
+        queues << { :key=>"todo",
                     :title=>"Main queue",
                     :length=>(resp[1].to_i + resp[2].to_i) }
 
