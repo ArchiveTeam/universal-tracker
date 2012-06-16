@@ -26,7 +26,7 @@ module UniversalTracker
     end
 
     def prefix
-      slug == "picplz" ? "" : "#{ slug }:"
+      "#{ slug }:"
     end
 
     def admins
