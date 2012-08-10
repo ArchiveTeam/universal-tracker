@@ -8,7 +8,7 @@ module UniversalTracker
       if downloader.is_a?(String) and
          item.is_a?(String) and
          bytes.is_a?(Hash) and
-         bytes.all?{|k,v|k.is_a?(String) and v.is_a?(Fixnum)}
+         bytes.all?{|k,v|k.is_a?(String) and v.is_a?(Integer)}
 
         done_hash = { "item"=>item,
                       "by"=>downloader,
@@ -35,7 +35,7 @@ module UniversalTracker
           end
         end
       else
-        raise "Invalid input."
+        raise "Invalid input: #{ data.inspect }."
       end
     end
 
