@@ -85,6 +85,16 @@ module UniversalTracker
         end
       end
 
+      def check_version(version)
+        if config.version.to_s.strip.empty?
+          true
+        elsif version.nil?
+          false
+        else
+          version.to_s.strip >= config.version.to_s.strip
+        end
+      end
+
       def check_request_rate
         key = "#{ prefix }requests_processed:" + Time.now.strftime("%M")
         replies = redis.pipelined do

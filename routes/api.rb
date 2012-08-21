@@ -41,8 +41,12 @@ module UniversalTracker
 
     def process_request(request, data)
       downloader = data["downloader"]
+      version = data["version"]
 
-      if downloader.is_a?(String)
+      if not tracker.check_version(version)
+        status 455
+        ""
+      elsif downloader.is_a?(String)
         case tracker.check_not_blocked_and_request_rate_ok(request.ip, downloader)
         when :blocked
 # TODO logging

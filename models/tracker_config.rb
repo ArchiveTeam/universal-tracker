@@ -44,6 +44,10 @@ module UniversalTracker
                  :type=>:regexp,
                  :label=>"Valid item regexp",
                  :default=>"[-_.A-Za-z0-9]{2,50}"
+    config_field :min_script_version,
+                 :type=>:string,
+                 :label=>"Required version (>=)",
+                 :default=>""
     config_field :moving_average_interval,
                  :type=>:integer,
                  :label=>"Moving average interval (minutes)",
