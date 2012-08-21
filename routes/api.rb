@@ -49,7 +49,7 @@ module UniversalTracker
 #         p "Hey, blocked: #{ request.ip }"
           raise Sinatra::NotFound
         when :rate_limit
-          status 420
+          status 429
           ""
         else
           tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
