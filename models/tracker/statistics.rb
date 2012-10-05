@@ -77,6 +77,10 @@ module UniversalTracker
         redis.hgetall("#{ prefix }downloader_count")
       end
 
+      def budget_per_downloader
+        redis.hgetall("#{ prefix }downloader_budget")
+      end
+
       def downloader_update_status
         resp = redis.pipelined do
           redis.hgetall("#{ prefix }downloader_version")

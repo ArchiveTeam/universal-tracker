@@ -1,4 +1,6 @@
 <%
+max_budget = tracker.min_downloader_budget
+max_budget = -(max_budget.to_i) unless max_budget.nil?
 requests_per_minute = tracker.requests_per_minute
 history = tracker.requests_per_minute_history
 %>
@@ -7,8 +9,13 @@ history = tracker.requests_per_minute_history
 
 <form method="post" action="/<%= tracker.slug %>/admin/limits">
   <p>
+    Maximum claims per downloader:
+    <input type="text" name="max_budget" size="5" value="<%= max_budget %>" />
+  </p>
+  <p>
     Requests per minute:
     <input type="text" name="requests_per_minute" size="5" value="<%= requests_per_minute %>" />
+    <br />
     <input type="submit" value="Update" />
   </p>
 </form>

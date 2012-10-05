@@ -84,6 +84,11 @@ module UniversalTracker
       else
         tracker.requests_per_minute = nil
       end
+      if params[:max_budget].to_s=~/[0-9]+/
+        tracker.min_downloader_budget = -(params[:max_budget].strip.to_i)
+      else
+        tracker.min_downloader_budget = nil
+      end
       redirect "/#{ tracker.slug }/admin/limits"
     end
 
