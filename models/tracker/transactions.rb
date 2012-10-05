@@ -133,7 +133,7 @@ module UniversalTracker
         if replies[0] == 1 or replies[1] == 1
           redis.decr(key)
           :blocked
-        elsif replies[2] and replies[3] and replies[2].to_i > replies[3].to_i
+        elsif replies[2] and replies[3] and replies[2].to_i < replies[3].to_i
           :blocked
         elsif replies[4] and replies[4].to_i < replies[5].to_i
           :rate_limit
