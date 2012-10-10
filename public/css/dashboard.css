@@ -52,7 +52,7 @@ h1 {
   margin-bottom: 32px;
 }
 .log {
-  margin-left: 470px;
+  margin-left: 450px;
 }
 a#show-all {
   position: absolute;
@@ -99,6 +99,12 @@ tfoot td {
 }
 .log td span.text {
   width: 170px;
+}
+.log td span.downloader {
+  padding-left: 31px;
+}
+.log tr.warrior td span.downloader {
+  background: left bottom no-repeat url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAZCAIAAACtotlwAAAE3ElEQVRIx6XUa0xTVxwAcL/ti1u2ZN+2ZFuWuSya+GXTuczEx3RGo3PIVNw08T2p4KT0ASgvl0IrtaVAayn0gaW0Reib0od93NuWS7v23tLSy6Ngw6tggVaiUirY3UwTnalOx//T/55z87v/87/nnDXpN45AIOBw2IeGBrHc54MBAEDRUMY317yh6PfDLpfF47HIZCKx+JZYzAOALr3+9uxsDJtdXl55azQY7DMY1G63bWQEsdl0MlmLw2Ho6bFpNDIQBCHI5XRao9Hpt0CTyUWDQYcgoNcLTE6GQiFPNIrOzYWj0cFAoIcv4GBVQ5DZ43G/DgVAR1HxFalM/kI3g2KxwOk0z8+PYMUODHjDYX8sFp6YQCcm0UgkgHXYaNTF4/FIJJIBfbSYPJy1/+N313z4/jt2wPF0EEEQpVIaDvsmJkKx2Eh4pG8mNooOuBceTPlgy3DYP3o3gPUXgiwKRVsikXgZXXmSbqKTrfRdJdkfhRDo6U/QapUA0A0jPbAfmp2LCITMtvYWGee8rLVSKsSDLhM66A2h7oWFMaz1S6lUhuV7Ibus6hc+cavf55mbT2AjTqcFqxEd8BmMcnZ9UQNxT0P5IW/5ho7qLRBrWzH5BLu+uIlDRkOARtOZuad3I2PVlUQmblPJxQP40lJqbR2H23B/YdxsajNpa4xV341WbNQWbvQd+8Kc+9UQab2Fu8tM28y4dlCjlegNusXk0stoZGyMw2tic3miRiaJeJnF5RWUXD1fUCiS8OWiXNWVLcO4dcHsT2pxP7JouWxmnjp/Rwi/YahgvZnyrfB6VmhgKEOlHSo1t4mPJQ8fJX1IH5ZIW4VUUg6l+IyrZZ+peDO79HgL5SSTedloqdeb6lqayEph0U38QfepzwDOvnhi/mV0Kjp9ncmg1VT3BwNTUzOKzk7QpFY0XBL+meNz6lHpYUfe5g4lVSQur2MT+kMS2N+i1tHNNnZbzVlf4ecee0OGfRpAPBW43a0VB+TUY6200/T8XQz8HhYl/1TeRZcHHnZX2+lbAIDt9jSLW8uC/WIYFiqU1EC/xKogGblnZ2YTmTd/r02la2Wyqy4zKcSCSydP/37qjzJKXtl1BwhOjQ+bO8rMhmoHWN8ur+z/B5VIKgLBW4wb5263i/7jmDbyBQRaQ0G9Kr/RRZSgJfJBXod1JZVsU6grOTcvFJEJ+MNoSOz3C5ubyX19IoORu5Rafh1qc8N0Bch0LpwQjR9hQj8xkNKu+EW2rVZupar91faH2Qz37qPHfd5GGG7m8Qrt9lqVqi6ZTL4S9SF+usJV1DW77arpSvOdPtjLkgPZFD2+8x5BEf1VNP09tf+bq661X+4gEU93dUk0auyi0kOQfQU7i69CNQ53jT22s8rD7gDTy88+bnH+Rbhp3EuWnKHIbvAVMpU+5+gxAV/wqovtXygMwywthGuf3k+xxediL04tLy3O3ZtJP3n89PFxKvWa2/I5+uB+QtJtFcALh5rGL9R2p1eW0v83nqPKbiND66QDie3MUZrYkl5FPENBAMzClQq8s2RtfNM1RKpzrAq1WO6QSaRCAunTrUeOEGpzaqxfF98BHD2rQnt7e3G5uVk/H1z73gc/7Ny+77dL6/bmhcPh1S5/anJyeHhILm3DXTi/P+toOY31ZDm1GvRvPEi6Tx9R7LgAAAAASUVORK5CYII=);
 }
 #chart-container {
   margin-top: 15px;
