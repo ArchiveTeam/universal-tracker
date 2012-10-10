@@ -330,6 +330,7 @@ module UniversalTracker
           bytes.values.each do |b| total_bytes += b.to_i end
 
           msg = { "downloader"=>downloader,
+                  "user_agent"=>done_hash["ua"].to_s,
                   "item"=>item,
                   "megabytes"=>(total_bytes.to_f / (1024*1024)),
                   "domain_bytes"=>bytes,

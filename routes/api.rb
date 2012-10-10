@@ -13,6 +13,7 @@ module UniversalTracker
         done_hash = { "item"=>item,
                       "by"=>downloader,
                       "ip"=>request.ip,
+                      "ua"=>request.user_agent,
                       "at"=>Time.now.utc.xmlschema,
                       "bytes"=>bytes }
         if data["version"].is_a?(String)
