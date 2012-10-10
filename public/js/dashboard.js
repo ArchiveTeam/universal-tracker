@@ -284,7 +284,9 @@
     if (msg.user_agent && msg.user_agent.match(/Warrior$/)) {
       tr.className = 'warrior';
     }
-    tr.appendChild(makeTD('text downloader', msg.downloader));
+    var td = makeTD('text', msg.downloader);
+    td.className += ' downloader';
+    tr.appendChild(td);
     tr.appendChild(makeTD('text', msg.item));
     tr.appendChild(makeTD('num',  Math.round(msg.megabytes), 'MB'));
 
