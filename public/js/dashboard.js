@@ -285,7 +285,7 @@
       tr.className = 'warrior';
     }
     var td = makeTD('text', msg.downloader);
-    td.className += ' downloader';
+    td.className = 'downloader';
     tr.appendChild(td);
     tr.appendChild(makeTD('text', msg.item));
     tr.appendChild(makeTD('num',  Math.round(msg.megabytes), 'MB'));
