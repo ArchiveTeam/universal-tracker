@@ -142,7 +142,7 @@ module UniversalTracker
       target = tracker.random_http_upload_target
       if target
         target += "/" unless target=~/\/$/
-        "#{ target }#{ upload_path }", 302
+        "#{ target }#{ upload_path }"
       else
         ""
       end
