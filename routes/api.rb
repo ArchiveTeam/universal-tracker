@@ -135,6 +135,18 @@ module UniversalTracker
         ""
       end
     end
+
+    get %r{/[a-z0-9]+/upload/(.+)} do
+      content_type :text
+      upload_path = params[:captures].first
+      target = tracker.random_http_upload_target
+      if target
+        target += "/" unless target=~/\/$/
+        "#{ target }#{ upload_path }", 302
+      else
+        ""
+      end
+    end
   end
 end
 
