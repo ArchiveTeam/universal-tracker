@@ -142,6 +142,10 @@ module UniversalTracker
         end
       end
 
+      def random_http_upload_target
+        redis.srandmember("#{ prefix }http_upload_target")
+      end
+
       def random_item
         redis.srandmember("#{ prefix }todo")
       end

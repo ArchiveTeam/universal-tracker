@@ -121,6 +121,20 @@ module UniversalTracker
       content_type :text
       process_uploaded(request, JSON.parse(request.body.read))
     end
+
+    put %r{/[a-z0-9]+/upload/(.+)} do
+      content_type :text
+      upload_path = params[:captures].first
+      target = tracker.random_http_upload_target
+      if target
+        target += "/" unless target=~/\/$/
+        redirect "#{ target }#{ upload_path }", 302
+        ""
+      else
+        status 429
+        ""
+      end
+    end
   end
 end
 
