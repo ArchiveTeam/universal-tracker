@@ -45,14 +45,10 @@ module UniversalTracker
       items = params[:items].to_s.downcase.scan(tracker_config.valid_item_regexp_object).map do |match|
         match[0]
       end.uniq
-      if items.size > 100
-        "Too many items."
-      else
-        new_items = tracker.add_items(items)
-        tracker.log_added_items(items, request.ip)
+      new_items = tracker.add_items(items)
+      tracker.log_added_items(items, request.ip)
 
-        erb :rescue_me_thanks, :locals=>{ :new_items=>new_items }
-      end
+      erb :rescue_me_thanks, :locals=>{ :new_items=>new_items }
     end
   end
 end

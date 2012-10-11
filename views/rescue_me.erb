@@ -28,15 +28,8 @@
 <script type="text/javascript">
 (function() {
   document.forms[0].onsubmit = function(evt) {
-    var text = document.forms[0].items.value;
-    var count = text.match(/\S+/mg).length;
-    if (count > 100 || text.length > 100*100) {
-      alert('You\'re posting more than 100 items! Thanks.\n\nUnfortunately, the tracker can\'t handle this. Please split your list in batches of less than 100, if it is small enough, or upload it somewhere and post the link via IRC.');
-      return false;
-    } else {
-      document.forms[0].submit_button.value = 'Processing...';
-      return true;
-    }
+    document.forms[0].submit_button.value = 'Processing...';
+    return true;
   }
 })();
 </script>
