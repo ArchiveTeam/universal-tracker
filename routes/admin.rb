@@ -109,6 +109,23 @@ module UniversalTracker
       redirect "/#{ tracker.slug }/admin/blocked"
     end
 
+    get "/:slug/admin/http_upload_targets" do
+      @admin_page = "/admin/http_upload_targets"
+      erb :admin_http_upload_targets, :layout=>:admin_layout
+    end
+
+    post "/:slug/admin/http_upload_targets" do
+      url = params[:url].to_s.strip
+      tracker.add_http_upload_target(url) unless url.empty?
+      redirect "/#{ tracker.slug }/admin/http_upload_targets"
+    end
+
+    post "/:slug/admin/http_upload_targets/remove" do
+      url = params[:url].to_s.strip
+      tracker.remove_http_upload_target(url) unless url.empty?
+      redirect "/#{ tracker.slug }/admin/http_upload_targets"
+    end
+
     get "/:slug/admin/logs" do
       @admin_page = "/admin/logs"
       erb :admin_logs, :layout=>:admin_layout

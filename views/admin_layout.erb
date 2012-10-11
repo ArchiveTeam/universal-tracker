@@ -34,10 +34,11 @@
               [ "/admin/logs", "Logs" ],
               [ "/admin/blocked", "Blocked" ],
               [ "/admin/limits", "Limits" ],
+              [ "/admin/http_upload_targets", "HTTP uploads" ],
               [ "/admin/config", "Configuration" ]
             ].each do |path, title|
           %>
-            <li <% if @admin_page==path %>class="active"<% end %>><a href="<%= "/#{ tracker.slug }#{ path } " %>"><%= title %></a></li>
+            <li <% if @admin_page==path %>class="active"<% end %>><a href="<%= "/#{ tracker.slug }#{ path }" %>"><%= title %></a></li>
           <% end %>
         </ul>
       <% else -%>
