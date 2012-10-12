@@ -123,6 +123,13 @@ module UniversalTracker
     end
 
     put %r{/[a-z0-9]+/upload/(.+)} do
+      redirect_upload_request
+    end
+    post %r{/[a-z0-9]+/upload/(.+)} do
+      redirect_upload_request
+    end
+
+    def redirect_upload_request
       content_type :text
       upload_path = params[:captures].first
       target = tracker.random_http_upload_target
