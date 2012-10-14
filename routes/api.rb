@@ -135,7 +135,7 @@ module UniversalTracker
       target = tracker.random_http_upload_target
       if target
         target += "/" unless target=~/\/$/
-        redirect "#{ target }#{ upload_path }", 302
+        redirect "#{ target }#{ upload_path }", 307
         ""
       else
         status 429
