@@ -21,6 +21,8 @@ module UniversalTracker
     end
 
     post "/:slug/admin/queues" do
+      if request.content_type =~ "text/plain"
+        items_from_file = request.body.read
       if params["items-file"] and params["items-file"][:tempfile]
         items_from_file = params["items-file"][:tempfile].read
       else
@@ -45,7 +47,12 @@ module UniversalTracker
         result = "Invalid queue."
       end
 
-      redirect "/#{ tracker.slug }/admin/queues?add_result=#{ CGI::escape(result) }"
+      if request.content_type =~ "text/plain"
+        content_type :text
+        result
+      else
+        redirect "/#{ tracker.slug }/admin/queues?add_result=#{ CGI::escape(result) }"
+      end
     end
 
     post "/:slug/admin/queues/destroy" do
