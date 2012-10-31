@@ -23,7 +23,7 @@ module UniversalTracker
     post "/:slug/admin/queues" do
       if request.content_type =~ "text/plain"
         items_from_file = request.body.read
-      if params["items-file"] and params["items-file"][:tempfile]
+      elsif params["items-file"] and params["items-file"][:tempfile]
         items_from_file = params["items-file"][:tempfile].read
       else
         items_from_file = ""
