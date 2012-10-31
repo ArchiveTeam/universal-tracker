@@ -21,7 +21,7 @@ module UniversalTracker
     end
 
     post "/:slug/admin/queues" do
-      if request.content_type =~ "text/plain"
+      if request.content_type =~ /text\/plain/
         items_from_file = request.body.read
       elsif params["items-file"] and params["items-file"][:tempfile]
         items_from_file = params["items-file"][:tempfile].read
@@ -47,7 +47,7 @@ module UniversalTracker
         result = "Invalid queue."
       end
 
-      if request.content_type =~ "text/plain"
+      if request.content_type =~ /text\/plain/
         content_type :text
         result
       else
