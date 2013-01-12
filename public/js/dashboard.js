@@ -362,14 +362,15 @@
     }
     var sumBytes = 0;
     while (perDownloaderData.length > 0) {
-      var minTime = null, minTimeIdx = null;
-      for (var j = perDownloaderData.length - 1; j>=0; j--) {
-        var thisTime = perDownloaderData[j][perDownloaderIndex[j]][0];
-        if (minTime == null || thisTime <= minTime) {
-          minTime = thisTime;
+      var minTime = null, minTimeIdx = null, j;
+      for (j = perDownloaderData.length - 1; j>=0; j--) {
+        var entry = perDownloaderData[j][perDownloaderIndex[j]];
+        if (entry && (minTime == null || entry[0] <= minTime)) {
+          minTime = entry[0];
           minTimeIdx = j;
         }
       }
+      if (j < 0) break;
       if (minTimeIdx != null) {
         if (perDownloaderIndex[minTimeIdx] > 0) {
           sumBytes -= perDownloaderData[minTimeIdx][perDownloaderIndex[minTimeIdx] - 1][1];
