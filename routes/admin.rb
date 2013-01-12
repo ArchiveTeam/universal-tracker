@@ -31,17 +31,19 @@ module UniversalTracker
       items_from_form = params["items"].to_s
       items = items_from_file.scan(/\S+/) + items_from_form.scan(/\S+/)
 
+      number_of_items = items.size
+
       if params[:check] == "yes"
         items = tracker.unknown_items(items)
       end
 
       if params[:queue] == "todo"
         added_items = tracker.add_items!(items)
-        result = "Processed items: #{ items.size }, added to main queue: #{ added_items.size }"
+        result = "Processed items: #{ number_of_items }, added to main queue: #{ added_items.size }"
       elsif not params[:downloader].to_s.strip.empty?
         downloader = params[:downloader].to_s.strip
         added_items = tracker.add_items_for_downloader!(downloader, items)
-        result = "Processed items: #{ items.size }, added for #{ downloader }: #{ added_items.size }"
+        result = "Processed items: #{ number_of_items }, added for #{ downloader }: #{ added_items.size }"
       else
         queue = nil
         result = "Invalid queue."
@@ -49,7 +51,7 @@ module UniversalTracker
 
       if request.content_type =~ /text\/plain/
         content_type :text
-        result
+        result + "\n"
       else
         redirect "/#{ tracker.slug }/admin/queues?add_result=#{ CGI::escape(result) }"
       end
