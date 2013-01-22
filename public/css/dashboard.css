@@ -138,3 +138,60 @@ textarea {
   margin: 0 0 0 -5px;
 }
 
+#how-to-help,
+#how-to-help-cue {
+  background: #eee;
+  margin: -8px -8px 8px -8px;
+}
+#how-to-help-cue h1 {
+  position: relative;
+  width: 960px;
+  margin: 0 auto 0 auto;
+  padding: 2px 0 7px 0;
+  border: none;
+  font-weight: normal;
+}
+#how-to-help-cue a {
+  text-decoration: none;
+}
+#how-to-help {
+  display: none;
+}
+#how-to-help-card {
+  position: relative;
+  width: 960px;
+  margin: 0 auto 0 auto;
+  padding: 12px 0 22px 0;
+}
+#how-to-help h1 {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-weight: normal;
+}
+#how-to-help .warrior-logo {
+  width: 100px;
+  float: left;
+  margin: 15px 12px 0 -15px;
+}
+#how-to-help .screenshots img {
+  width: 256px;
+  border: 5px solid #fff;
+}
+#how-to-help ol {
+  padding-left: 0;
+  margin: 0 0 10px 0;
+  list-style: decimal;
+}
+#how-to-help li {
+  overflow-x: visible;
+  white-space: normal;
+  margin-left: 2em;
+  padding-left: 5px;
+  list-style: decimal;
+}
+#how-to-help p, #how-to-help ol, #how-to-help li {
+  font-size: 16px;
+  max-width: 600px;
+}
+

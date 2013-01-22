@@ -491,5 +491,12 @@
     window.setInterval(function() { refreshUpdateStatus(); }, 60000);
   });
 
+  $('#how-to-help-cue').click(function(e) {
+    e.preventDefault();
+
+    $('#how-to-help-cue').animate({height: "hide"});
+    $('#how-to-help').animate({height: "show"});
+  });
+
 })(window.trackerConfig);
 
