@@ -181,4 +181,15 @@ body {
 #content form table.map {
   margin: -5px -7px -5px -7px;
 }
+#content code {
+  font-family: monospace;
+}
+#content ul {
+  list-style: dot;
+  margin: 0 7px 15px 7px;
+}
+#content ul li {
+  list-style: disc;
+  margin: 0 0 0 1.5em;
+}
 

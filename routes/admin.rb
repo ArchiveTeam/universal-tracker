@@ -118,21 +118,38 @@ module UniversalTracker
       redirect "/#{ tracker.slug }/admin/blocked"
     end
 
-    get "/:slug/admin/http_upload_targets" do
-      @admin_page = "/admin/http_upload_targets"
-      erb :admin_http_upload_targets, :layout=>:admin_layout
+    get "/:slug/admin/upload_targets" do
+      @admin_page = "/admin/upload_targets"
+      erb :admin_upload_targets, :layout=>:admin_layout
     end
 
-    post "/:slug/admin/http_upload_targets" do
+    post "/:slug/admin/upload_targets" do
       url = params[:url].to_s.strip
-      tracker.add_http_upload_target(url) unless url.empty?
-      redirect "/#{ tracker.slug }/admin/http_upload_targets"
+      tracker.add_upload_target(url) unless url.empty?
+      redirect "/#{ tracker.slug }/admin/upload_targets"
     end
 
-    post "/:slug/admin/http_upload_targets/remove" do
+    post "/:slug/admin/upload_targets/:action" do
       url = params[:url].to_s.strip
-      tracker.remove_http_upload_target(url) unless url.empty?
-      redirect "/#{ tracker.slug }/admin/http_upload_targets"
+
+      unless url.empty?
+        case params[:action]
+        when "remove"
+          tracker.remove_upload_target(url)
+        when "activate"
+          tracker.activate_upload_target(url)
+        when "deactivate"
+          tracker.deactivate_upload_target(url)
+        end
+      end
+
+      redirect "/#{ tracker.slug }/admin/upload_targets"
+    end
+
+    post "/:slug/admin/upload_targets/remove" do
+      url = params[:url].to_s.strip
+      tracker.remove_upload_target(url) unless url.empty?
+      redirect "/#{ tracker.slug }/admin/upload_targets"
     end
 
     get "/:slug/admin/logs" do

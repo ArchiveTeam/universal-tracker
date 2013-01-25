@@ -1,0 +1,65 @@
+<h2>Upload targets</h2>
+
+<p>
+  Use <code>:downloader</code> to include the downloader name. For example:
+</p>
+<ul>
+  <li><code>rsync://fos.textfiles.com/warrior/this-project/<strong>:downloader</strong>/</code></li>
+  <li><code>http://fos.textfiles.com/warrior/this-project/<strong>:downloader</strong>/</code></li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th colspan="4">Upload targets</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th colspan="4">
+        <form method="post" action="/<%= tracker.slug %>/admin/upload_targets">
+          Add: 
+          <input type="text" name="url" placeholder="URL" value="" size="50" />
+          <input type="submit" value="Add" />
+        </form>
+      </th>
+    </tr>
+    <% tracker.upload_targets.sort.each do |url| -%>
+      <tr>
+        <td>&#x2714;</td>
+        <th scope="row" width="100%"><%= url %></th>
+        <td>
+          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/deactivate">
+            <input type="hidden" name="url" value="<%= url %>" />
+            <input type="submit" value="Deactivate" />
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/remove">
+            <input type="hidden" name="url" value="<%= url %>" />
+            <input type="submit" value="Remove" />
+          </form>
+        </td>
+      </tr>
+    <% end -%>
+    <% tracker.inactive_upload_targets.sort.each do |url| -%>
+      <tr>
+        <td>&#x2715;</td>
+        <th scope="row" width="100%"><%= url %></th>
+        <td>
+          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/activate">
+            <input type="hidden" name="url" value="<%= url %>" />
+            <input type="submit" value="Activate" />
+          </form>
+        </td>
+        <td>
+          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/remove">
+            <input type="hidden" name="url" value="<%= url %>" />
+            <input type="submit" value="Remove" />
+          </form>
+        </td>
+      </tr>
+    <% end -%>
+  </tbody>
+</table>
+

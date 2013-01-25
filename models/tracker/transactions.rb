@@ -142,20 +142,33 @@ module UniversalTracker
         end
       end
 
-      def random_http_upload_target
-        redis.srandmember("#{ prefix }http_upload_target")
+      def random_upload_target
+        redis.srandmember("#{ prefix }upload_target")
       end
 
-      def http_upload_targets
-        redis.smembers("#{ prefix }http_upload_target") || []
+      def upload_targets
+        redis.smembers("#{ prefix }upload_target") || []
       end
 
-      def add_http_upload_target(url)
-        redis.sadd("#{ prefix }http_upload_target", url)
+      def add_upload_target(url)
+        activate_upload_target(url) or redis.sadd("#{ prefix }upload_target", url)
       end
 
-      def remove_http_upload_target(url)
-        redis.srem("#{ prefix }http_upload_target", url)
+      def remove_upload_target(url)
+        redis.srem("#{ prefix }upload_target", url)
+        redis.srem("#{ prefix }inactive_upload_target", url)
+      end
+
+      def inactive_upload_targets
+        redis.smembers("#{ prefix }inactive_upload_target") || []
+      end
+
+      def activate_upload_target(url)
+        redis.smove("#{ prefix }inactive_upload_target", "#{ prefix }upload_target", url)
+      end
+
+      def deactivate_upload_target(url)
+        redis.smove("#{ prefix }upload_target", "#{ prefix }inactive_upload_target", url)
       end
 
       def random_item

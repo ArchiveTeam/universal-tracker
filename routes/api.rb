@@ -122,36 +122,15 @@ module UniversalTracker
       process_uploaded(request, JSON.parse(request.body.read))
     end
 
-    put %r{/[a-z0-9]+/upload/(.+)} do
-      redirect_upload_request
-    end
-    post %r{/[a-z0-9]+/upload/(.+)} do
-      redirect_upload_request
-    end
+    post "/:slug/upload" do
+      data = JSON.parse(request.body.read)
+      downloader = data["downloader"]
 
-    def redirect_upload_request
-      content_type :text
-      upload_path = params[:captures].first
-      target = tracker.random_http_upload_target
-      if target
-        target += "/" unless target=~/\/$/
-        redirect "#{ target }#{ upload_path }", 307
-        ""
+      content_type :json
+      if downloader.is_a?(String) and target = tracker.random_upload_target
+        JSON.dump(:upload_target=>target.gsub(":downloader", downloader))
       else
-        status 429
-        ""
-      end
-    end
-
-    get %r{/[a-z0-9]+/upload/(.+)} do
-      content_type :text
-      upload_path = params[:captures].first
-      target = tracker.random_http_upload_target
-      if target
-        target += "/" unless target=~/\/$/
-        "#{ target }#{ upload_path }"
-      else
-        ""
+        "{}"
       end
     end
   end
