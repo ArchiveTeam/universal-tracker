@@ -138,6 +138,9 @@ textarea {
   margin: 0 0 0 -5px;
 }
 
+body.root #how-to-help {
+  margin-top: 50px;
+}
 #how-to-help,
 #how-to-help-cue {
   background: #eee;
@@ -154,7 +157,7 @@ textarea {
 #how-to-help-cue a {
   text-decoration: none;
 }
-#how-to-help {
+#how-to-help.expandable {
   display: none;
 }
 #how-to-help-card {
@@ -193,5 +196,50 @@ textarea {
 #how-to-help p, #how-to-help ol, #how-to-help li {
   font-size: 16px;
   max-width: 600px;
+}
+
+#error-404-message {
+  position: relative;
+  width: 960px;
+  margin: 20px auto -20px auto;
+}
+#error-404-message h1 {
+  border-bottom: none;
+}
+#error-404-message p {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+#active-leaderboards {
+  position: relative;
+  width: 960px;
+  margin: 10px auto 20px auto;
+  overflow-x: hidden;
+}
+#active-leaderboards ul {
+  margin-left: -16px; /* to hide the leftmost | */
+}
+#active-leaderboards li {
+  display: inline-block;
+  margin-right: 15px;
+  list-style: none;
+
+  border-left: 1px solid #ccc;
+  padding-left: 15px;
+}
+#active-leaderboards a {
+  display: block;
+  text-decoration: none;
+  color: #000;
+}
+#active-leaderboards span.project-logo {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+}
+#active-leaderboards span.project-logo img {
+  max-width: 100px;
+  max-height: 50px;
 }
 

@@ -14,34 +14,8 @@
   <h1>You can help. <a href="#">Run your own ArchiveTeam Warrior.</a></h1>
 </div>
 
-<div id="how-to-help">
-  <div id="how-to-help-card">
-    <h1>Run an ArchiveTeam Warrior on your computer.</h1>
-    <img src="/how-to-help/warrior-logo.png" class="warrior-logo" width="100" height="102" />
-
-    <div class="screenshots">
-      <img src="/how-to-help/warrior-vm-screenshot.png" style="position: absolute; top: 49px; right: 35px;" width="256" height="181" title="The Warrior virtual machine" />
-      <img src="/how-to-help/warrior-web-screenshot.png" style="position: absolute; top: 245px; right: 35px;" width="256" height="198" title="The Warrior web interface" />
-    </div>
-
-    <p>The ArchiveTeam Warrior is a virtual archiving appliance. You can run it to help with the ArchiveTeam archiving efforts. It will download sites and upload them to our archive &mdash; and it&#8217;s really easy to do!</p>
-    <p>The warrior is a virtual machine, so there is no risk to your computer. The warrior will only use your bandwidth and some of your disk space.</p>
-    <p>The warrior runs on Windows, OS X and Linux. You&#8217;ll need <a href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a> (recommended), VMware or a similar program to run the virtual machine.</p>
-    
-    <p>Instructions for VirtualBox:</p>
-    <ol>
-      <li>Download the <a rel="nofollow" class="external text" href="http://archive.org/download/archiveteam-warrior/archiveteam-warrior-v2-20121008.ova">appliance</a> (174MB).</li>
-      <li>In VirtualBox, click File &gt; Import Appliance and open the file.</li>
-      <li>Start the virtual machine. It will fetch the latest updates and will eventually tell you to start your web browser.</li>
-    </ol>
-
-    <p>Once you&#8217;ve started your warrior:</p>
-    <ol>
-      <li>Go to <a href="http://localhost:8001/">http://localhost:8001/</a> and check the Settings page.</li>
-      <li>Choose a username &mdash; we&#8217;ll show your progress on the leaderboard.</li>
-      <li>Go to the All projects tab and pick a project to work on. Even better: select ArchiveTeam&#8217;s Choice to let your warrior work on the most urgent project.</li>
-    </ol>
-  </div>
+<div id="how-to-help" class="expandable">
+  <%== erb :how_to_help_card %>
 </div>
 
 <div id="container">

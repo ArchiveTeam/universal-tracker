@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>ArchiveTeam Warrior</title>
+  <link href="https://fonts.googleapis.com/css?family=Lato:300" rel="stylesheet" type="text/css" />
+  <link href="/css/dashboard.css?1341053041" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="root">
+
+<% if defined?(@error_not_found) %>
+  <div id="error-404-message">
+    <h1>Sorry, that project does not exist.</h1>
+    <p>We close the leaderboard when a project is finished. See <a href="http://archiveteam.org/index.php?title=ArchiveTeam_Warrior#Projects">the Archive Team wiki</a> to find out about earlier projects.</p>
+  </div>
+<% end %>
+
+<div id="how-to-help">
+  <%== erb :how_to_help_card %>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+/* <![CDATA[ */
+$(document).ready(function() {
+  $.get('http://warriorhq.archiveteam.org/projects.json', null, function(data) {
+    if (data.projects && data.projects.length > 0) {
+      var div = document.createElement('div'),
+    p = document.createElement('p'),
+    ul = document.createElement('ul'),
+    anyProjects = false;
+      div.id = 'active-leaderboards';
+      p.innerHTML = 'Current projects';
+      div.appendChild(p);
+      div.appendChild(ul);
+      for (var i=0; i<data.projects.length; i++) {
+        if (data.projects[i].logo && data.projects[i].leaderboard) {
+    var li = document.createElement('li'),
+        a = document.createElement('a'),
+        span = document.createElement('span'),
+        img = document.createElement('img');
+    li.appendChild(a);
+    a.href = data.projects[i].leaderboard;
+    span.className = 'project-logo';
+    a.appendChild(span);
+    img.src = data.projects[i].logo;
+    span.appendChild(img);
+    a.appendChild(document.createTextNode(' ' + data.projects[i].title));
+    ul.appendChild(li);
+        }
+      }
+      $('body').append(div);
+    }
+  });
+});
+/* ]]> */
+</script>
+
+</body>
+</html>
+

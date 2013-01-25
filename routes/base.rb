@@ -11,7 +11,7 @@ module UniversalTracker
     end
 
     get "/" do
-      raise Sinatra::NotFound
+      erb :root_not_found
     end
   end
 end

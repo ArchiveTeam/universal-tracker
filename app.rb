@@ -8,7 +8,12 @@ module UniversalTracker
     set :assets_version, File.mtime(__FILE__).to_i
 
     not_found do
-      ""
+      if request.path =~ /^\/[a-z0-9-]+\/$/
+        @error_not_found = true
+        erb :root_not_found
+      else
+        ""
+      end
     end
   end
 end
