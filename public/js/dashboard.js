@@ -204,10 +204,13 @@
     div.appendChild(table);
 
     var a = document.createElement('a');
-    a.innerHTML = showAll ? '&ndash;' : '+';
+    a.innerHTML = showAll ? '&ndash; ' : '+ ';
     a.id = 'show-all';
     a.href = showAll ? '#' : '#show-all';
     a.onclick = toggleShowAll;
+    span = document.createElement('span');
+    span.innerHTML = showAll ? 'Show fewer' : 'Show all';
+    a.appendChild(span);
     div.appendChild(a);
 
     var left = document.getElementById('left');

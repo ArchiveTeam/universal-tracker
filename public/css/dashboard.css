@@ -73,6 +73,11 @@ a#show-all:hover {
   color: #000;
   background: #aaa;
 }
+a#show-all span {
+  display: inline-block;
+  vertical-align: top;
+  font-size: 12px;
+}
 td span {
   display: inline-block;
 }
