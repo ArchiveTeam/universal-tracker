@@ -97,6 +97,25 @@ tfoot td {
   border-top: 1px solid #000;
   height: 31px;
 }
+table.items-count {
+  width: 100%;
+}
+.items-count td.num {
+  width: auto;
+  color: #aaa;
+  text-align: right;
+}
+.items-count span.text,
+.items-count span.value {
+  color: #000;
+  width: auto;
+}
+.items-count span.unit {
+  width: auto;
+}
+.items-count span.unit:last-child {
+  width: 48px;
+}
 .log td span.text {
   width: 170px;
 }

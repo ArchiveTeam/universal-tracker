@@ -102,15 +102,18 @@ module UniversalTracker
           redis.scard("#{ prefix }done")
           redis.scard("#{ prefix }todo")
           redis.scard("#{ prefix }todo:secondary")
+          redis.zcard("#{ prefix }out")
           redis.lrange("#{ prefix }items_done_chartdata", 0, -1)
         end
 
         domain_bytes = Hash[*resp[0]]
         downloader_bytes = Hash[*resp[1]]
         downloader_count = Hash[*resp[2]]
-        total_items_done = resp[3]
-        total_items = resp[3].to_i + resp[4].to_i + resp[5].to_i
-        items_done_chart = (resp[6] || []).systematic_sample(config.history_length).map do |item|
+        total_items_done = resp[3].to_i
+        total_items_todo = resp[4].to_i + resp[5].to_i
+        total_items_out = resp[6].to_i
+        total_items = total_items_done + total_items_todo + total_items_out
+        items_done_chart = (resp[7] || []).systematic_sample(config.history_length).map do |item|
           JSON.parse(item)
         end
 
@@ -146,6 +149,8 @@ module UniversalTracker
           "downloaders"=>downloader_count.keys,
           "total_items_done"=>total_items_done.to_i,
           "total_items"=>total_items.to_i,
+          "counts"=>{ "todo"=>total_items_todo, "out"=>total_items_out, "done"=>total_items_done },
+          "total_items_out"=>total_items_out.to_i,
           "total_bytes"=>total_bytes
         }
       end

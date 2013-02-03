@@ -94,52 +94,90 @@
   function redrawStats() {
     var showAll = ((''+location.hash).match('show-all'));
 
-    var div, table, tbody, tfoot, tr;
+    var div, table, tbody, tfoot, tr, td, span;
 
     var div = document.createElement('div');
 
     table = document.createElement('table');
+    table.className = 'items-count';
     tbody = document.createElement('tbody');
     tr = document.createElement('tr');
     tr.appendChild(makeTD('text', 'items'));
-    tr.appendChild(makeTD('num',
-                          stats.total_items_done,
-                          'done'));
-    tr.appendChild(makeTD('num',
-                          stats.total_items - stats.total_items_done,
-                          'to do'));
+
+    td = document.createElement('td');
+    td.className = 'num';
+    tr.appendChild(td);
+
+    span = document.createElement('span');
+    span.className = 'value';
+    span.innerHTML = stats.counts.done;
+    td.appendChild(span);
+    span = document.createElement('span');
+    span.className = 'unit';
+    span.innerHTML = 'done';
+    td.appendChild(span);
+
+    if (stats.counts.out > 0) {
+      td.appendChild(document.createTextNode(' + '));
+
+      span = document.createElement('span');
+      span.className = 'value';
+      span.innerHTML = stats.counts.out;
+      td.appendChild(span);
+      span = document.createElement('span');
+      span.className = 'unit';
+      span.innerHTML = 'out';
+      td.appendChild(span);
+    }
+
+    td.appendChild(document.createTextNode(' + '));
+
+    span = document.createElement('span');
+    span.className = 'value';
+    span.innerHTML = stats.counts.todo;
+    td.appendChild(span);
+    span = document.createElement('span');
+    span.className = 'unit';
+    span.innerHTML = 'to do';
+    td.appendChild(span);
+
     tbody.appendChild(tr);
     table.appendChild(tbody);
     div.appendChild(table);
 
     table = document.createElement('table');
     tbody = document.createElement('tbody');
+    var domain_count = 0;
     for (var domain in stats.domain_bytes) {
       if (trackerConfig.domains[domain]) {
+        domain_count += 1;
         tr = document.createElement('tr');
         tr.appendChild(makeTD('text', trackerConfig.domains[domain]));
         tr.appendChild(makeTD('num',
                               Math.round(stats.domain_bytes[domain]/(1024*1024*1024)),
                               'GB'));
         tr.appendChild(makeTD('num',
-                              Math.round((stats.domain_bytes[domain]/stats.total_items_done)/(1024*1024)),
+                              Math.round((stats.domain_bytes[domain]/stats.counts.done)/(1024*1024)),
                               'MB/u'));
         tbody.appendChild(tr);
       }
     }
     table.appendChild(tbody);
 
-    tfoot = document.createElement('tfoot');
-    tr = document.createElement('tr');
-    tr.appendChild(makeTD('text', 'total'));
-    tr.appendChild(makeTD('num',
-                          Math.round(stats.total_bytes/(1024*1024*1024)),
-                          'GB'));
-    tr.appendChild(makeTD('num',
-                          Math.round((stats.total_bytes/stats.total_items_done)/(1024*1024)),
-                          'MB/u'));
-    tfoot.appendChild(tr);
-    table.appendChild(tfoot);
+    if (domain_count > 1) {
+      tfoot = document.createElement('tfoot');
+      tr = document.createElement('tr');
+      tr.appendChild(makeTD('text', 'total'));
+      tr.appendChild(makeTD('num',
+                            Math.round(stats.total_bytes/(1024*1024*1024)),
+                            'GB'));
+      tr.appendChild(makeTD('num',
+                            Math.round((stats.total_bytes/stats.counts.done)/(1024*1024)),
+                            'MB/u'));
+      tfoot.appendChild(tr);
+      table.appendChild(tfoot);
+    }
+
     div.appendChild(table);
 
     var downloaders = stats.downloaders.sort(function(a, b) {
@@ -184,9 +222,9 @@
       return stats.downloader_bytes[b] - stats.downloader_bytes[a];
     });
 
-    chart.series[0].addPoint([ new Date() * 1, stats.total_items_done ],
+    chart.series[0].addPoint([ new Date() * 1, stats.counts.done ],
                              false, false, false);
-    stats.items_done_rate.addPoint([ new Date() * 1, stats.total_items_done ],
+    stats.items_done_rate.addPoint([ new Date() * 1, stats.counts.done ],
                                    false, false, false);
     stats.bytes_download_rate.addPoint([ new Date() * 1, stats.total_bytes ],
                                    false, false, false);
@@ -256,7 +294,7 @@
   }
 
   function updateStats(msg) {
-    stats.total_items_done += 1;
+    stats.counts = msg.counts;
     if (!stats.downloader_bytes[msg.downloader]) {
       stats.downloader_bytes[msg.downloader] = 0;
       stats.downloader_count[msg.downloader] = 0;

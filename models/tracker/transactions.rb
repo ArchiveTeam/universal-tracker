@@ -378,8 +378,17 @@ module UniversalTracker
             redis.rpush("#{ prefix }log", JSON.dump(done_hash))
 
             redis.hset("#{ prefix }downloader_version", downloader, done_hash["version"].to_s)
-            redis.publish(tracker_manager.config.redis_pubsub_channel, JSON.dump(msg))
           end
+
+          counts = redis.pipelined do
+            redis.scard("#{ prefix }todo")
+            redis.zcard("#{ prefix }out")
+            redis.scard("#{ prefix }done")
+          end
+
+          msg["counts"] = { "todo"=>counts[0].to_i, "out"=>counts[1].to_i, "done"=>counts[2].to_i }
+
+          redis.publish(tracker_manager.config.redis_pubsub_channel, JSON.dump(msg))
           
           # we don't count items twice
           unless prev_status==:done
