@@ -1,6 +1,6 @@
 body {
   font-family: 'Lato', sans-serif;
-  font-size: 24px;
+  font-size: 20px;
 }
 form {
   margin: 0;
@@ -11,7 +11,7 @@ ul, li {
   padding: 0;
   text-indent: 0;
   list-style: none;
-  font-size: 24px;
+  font-size: 20px;
 }
 table, td, th {
   padding: 0;
@@ -20,12 +20,12 @@ table, td, th {
 }
 li, td {
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   overflow-x: hidden;
   white-space: nowrap;
 }
 td {
-  height: 32px;
+  height: 30px;
 }
 th {
   text-align: left;
@@ -35,7 +35,7 @@ h1 {
   padding: 0 0 4px 7px;
   border-bottom: 1px solid #000;
   font-weight: normal;
-  font-size: 24px;
+  font-size: 20px;
 }
 
 #update-status {
@@ -49,7 +49,7 @@ h1 {
   position: relative;
 }
 #left table {
-  margin-bottom: 32px;
+  margin-bottom: 30px;
 }
 .log {
   margin-left: 450px;
@@ -96,11 +96,11 @@ span.unit {
   padding-left: 4px;
   text-align: left;
   color: #aaa;
-  font-size: 18px;
+  font-size: 16px;
 }
 tfoot td {
   border-top: 1px solid #000;
-  height: 31px;
+  height: 29px;
 }
 table.items-count {
   width: 100%;
@@ -152,7 +152,7 @@ p {
   margin: 10px 0 10px 0;
 }
 input[type=submit] {
-  font-size: 24px;
+  font-size: 20px;
   padding: 3px 8px;
 }
 textarea {
