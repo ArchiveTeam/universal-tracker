@@ -407,10 +407,11 @@ module UniversalTracker
       # to update the statistics.
       def update_stats_when_done(downloader, bytes)
         timestamp = Time.now.utc.to_i
-        total_bytes = bytes.values.inject(0) { |sum,b| sum + b }
+        minute = Time.now.utc.strftime("%Y%m%d%H%M")
+        sum_bytes = bytes.values.inject(0) { |sum,b| sum + b }
 
         resp = redis.pipelined do
-          redis.hincrby("#{ prefix }downloader_bytes", downloader, total_bytes)
+          redis.hincrby("#{ prefix }downloader_bytes", downloader, sum_bytes)
           redis.hincrby("#{ prefix }downloader_count", downloader, 1)
           redis.scard("#{ prefix }done")
 
@@ -422,13 +423,44 @@ module UniversalTracker
         downloader_bytes = resp[0]
         downloader_count = resp[1]
         done_count = resp[2]
+        total_bytes = resp[3..100].inject(0) { |sum,b| sum + b.to_i }
 
-        redis.pipelined do
-          redis.rpush("#{ prefix }downloader_chartdata:#{ downloader }", "[#{ timestamp },#{ downloader_bytes }]")
-          if done_count % 10 == 0
-            redis.rpush("#{ prefix }items_done_chartdata", "[#{ timestamp },#{ done_count }]")
-          end
-        end
+        redis.eval(%{
+            local prev_timestamp = nil
+            local entry = nil
+
+            -- downloader bytes chart
+            prev_timestamp = redis.call('HGET', KEYS[1], ARGV[1]) or -1
+            if tonumber(prev_timestamp) < tonumber(ARGV[2]) then
+              entry = string.format('%s=%s ', ARGV[2], ARGV[3])
+              redis.call('APPEND', KEYS[2], entry)
+              redis.call('HSET', KEYS[1], ARGV[1], ARGV[2])
+            end
+
+            -- total items chart
+            prev_timestamp = redis.call('HGET', KEYS[1], 'total items') or -1
+            if tonumber(prev_timestamp) < tonumber(ARGV[2]) then
+              entry = string.format('%s=%s ', ARGV[2], ARGV[4])
+              redis.call('APPEND', KEYS[3], entry)
+              redis.call('HSET', KEYS[1], 'total items', ARGV[2])
+            end
+
+            -- total bytes chart
+            prev_timestamp = redis.call('HGET', KEYS[1], 'total bytes') or -1
+            if tonumber(prev_timestamp) < tonumber(ARGV[2]) then
+              entry = string.format('%s=%s ', ARGV[2], ARGV[5])
+              redis.call('APPEND', KEYS[4], entry)
+              redis.call('HSET', KEYS[1], 'total bytes', ARGV[2])
+            end
+          }, 4,
+          "#{ prefix }chart:previous_timestamp",
+          "#{ prefix }chart:downloader_bytes:#{ downloader }",
+          "#{ prefix }chart:total_items",
+          "#{ prefix }chart:total_bytes",
+          downloader, minute,
+          "%013x" % downloader_bytes,
+          "%08x" % done_count,
+          "%013x" % total_bytes)
       end
     end
   end

@@ -94,6 +94,16 @@ module UniversalTracker
         }
       end
 
+      def process_chart_data(list)
+        list_parsed = []
+        if list
+          list.scan(/([0-9]+)=([0-9a-zA-Z]+)/) do |t,v|
+            list_parsed << [ Time.utc(t[0,4], t[4,2], t[6,2], t[8,2], t[10,2]).to_i, v.to_i(16) ]
+          end
+        end
+        list_parsed
+      end
+
       def stats
         resp = redis.pipelined do
           redis.hgetall("#{ prefix }domain_bytes")
@@ -103,7 +113,8 @@ module UniversalTracker
           redis.scard("#{ prefix }todo")
           redis.scard("#{ prefix }todo:secondary")
           redis.zcard("#{ prefix }out")
-          redis.lrange("#{ prefix }items_done_chartdata", 0, -1)
+          redis.get("#{ prefix }chart:total_items")
+          redis.get("#{ prefix }chart:total_bytes")
         end
 
         domain_bytes = Hash[*resp[0]]
@@ -113,22 +124,19 @@ module UniversalTracker
         total_items_todo = resp[4].to_i + resp[5].to_i
         total_items_out = resp[6].to_i
         total_items = total_items_done + total_items_todo + total_items_out
-        items_done_chart = (resp[7] || []).systematic_sample(config.history_length).map do |item|
-          JSON.parse(item)
-        end
+        items_done_chart = process_chart_data(resp[7])
+        bytes_done_chart = process_chart_data(resp[8])
 
         downloaders = downloader_bytes.keys
-        downloader_fields = downloaders.map{|d|"#{ prefix }downloader_chartdata:#{ d }"}
+        downloader_fields = downloaders.map{|d|"#{ prefix }chart:downloader_bytes:#{ d }"}
 
         unless downloader_fields.empty?
           resp = redis.pipelined do
             downloader_fields.each do |fieldname|
-              redis.lrange(fieldname, 0, -1)
+              redis.get(fieldname)
             end
           end.map do |list|
-            (list || []).systematic_sample(config.history_length).map do |item|
-              JSON.parse(item)
-            end
+            process_chart_data(list)
           end
           downloader_chart = Hash[downloaders.zip(resp)]
         else
@@ -146,6 +154,7 @@ module UniversalTracker
           "downloader_count"=>Hash[downloader_count.map{ |k,v| [k, v.to_i] }],
           "downloader_chart"=>downloader_chart,
           "items_done_chart"=>items_done_chart,
+          "bytes_done_chart"=>bytes_done_chart,
           "downloaders"=>downloader_count.keys,
           "total_items_done"=>total_items_done.to_i,
           "total_items"=>total_items.to_i,
