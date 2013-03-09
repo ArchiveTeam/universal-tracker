@@ -155,9 +155,12 @@ module UniversalTracker
           limit = replies[5].to_i
         end
         if replies[0] == 1 or replies[1] == 1
+          # username or ip is blocked
           redis.decr(key)
           :blocked
         elsif replies[2] and replies[3] and replies[2].to_i < replies[3].to_i
+          # user exceeded the budget
+          redis.decr(key)
           :blocked
         elsif limit and limit.to_i < replies[6].to_i
           :rate_limit
