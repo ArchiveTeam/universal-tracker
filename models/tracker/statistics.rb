@@ -109,7 +109,7 @@ module UniversalTracker
           redis.hgetall("#{ prefix }domain_bytes")
           redis.hgetall("#{ prefix }downloader_bytes")
           redis.hgetall("#{ prefix }downloader_count")
-          redis.scard("#{ prefix }done")
+          redis.get("#{ prefix }done_counter")
           redis.scard("#{ prefix }todo")
           redis.scard("#{ prefix }todo:secondary")
           redis.zcard("#{ prefix }out")

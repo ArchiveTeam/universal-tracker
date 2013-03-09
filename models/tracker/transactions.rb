@@ -402,12 +402,14 @@ module UniversalTracker
             redis.rpush("#{ prefix }log", JSON.dump(done_hash))
 
             redis.hset("#{ prefix }downloader_version", downloader, done_hash["version"].to_s)
+
+            redis.incr("#{ prefix }done_counter") unless prev_status==:done
           end
 
           counts = redis.pipelined do
             redis.scard("#{ prefix }todo")
             redis.zcard("#{ prefix }out")
-            redis.scard("#{ prefix }done")
+            redis.get("#{ prefix }done_counter")
           end
 
           msg["counts"] = { "todo"=>counts[0].to_i, "out"=>counts[1].to_i, "done"=>counts[2].to_i }
@@ -437,7 +439,7 @@ module UniversalTracker
         resp = redis.pipelined do
           redis.hincrby("#{ prefix }downloader_bytes", downloader, sum_bytes)
           redis.hincrby("#{ prefix }downloader_count", downloader, 1)
-          redis.scard("#{ prefix }done")
+          redis.get("#{ prefix }done_counter")
 
           bytes.each do |domain, b|
             redis.hincrby("#{ prefix }domain_bytes", domain, b.to_i)
@@ -446,7 +448,7 @@ module UniversalTracker
 
         downloader_bytes = resp[0]
         downloader_count = resp[1]
-        done_count = resp[2]
+        done_count = resp[2].to_i
         total_bytes = resp[3..100].inject(0) { |sum,b| sum + b.to_i }
 
         redis.eval(%{
