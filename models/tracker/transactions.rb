@@ -73,6 +73,10 @@ module UniversalTracker
         redis.smembers("#{ prefix }blocked")
       end
 
+      def requests_per_minute_monitor
+        redis.get("#{ prefix }requests_per_minute:monitor")
+      end
+
       def requests_per_minute
         redis.get("#{ prefix }requests_per_minute")
       end
@@ -111,10 +115,21 @@ module UniversalTracker
         key = "#{ prefix }requests_processed:" + Time.now.strftime("%M")
         replies = redis.pipelined do
           redis.get("#{ prefix }requests_per_minute")
+          redis.get("#{ prefix }requests_per_minute:monitor")
           redis.incr(key)
           redis.expire(key, 300)
         end
-        replies[0].nil? or (replies[0].to_i >= replies[1].to_i)
+        limit = nil
+        if replies[0] and replies[1]
+          limit = [ replies[0].to_i, replies[1].to_i ].min
+        elsif replies[0]
+          limit = replies[0].to_i
+        elsif replies[1]
+          limit = replies[1].to_i
+        else
+          return true
+        end
+        limit >= replies[2].to_i
       end
 
       def check_not_blocked_and_request_rate_ok(request_ip, downloader)
@@ -127,15 +142,24 @@ module UniversalTracker
           redis.get("#{ prefix }min_downloader_budget")
 
           redis.get("#{ prefix }requests_per_minute")
+          redis.get("#{ prefix }requests_per_minute:monitor")
           redis.incr(key)
           redis.expire(key, 300)
+        end
+        limit = nil
+        if replies[4] and replies[5]
+          limit = [ replies[4].to_i, replies[5].to_i ].min
+        elsif replies[4]
+          limit = replies[4].to_i
+        elsif replies[5]
+          limit = replies[5].to_i
         end
         if replies[0] == 1 or replies[1] == 1
           redis.decr(key)
           :blocked
         elsif replies[2] and replies[3] and replies[2].to_i < replies[3].to_i
           :blocked
-        elsif replies[4] and replies[4].to_i < replies[5].to_i
+        elsif limit and limit.to_i < replies[6].to_i
           :rate_limit
         else
           :ok
