@@ -122,7 +122,7 @@ module UniversalTracker
           if limit then
             local granted = tonumber(redis.call('get', KEYS[4]) or 0)
             local sec = tonumber(ARGV[1])
-            if granted > (limit * math.min(1, sec / 50)) then
+            if granted >= (limit * math.min(1, sec / 50)) then
               return 0
             end
           end
