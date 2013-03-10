@@ -16,7 +16,8 @@
 <p><%= tracker.number_of_claims %> &mdash; <a href="/<%= tracker.slug %>/admin/claims">manage</a></p>
 
 <h3>Requests per minute</h3>
-<p><%= tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= tracker.requests_per_minute || "not set" %> &mdash; <a href="/<%= tracker.slug %>/admin/limits">manage</a></p>
+<p>requested: <%= tracker.requests_per_minute_history.map{|m,r|r}.join(" / ") %></p>
+<p>granted: <%= tracker.requests_granted_per_minute_history.map{|m,r|r}.join(" / ") %> &mdash; max:<%= tracker.requests_per_minute || "not set" %> &mdash; <a href="/<%= tracker.slug %>/admin/limits">manage</a></p>
 
 <h3>Log length</h3>
 <p><%= tracker.log_length %></p>

@@ -112,57 +112,48 @@ module UniversalTracker
       end
 
       def check_request_rate
-        key = "#{ prefix }requests_processed:" + Time.now.strftime("%M")
-        replies = redis.pipelined do
-          redis.get("#{ prefix }requests_per_minute")
-          redis.get("#{ prefix }requests_per_minute:monitor")
-          redis.incr(key)
-          redis.expire(key, 300)
-        end
-        limit = nil
-        if replies[0] and replies[1]
-          limit = [ replies[0].to_i, replies[1].to_i ].min
-        elsif replies[0]
-          limit = replies[0].to_i
-        elsif replies[1]
-          limit = replies[1].to_i
-        else
-          return true
-        end
-        limit >= replies[2].to_i
+        minute = Time.now.strftime("%M")
+        reply = redis.eval(%{
+          local limit_a = tonumber(redis.call('get', KEYS[1]) or (1/0))
+          local limit_b = tonumber(redis.call('get', KEYS[2]) or (1/0))
+          local limit = math.min(limit_a, limit_b)
+          redis.call('incr', KEYS[3])
+          redis.call('expire', KEYS[3], 300)
+          if limit then
+            local granted = tonumber(redis.call('get', KEYS[4]) or 0)
+            local sec = tonumber(ARGV[1])
+            if granted > (limit * math.min(1, sec / 50)) then
+              return 0
+            end
+          end
+          redis.call('incr', KEYS[4])
+          redis.call('expire', KEYS[4], 300)
+          return 1
+        }, 4,
+          "#{ prefix }requests_per_minute",
+          "#{ prefix }requests_per_minute:monitor",
+          "#{ prefix }requests_processed:#{ minute }",
+          "#{ prefix }requests_granted:#{ minute }",
+          Time.now.sec 
+        )
+        return (reply.to_i==1)
       end
 
       def check_not_blocked_and_request_rate_ok(request_ip, downloader)
-        key = "#{ prefix }requests_processed:" + Time.now.strftime("%M")
         replies = redis.pipelined do
           redis.sismember("#{ prefix }blocked", request_ip)
           redis.sismember("#{ prefix }blocked", downloader)
 
           redis.hget("#{ prefix }downloader_budget", downloader)
           redis.get("#{ prefix }min_downloader_budget")
-
-          redis.get("#{ prefix }requests_per_minute")
-          redis.get("#{ prefix }requests_per_minute:monitor")
-          redis.incr(key)
-          redis.expire(key, 300)
-        end
-        limit = nil
-        if replies[4] and replies[5]
-          limit = [ replies[4].to_i, replies[5].to_i ].min
-        elsif replies[4]
-          limit = replies[4].to_i
-        elsif replies[5]
-          limit = replies[5].to_i
         end
         if replies[0] == 1 or replies[1] == 1
           # username or ip is blocked
-          redis.decr(key)
           :blocked
         elsif replies[2] and replies[3] and replies[2].to_i < replies[3].to_i
           # user exceeded the budget
-          redis.decr(key)
           :blocked
-        elsif limit and limit.to_i < replies[6].to_i
+        elsif not check_request_rate
           :rate_limit
         else
           :ok

@@ -3,7 +3,9 @@ max_budget = tracker.min_downloader_budget
 max_budget = -(max_budget.to_i) unless max_budget.nil?
 requests_per_minute = tracker.requests_per_minute
 monitor_requests_per_minute = tracker.requests_per_minute_monitor
-history = tracker.requests_per_minute_history
+history_requested = Hash[tracker.requests_per_minute_history]
+history_granted = Hash[tracker.requests_granted_per_minute_history]
+history_minutes = (history_requested.keys + history_granted.keys).uniq.sort
 %>
 
 <h2>Limits</h2>
@@ -28,12 +30,13 @@ history = tracker.requests_per_minute_history
     <tr>
       <th scope="col">Minute</th>
       <th scope="col">Requests</th>
+      <th scope="col">Grants</th>
     </tr>
   </thead>
 
   <tbody>
-    <% history.reverse.each do |minute, requests| -%>
-      <tr><td><%= minute %></td><td><%= requests %></tr>
+    <% history_minutes.reverse.each do |minute| -%>
+      <tr><td><%= minute %></td><td><%= history_requested[minute] %></td><td><%= history_granted[minute] %></td></tr>
     <% end -%>
   </tbody>
 </table>

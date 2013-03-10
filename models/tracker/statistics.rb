@@ -50,6 +50,20 @@ module UniversalTracker
         end
       end
 
+      def requests_granted_per_minute_history
+        minutes = redis.keys("#{ prefix }requests_granted:*")
+        replies = redis.pipelined do
+          minutes.each do |key|
+            redis.get(key)
+          end
+        end
+        minutes.zip(replies || []).map do |minute, requests|
+          [ minute[/[0-9]+$/], requests ]
+        end.sort_by do |minute, requests|
+          minute.to_i
+        end
+      end
+
       def number_of_claims
         redis.zcard("#{ prefix }out")
       end
