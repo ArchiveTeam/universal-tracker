@@ -294,6 +294,14 @@ module UniversalTracker
         redis.del("#{ prefix }#{ queue }") if queue=~/^todo/
       end
 
+      def calculate_extra_parameters(request_ip, downloader, item)
+        data = {}
+        if rules = redis.get("#{ prefix }extra_parameters")
+          eval(rules)
+        end
+        data
+      end
+
       def request_item(request_ip, downloader)
         replies = redis.pipelined do
           redis.spop("#{ prefix }todo:d:#{ downloader }")

@@ -43,6 +43,7 @@ module UniversalTracker
     def process_request(request, data)
       downloader = data["downloader"]
       version = data["version"]
+      api_version = data["api_version"]
 
       if not tracker.check_version(version)
         status 455
@@ -57,7 +58,19 @@ module UniversalTracker
           status 429
           ""
         else
-          tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
+          item = tracker.request_item(request.ip, downloader) or raise Sinatra::NotFound
+
+          case api_version
+          when "2"
+            data = { "item_name"=>item }
+            data.update(tracker.calculate_extra_parameters(request.ip, downloader, item))
+
+            content_type :json
+            JSON.dump(data)
+          else
+            content_type :text
+            item
+          end
         end
       else
         raise "Invalid input."
