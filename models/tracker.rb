@@ -49,7 +49,8 @@ module UniversalTracker
     end
 
     def destroy
-      keys = redis.keys("#{ prefix }:*")
+      return if prefix.empty?
+      keys = redis.keys("#{ prefix }*")
       redis.pipelined do
         keys.each do |key|
           redis.del(key)
