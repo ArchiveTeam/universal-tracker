@@ -49,12 +49,11 @@ module UniversalTracker
     end
 
     def destroy
-      keys = %w{ tracker_admins log out downloader_count todo done blocked items_done_chartdata claims downloader_version downloader_bytes downloader_budget requests_per_minute min_downloader_budget http_upload_target upload_target inactive_upload_target domain_bytes blocked-log done_counter }.map{|k| "#{ prefix }#{ k }" }
-      %w{ downloader_chartdata:* chart:* log:* todo:* requests_processed:* requests_granted:* }.map do |k|
-        keys.push(*redis.keys("#{ prefix }#{ k }"))
-      end
-      keys.each do |key|
-        redis.del(key)
+      keys = redis.keys("#{ prefix }:*")
+      redis.pipelined do
+        keys.each do |key|
+          redis.del(key)
+        end
       end
       redis.hdel("trackers", slug)
     end
