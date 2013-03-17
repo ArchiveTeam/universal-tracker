@@ -248,6 +248,7 @@ body.root #how-to-help {
   display: inline-block;
   margin-right: 15px;
   list-style: none;
+  vertical-align: middle;
 
   border-left: 1px solid #ccc;
   padding-left: 15px;
