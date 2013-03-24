@@ -24,37 +24,19 @@
         </form>
       </th>
     </tr>
-    <% tracker.upload_targets.sort.each do |url| -%>
+    <% tracker.all_upload_targets.each do |target| -%>
       <tr>
-        <td>&#x2714;</td>
-        <th scope="row" width="100%"><%= url %></th>
+        <td>&#x<%= target[:active] ? 2714 : 2715 %>;</td>
+        <th scope="row" width="100%"><%= target[:url] %></th>
         <td>
-          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/deactivate">
-            <input type="hidden" name="url" value="<%= url %>" />
-            <input type="submit" value="Deactivate" />
+          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/<%= target[:active] ? "deactivate" : "activate" %>">
+            <input type="hidden" name="url" value="<%= target[:url] %>" />
+            <input type="submit" value="<%= target[:active] ? "Deactivate" : "Activate" %>" />
           </form>
         </td>
         <td>
           <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/remove">
-            <input type="hidden" name="url" value="<%= url %>" />
-            <input type="submit" value="Remove" />
-          </form>
-        </td>
-      </tr>
-    <% end -%>
-    <% tracker.inactive_upload_targets.sort.each do |url| -%>
-      <tr>
-        <td>&#x2715;</td>
-        <th scope="row" width="100%"><%= url %></th>
-        <td>
-          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/activate">
-            <input type="hidden" name="url" value="<%= url %>" />
-            <input type="submit" value="Activate" />
-          </form>
-        </td>
-        <td>
-          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/remove">
-            <input type="hidden" name="url" value="<%= url %>" />
+            <input type="hidden" name="url" value="<%= target[:url] %>" />
             <input type="submit" value="Remove" />
           </form>
         </td>

@@ -181,6 +181,13 @@ module UniversalTracker
         redis.smembers("#{ prefix }inactive_upload_target") || []
       end
 
+      def all_upload_targets
+        (upload_targets.map{|t|{:url=>t, :active=>true}} +
+         inactive_upload_targets.map{|t|{:url=>t, :active=>false}}).sort_by do |target|
+          target[:url]
+        end
+      end
+
       def activate_upload_target(url)
         redis.smove("#{ prefix }inactive_upload_target", "#{ prefix }upload_target", url)
       end
