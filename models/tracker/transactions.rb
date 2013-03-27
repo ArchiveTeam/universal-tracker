@@ -114,6 +114,9 @@ module UniversalTracker
       def check_request_rate
         minute = Time.now.strftime("%M")
         reply = redis.eval(%{
+          if tonumber(redis.call('scard', KEYS[5])) == 0 then
+            return 1
+          end
           local limit_a = tonumber(redis.call('get', KEYS[1]) or (1/0))
           local limit_b = tonumber(redis.call('get', KEYS[2]) or (1/0))
           local limit = math.min(limit_a, limit_b)
@@ -129,11 +132,12 @@ module UniversalTracker
           redis.call('incr', KEYS[4])
           redis.call('expire', KEYS[4], 300)
           return 1
-        }, 4,
+        }, 5,
           "#{ prefix }requests_per_minute",
           "#{ prefix }requests_per_minute:monitor",
           "#{ prefix }requests_processed:#{ minute }",
           "#{ prefix }requests_granted:#{ minute }",
+          "#{ prefix }todo",
           Time.now.sec 
         )
         return (reply.to_i==1)
