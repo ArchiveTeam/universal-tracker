@@ -39,7 +39,7 @@ window.trackerConfig = {
   numberOfDownloaders: 18 - (<%= tracker_config.domains.size %>) - (<%= tracker_config.domains.size < 2 ? 3 : 4 %>),
   numberOfDownloadersInGraph: 18 - (<%= tracker_config.domains.size %>) - (<%= tracker_config.domains.size < 2 ? 3 : 4 %>),
   statsPath: '/<%= tracker.slug %>/stats.json',
-  updateStatusPath: '/<%= tracker.slug %>/update-status.json',
+  updateStatusPath: null, // '/<%= tracker.slug %>/update-status.json',
   logChannel: '<%= tracker_config.live_log_channel %>',
   logHost: '<%= tracker_manager_config.live_log_host %>',
   domains: <%== JSON.dump(tracker_config.domains) %>

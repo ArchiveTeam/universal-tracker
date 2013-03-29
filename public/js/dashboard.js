@@ -493,6 +493,8 @@
   }
 
   function refreshUpdateStatus() {
+    if (!trackerConfig.updateStatusPath) return;
+
     jQuery.getJSON(trackerConfig.updateStatusPath, function(data) {
       if (data.current_version == null || data.current_version == '')
         return;
@@ -527,9 +529,11 @@
     updateChart();
 
     initLog();
-    refreshUpdateStatus();
 
-    window.setInterval(function() { refreshUpdateStatus(); }, 60000);
+    if (trackerConfig.updateStatusPath) {
+      refreshUpdateStatus();
+      window.setInterval(function() { refreshUpdateStatus(); }, 60000);
+    }
   });
 
   $('#how-to-help-cue').click(function(e) {
