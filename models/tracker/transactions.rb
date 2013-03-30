@@ -396,6 +396,15 @@ module UniversalTracker
         out
       end
 
+      def recalculate_budgets
+        redis.eval(%{
+          redis.call('DEL', KEYS[2])
+          for i, claim in ipairs(redis.call('HVALS', KEYS[1])) do
+            redis.call('HINCRBY', KEYS[2], string.match(claim, '%S+$'), -1)
+          end
+        }, 2, "#{ prefix }claims", "#{ prefix }downloader_budget")
+      end
+
       def mark_item_done(downloader, item, bytes, done_hash)
         if prev_status = item_status(item)
           total_bytes = 0

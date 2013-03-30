@@ -28,18 +28,26 @@ end
       -%>
     </select>
     matching
-    <input type="text" name="regexp" value="<%= params[:regexp] %>" />
-    <input type="submit" value="Add back to the queue" />
+    <input type="text" name="regexp" value="<%= params[:regexp] %>" style="width:130px" />
+    <input type="submit" value="Requeue" />
   </p>
 </form>
 
-<form method="get" action="/<%= tracker.slug %>/admin/claims">
+<form method="get" action="/<%= tracker.slug %>/admin/claims" style="float: left">
   <p>
     Only show items matching:
     <input type="text" name="regexp" value="<%= params[:regexp] %>" />
     <input type="submit" value="Filter" />
   </p>
 </form>
+
+<form method="post" action="/<%= tracker.slug %>/admin/recalculate_budgets" style="float: right">
+  <p>
+    <input type="submit" value="Recalculate claim budgets" />
+  </p>
+</form>
+
+<br style="clear: both;" />
 
 <table id="claims">
   <thead>

@@ -82,6 +82,11 @@ module UniversalTracker
       redirect "/#{ tracker.slug }/admin/claims"
     end
 
+    post "/:slug/admin/recalculate_budgets" do
+      tracker.recalculate_budgets
+      redirect "/#{ tracker.slug }/admin/claims"
+    end
+
     get "/:slug/admin/limits" do
       @admin_page = "/admin/limits"
       erb :admin_limits, :layout=>:admin_layout
