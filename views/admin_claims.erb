@@ -68,7 +68,7 @@ end
         </th>
         <th scope="rowgroup"><%==
           ids = claims.map{|c|c[:ip]}.uniq.sort_by{|ip|ip.split(",").map{|i|i.to_i}}
-          ids[0,3].join("<br/>") + (ids.size > 3 ? "<br/>(+ #{ ids.size - 3 } not shown)": "")
+          ids[0,(ids.size <= 3 ? 3 : 2)].join("<br/>") + (ids.size > 3 ? "<br/>(+ #{ ids.size - 2 } not shown)": "")
         %></th>
         <td scope="rowgroup"><%= claims.first[:since].xmlschema %></th>
         <th scope="rowgroup"><%= done_per_downloader[downloader] %></th>
