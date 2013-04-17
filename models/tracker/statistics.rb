@@ -118,35 +118,25 @@ module UniversalTracker
         list_parsed
       end
 
-      def stats
+      def charts
+        # chart data
         resp = redis.pipelined do
-          redis.hgetall("#{ prefix }domain_bytes")
-          redis.hgetall("#{ prefix }downloader_bytes")
-          redis.hgetall("#{ prefix }downloader_count")
-          redis.get("#{ prefix }done_counter")
-          redis.scard("#{ prefix }todo")
-          redis.scard("#{ prefix }todo:secondary")
-          redis.zcard("#{ prefix }out")
-          redis.get("#{ prefix }chart:total_items")
-          redis.get("#{ prefix }chart:total_bytes")
+          redis.hkeys("#{ prefix }downloader_bytes")     # 0
+          redis.get("#{ prefix }chart:total_items")      # 1
+          redis.get("#{ prefix }chart:total_bytes")      # 2
+          redis.lrange("#{ prefix }chart:previous_chart_data_urls", 0, -1)   # 3
         end
 
-        domain_bytes = Hash[*resp[0]]
-        downloader_bytes = Hash[*resp[1]]
-        downloader_count = Hash[*resp[2]]
-        total_items_done = resp[3].to_i
-        total_items_todo = resp[4].to_i + resp[5].to_i
-        total_items_out = resp[6].to_i
-        total_items = total_items_done + total_items_todo + total_items_out
-        items_done_chart = process_chart_data(resp[7])
-        bytes_done_chart = process_chart_data(resp[8])
+        downloaders = resp[0]
+        items_done_chart = process_chart_data(resp[1])
+        bytes_done_chart = process_chart_data(resp[2])
+        previous_chart_data_urls = resp[3]
 
-        downloaders = downloader_bytes.keys
-        downloader_fields = downloaders.map{|d|"#{ prefix }chart:downloader_bytes:#{ d }"}
+        downloader_chart_fields = downloaders.map{|d|"#{ prefix }chart:downloader_bytes:#{ d }"}
 
-        unless downloader_fields.empty?
+        unless downloader_chart_fields.empty?
           resp = redis.pipelined do
-            downloader_fields.each do |fieldname|
+            downloader_chart_fields.each do |fieldname|
               redis.get(fieldname)
             end
           end.map do |list|
@@ -157,18 +147,109 @@ module UniversalTracker
           downloader_chart = {}
         end
 
+        stats = {
+          # chart data
+          "downloader_chart"=>downloader_chart,
+          "items_done_chart"=>items_done_chart,
+          "bytes_done_chart"=>bytes_done_chart,
+          "previous_chart_data_urls"=>previous_chart_data_urls
+        }
+      end
+
+      def archive_charts
+        downloaders = redis.hkeys("#{ prefix }downloader_bytes")
+        downloader_chart_fields = downloaders.map{|d|"#{ prefix }chart:downloader_bytes:#{ d }"}
+
+        redis.multi do
+          redis.renamenx("#{ prefix }chart:total_items", "#{ prefix }chart:total_items:archive")
+          redis.renamenx("#{ prefix }chart:total_bytes", "#{ prefix }chart:total_bytes:archive")
+          downloader_chart_fields.each do |fieldname|
+            redis.renamenx(fieldname, fieldname+":archive")
+          end
+        end
+
+        timestamp = Time.now.utc.xmlschema
+
+        # chart data
+        resp = redis.pipelined do
+          redis.get("#{ prefix }chart:total_items:archive")      # 0
+          redis.get("#{ prefix }chart:total_bytes:archive")      # 1
+        end
+
+        items_done_chart = process_chart_data(resp[0])
+        bytes_done_chart = process_chart_data(resp[1])
+
+        downloader_chart_fields = downloaders.map{|d|"#{ prefix }chart:downloader_bytes:#{ d }:archive"}
+
+        unless downloader_chart_fields.empty?
+          resp = redis.pipelined do
+            downloader_chart_fields.each do |fieldname|
+              redis.get(fieldname)
+            end
+          end.map do |list|
+            process_chart_data(list)
+          end
+          downloader_chart = Hash[downloaders.zip(resp)]
+        else
+          downloader_chart = {}
+        end
+
+        stats = {
+          # chart data
+          "downloader_chart"=>downloader_chart,
+          "items_done_chart"=>items_done_chart,
+          "bytes_done_chart"=>bytes_done_chart
+        }
+
+        archive_file = File.expand_path("../../../charts-archive/#{ prefix }#{ timestamp }.json", __FILE__)
+        File.open(archive_file, "w") do |f|
+          JSON.dump(stats, f)
+        end
+        system("gzip -c #{ archive_file } > #{ archive_file }.gz")
+
+        redis.lpush("#{ prefix }chart:previous_chart_data_urls", "/charts-archive/#{ prefix }#{ timestamp }.json")
+
+        redis.multi do
+          redis.del("#{ prefix }chart:total_items", "#{ prefix }chart:total_items:archive")
+          redis.del("#{ prefix }chart:total_bytes", "#{ prefix }chart:total_bytes:archive")
+          downloader_chart_fields.each do |fieldname|
+            redis.del(fieldname, fieldname+":archive")
+          end
+        end
+      end
+
+      def stats
+        # simple statistics
+        resp = redis.pipelined do
+          redis.hgetall("#{ prefix }domain_bytes")       # 0
+          redis.hgetall("#{ prefix }downloader_bytes")   # 1
+          redis.hgetall("#{ prefix }downloader_count")   # 2
+          redis.get("#{ prefix }done_counter")           # 3
+          redis.scard("#{ prefix }todo")                 # 4
+          redis.scard("#{ prefix }todo:secondary")       # 5
+          redis.zcard("#{ prefix }out")                  # 6
+        end
+
+        domain_bytes = Hash[*resp[0]]
+        downloader_bytes = Hash[*resp[1]]
+        downloader_count = Hash[*resp[2]]
+        total_items_done = resp[3].to_i
+        total_items_todo = resp[4].to_i + resp[5].to_i
+        total_items_out = resp[6].to_i
+        total_items = total_items_done + total_items_todo + total_items_out
+
         total_bytes = 0
         domain_bytes.each do |d, bytes|
           total_bytes += bytes.to_i
         end
 
+        downloaders = downloader_bytes.keys
+
         stats = {
+          # simple stats
           "domain_bytes"=>Hash[domain_bytes.map{ |k,v| [k, v.to_i] }],
           "downloader_bytes"=>Hash[downloader_bytes.map{ |k,v| [k, v.to_i] }],
           "downloader_count"=>Hash[downloader_count.map{ |k,v| [k, v.to_i] }],
-          "downloader_chart"=>downloader_chart,
-          "items_done_chart"=>items_done_chart,
-          "bytes_done_chart"=>bytes_done_chart,
           "downloaders"=>downloader_count.keys,
           "total_items_done"=>total_items_done.to_i,
           "total_items"=>total_items.to_i,

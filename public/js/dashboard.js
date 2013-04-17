@@ -221,6 +221,8 @@
   var lastRedrawn = null;
   var downloaderSeries = {};
   function updateChart() {
+    if (!chart) return;
+
     var downloaders = stats.downloaders.sort(function(a, b) {
       return stats.downloader_bytes[b] - stats.downloader_bytes[a];
     });
@@ -520,13 +522,37 @@
     });
   }
 
+  var previousChartDataUrls = [];
+  function handleCharts(newCharts) {
+    if (!stats.downloader_chart) stats.downloader_chart = {};
+    if (!stats.items_done_chart) stats.items_done_chart = [];
+    if (!stats.items_done_chart) stats.items_done_chart = [];
+
+    for (var d in newCharts.downloader_chart) {
+      if (!stats.downloader_chart[d]) stats.downloader_chart[d] = [];
+      stats.downloader_chart[d] = newCharts.downloader_chart[d].concat(stats.downloader_chart[d]);
+    }
+    stats.items_done_chart = newCharts.items_done_chart.concat(stats.items_done_chart);
+    stats.bytes_done_chart = newCharts.bytes_done_chart.concat(stats.bytes_done_chart);
+
+    if (newCharts.previous_chart_data_urls) {
+      previousChartDataUrls.push.apply(previousChartDataUrls, newCharts.previous_chart_data_urls);
+    }
+
+    if (previousChartDataUrls.length > 0) {
+      jQuery.getJSON(previousChartDataUrls.shift(), handleCharts);
+    } else {
+      buildChart();
+      redrawStats();
+      updateChart();
+    }
+  }
+
   var stats = null;
   jQuery.getJSON(trackerConfig.statsPath, function(newStats) {
     stats = newStats;
 
-    buildChart();
     redrawStats();
-    updateChart();
 
     initLog();
 
@@ -534,6 +560,8 @@
       refreshUpdateStatus();
       window.setInterval(function() { refreshUpdateStatus(); }, 60000);
     }
+
+    jQuery.getJSON(trackerConfig.chartsPath, handleCharts);
   });
 
   $('#how-to-help-cue').click(function(e) {

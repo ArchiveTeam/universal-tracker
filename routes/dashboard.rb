@@ -22,6 +22,16 @@ module UniversalTracker
       end
     end
 
+    get "/:slug/charts.json" do
+      content_type :json
+      expires 60, :public, :must_revalidate
+      headers["Content-Encoding"] = "gzip"
+
+      gzip_cached("cache:#{ tracker.slug }:charts.json.gz") do
+        JSON.dump(tracker.charts)
+      end
+    end
+
     get "/:slug/update-status.json" do
       content_type :json
       expires 60, :public, :must_revalidate
