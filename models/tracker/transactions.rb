@@ -117,7 +117,7 @@ module UniversalTracker
         this_minute = "%02d" % t.min
 
         reply = redis.eval(%{
-          if tonumber(redis.call('scard', KEYS[6])) == 0 then
+          if tonumber(redis.call('scard', KEYS[6])) == 0 and tonumber(redis.call('scard', KEYS[7])) == 0 then
             return 1
           end
           local limit_a = tonumber(redis.call('get', KEYS[1]) or (1/0))
@@ -137,13 +137,14 @@ module UniversalTracker
           redis.call('incr', KEYS[4])
           redis.call('expire', KEYS[4], 300)
           return 1
-        }, 6,
+        }, 7,
           "#{ prefix }requests_per_minute",
           "#{ prefix }requests_per_minute:monitor",
           "#{ prefix }requests_processed:#{ this_minute }",
           "#{ prefix }requests_granted:#{ this_minute }",
           "#{ prefix }requests_granted:#{ prev_minute }",
           "#{ prefix }todo",
+          "#{ prefix }todo:secondary",
           Time.now.sec 
         )
 
@@ -437,11 +438,12 @@ module UniversalTracker
 
           counts = redis.pipelined do
             redis.scard("#{ prefix }todo")
+            redis.scard("#{ prefix }todo:secondary")
             redis.zcard("#{ prefix }out")
             redis.get("#{ prefix }done_counter")
           end
 
-          msg["counts"] = { "todo"=>counts[0].to_i, "out"=>counts[1].to_i, "done"=>counts[2].to_i }
+          msg["counts"] = { "todo"=>counts[0].to_i+counts[1].to_i, "out"=>counts[2].to_i, "done"=>counts[3].to_i }
 
           redis.publish(tracker_manager.config.redis_pubsub_channel, JSON.dump(msg))
           
