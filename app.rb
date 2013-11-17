@@ -2,6 +2,8 @@ require "sinatra"
 require "time"
 require "cgi"
 
+Encoding.default_external = 'UTF-8'
+
 module UniversalTracker
   class App < Sinatra::Base
     set :erb, :escape_html => true
