@@ -107,6 +107,16 @@ module UniversalTracker
       end
     end
 
+    post "/:slug/errored" do
+      content_type :text
+      data = JSON.parse(request.body.read)
+      if tracker.error_item(data["item"])
+        "Item moved to error queue.\n"
+      else
+        "Invalid item.\n"
+      end
+    end
+
     post "/:slug/done" do
       content_type :text
       process_done(request, JSON.parse(request.body.read))

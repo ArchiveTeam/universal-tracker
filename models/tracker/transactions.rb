@@ -375,6 +375,34 @@ module UniversalTracker
         end
       end
 
+      def error_item(item)
+        redis.eval(%Q{
+          local out_set = KEYS[1]
+          local claims_set = KEYS[2]
+          local todo_set = KEYS[3]
+          local error_set = KEYS[4]
+          local item = ARGV[1]
+
+          local rank = redis.call('zrank', out_set, item)
+
+          if rank then
+            redis.call('zrem', out_set, item)
+            redis.call('hdel', claims_set, item)
+            redis.call('sadd', todo_set, item)
+            redis.call('sadd', error_set, item)
+            return true
+          else
+            return false
+          end
+        }, 4,
+          "#{ prefix }out",
+          "#{ prefix }claims",
+          "#{ prefix }todo",
+          "#{ prefix }error",
+          item
+        )
+      end
+
       def release_stale(time, regexp=nil)
         out = redis.zrangebyscore("#{ prefix }out", 0, time.to_i)
         if regexp
