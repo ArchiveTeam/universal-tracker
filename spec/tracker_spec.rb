@@ -4,20 +4,14 @@ module UniversalTracker
 
   describe Tracker do
     before :each do
-      @config = TrackerConfig.new
-      @tracker = Tracker.new($redis, @config)
+      @config = TrackerConfig.new('test-project')
+      @manager = TrackerManager.new($redis)
+      @tracker = Tracker.new($redis, @manager, @config)
     end
 
     it "should keep a Redis connection" do
-      tracker = Tracker.new($redis, @config)
+      tracker = Tracker.new($redis, @manager, @config)
       tracker.redis.should === $redis
-    end
-
-    it "should load the TrackerConfig" do
-      $redis.set("tracker_config", '{"title":"foobar tracker"}')
-
-      tracker = Tracker.new($redis)
-      tracker.config.title.should == "foobar tracker"
     end
 
     it "should return a random item" do
@@ -140,7 +134,7 @@ module UniversalTracker
         @tracker.add_items(["abc","def"])
         @tracker.request_item("127.0.0.1", "downloader")
         @tracker.request_item("127.0.0.1", "downloader")
-        $redis.zadd("out", Time.now.to_i - 24 * 60 * 60, "abc")
+        $redis.zadd("#{@tracker.prefix}out", Time.now.to_i - 24 * 60 * 60, "abc")
       end
 
       it "should return the stale claims to the queue" do
@@ -196,7 +190,7 @@ module UniversalTracker
 
       it "should send a pubsub message" do
         @tracker.redis.should_receive(:publish) do |channel, message|
-          channel.should == @tracker.config.redis_pubsub_channel
+          channel.should == @manager.config.redis_pubsub_channel
           message.should be_a(String)
           msg = JSON.parse(message)
           msg["log_channel"].should == @tracker.config.live_log_channel
