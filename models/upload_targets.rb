@@ -1,3 +1,5 @@
+require 'uri'
+
 ##
 # Stores a set of upload targets for a tracker and provides methods for
 # weighting, activating, and deactivating them.
@@ -40,7 +42,9 @@ class UploadTargets
   end
 
   def add(url)
-    activate(url) or redis.sadd(active_upload_targets_key, url)
+    conformed_url = conform(url)
+
+    activate(conformed_url) or redis.sadd(active_upload_targets_key, conformed_url)
   end
 
   def remove(url)
@@ -48,7 +52,20 @@ class UploadTargets
     redis.srem(inactive_upload_targets_key, url)
   end
 
+  def clear
+    redis.del(active_upload_targets_key)
+    redis.del(inactive_upload_targets_key)
+  end
+
   private
+
+  def conform(url)
+    if !URI(url).path.end_with?('/')
+      url + '/'
+    else
+      url
+    end
+  end
 
   def active_upload_targets_key
     "#{tracker.prefix}upload_target"
