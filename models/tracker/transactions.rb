@@ -258,6 +258,8 @@ module UniversalTracker
         rescue Redis::CommandError => e
           if e.message =~ /NOSCRIPT/
             retry
+          else
+            raise e
           end
         end
 
