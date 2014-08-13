@@ -66,7 +66,7 @@ module UniversalTracker
           keys.each do |key|
             redis.sismember("#{ prefix }blocked", key)
           end
-        end.any?{|r|r.to_i==1}
+        end.any?
       end
 
       def blocked
@@ -215,11 +215,11 @@ module UniversalTracker
           redis.hexists("#{ prefix }claims", item)
           redis.sismember("#{ prefix }done", item)
         end
-        if replies[0] == 1 or replies[1] == 1
+        if replies[0] or replies[1]
           :todo
-        elsif replies[2] == 1
+        elsif replies[2]
           :out
-        elsif replies[3] == 1
+        elsif replies[3]
           :done
         else
           nil
@@ -249,21 +249,26 @@ module UniversalTracker
       end
 
       def unknown_items(items)
-        replies = redis.pipelined do
-          items.each do |item|
-            redis.sismember("#{ prefix }todo", item)
-            redis.sismember("#{ prefix }todo:secondary", item)
-            redis.hexists("#{ prefix }claims", item)
-            redis.sismember("#{ prefix }done", item)
+        begin
+          script_ident = redis.script(:load, ITEM_UNKNOWN_SCRIPT)
+
+          replies = redis.pipelined do
+            items.each { |item| redis.evalsha(script_ident, [], [prefix, item]) }
+          end
+        rescue Redis::CommandError => e
+          if e.message =~ /NOSCRIPT/
+            retry
           end
         end
 
         to_add = []
-        replies.each_slice(4).each_with_index do |response, idx|
-          if response==[0,0,0,0]
+
+        replies.each_with_index.each do |unknown, idx|
+          if unknown
             to_add << items[idx]
           end
         end
+
         to_add
       end
 
@@ -285,13 +290,15 @@ module UniversalTracker
 
         added = []
         queue_key = "#{ prefix }#{ queue }"
+
         replies = redis.pipelined do
           items.each do |item|
             redis.sadd(queue_key, item)
           end
         end
+
         replies.each_with_index do |reply, idx|
-          added << items[idx] if reply==1
+          added << items[idx] if reply
         end
         added
       end
@@ -456,6 +463,26 @@ module UniversalTracker
 
       private
 
+      ##
+      # Used by #unknown_items to determine whether an item is already in the
+      # todo, done, or claimed sets.
+      ITEM_UNKNOWN_SCRIPT = %Q{
+        local item = ARGV[2]
+        local sets = {ARGV[1]..'todo', ARGV[1]..'secondary', ARGV[1]..'done'}
+
+        for index, set_name in ipairs(sets) do
+          if redis.call('sismember', set_name, item) ~= 0 then
+            return false
+          end
+        end
+
+        if redis.call('hexists', ARGV[1]..'claims', item) ~= 0 then
+          return false
+        end
+
+        return true
+      }
+
       # After an item has been marked done, this function should be called
       # to update the statistics.
       def update_stats_when_done(downloader, bytes)
@@ -505,15 +532,18 @@ module UniversalTracker
               redis.call('APPEND', KEYS[4], entry)
               redis.call('HSET', KEYS[1], 'total bytes', ARGV[2])
             end
-          }, 4,
-          "#{ prefix }chart:previous_timestamp",
-          "#{ prefix }chart:downloader_bytes:#{ downloader }",
-          "#{ prefix }chart:total_items",
-          "#{ prefix }chart:total_bytes",
-          downloader, minute,
-          "%013x" % downloader_bytes,
-          "%08x" % done_count,
-          "%013x" % total_bytes)
+          },
+          ["#{ prefix }chart:previous_timestamp",
+           "#{ prefix }chart:downloader_bytes:#{ downloader }",
+           "#{ prefix }chart:total_items",
+           "#{ prefix }chart:total_bytes"
+          ],
+          [downloader,
+           minute,
+           "%013x" % downloader_bytes,
+           "%08x" % done_count,
+           "%013x" % total_bytes
+          ])
       end
     end
   end
