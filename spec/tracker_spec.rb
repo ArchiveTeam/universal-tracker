@@ -27,7 +27,7 @@ module UniversalTracker
       @tracker.ip_blocked?("192.0.0.2").should == true
 
       @tracker.ip_block_log.should == ['{"test":123}']
-      @tracker.blocked?(["192.0.0.1"])
+      @tracker.blocked?(["192.0.0.1"]).should be_true
     end
 
     it "should block downloaders" do
