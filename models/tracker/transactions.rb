@@ -180,12 +180,16 @@ module UniversalTracker
         upload_targets.active
       end
 
-      def add_upload_target(url)
-        upload_targets.add(url)
+      def add_upload_target(url, score)
+        upload_targets.add(url, score)
       end
 
       def remove_upload_target(url)
         upload_targets.remove(url)
+      end
+
+      def rescore_upload_target(url, score)
+        upload_targets.rescore(url, score)
       end
 
       def inactive_upload_targets
