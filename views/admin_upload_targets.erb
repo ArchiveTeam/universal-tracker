@@ -8,18 +8,20 @@
   <li><code>http://fos.textfiles.com/warrior/this-project/<strong>:downloader</strong>/</code></li>
 </ul>
 
-<table>
+<table class="upload-targets">
   <thead>
     <tr>
-      <th colspan="4">Upload targets</th>
+      <th colspan="5">Upload targets</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th colspan="4">
+      <th colspan="5">
         <form method="post" action="/<%= tracker.slug %>/admin/upload_targets">
           Add: 
-          <input type="text" name="url" placeholder="URL" value="" size="50" />
+          <input type="text" name="url" placeholder="URL" value="" size="50" required />
+          Score:
+          <input type="number" name="score" class="target-score" placeholder="Score" min="1" required step="1" value="1" />
           <input type="submit" value="Add" />
         </form>
       </th>
@@ -28,6 +30,12 @@
       <tr>
         <td>&#x<%= target[:active] ? 2714 : 2715 %>;</td>
         <th scope="row" width="100%"><%= target[:url] %></th>
+        <td>
+          <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/rescore">
+            <input type="hidden" name="url" value="<%= target[:url] %>" />
+            <input type="number" name="score" class="target-score" placeholder="Score" min="1" step="1" value="<%= target[:score] %>" />
+            <input type="submit" value="Change" />
+          </form>
         <td>
           <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/<%= target[:active] ? "deactivate" : "activate" %>">
             <input type="hidden" name="url" value="<%= target[:url] %>" />
