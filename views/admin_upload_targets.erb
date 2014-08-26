@@ -29,7 +29,7 @@
     <% tracker.all_upload_targets.each do |target| -%>
       <tr>
         <td>&#x<%= target[:active] ? 2714 : 2715 %>;</td>
-        <th scope="row" width="100%"><%= target[:url] %></th>
+        <th><%= target[:url] %></th>
         <td>
           <form method="post" action="/<%= tracker.slug %>/admin/upload_targets/rescore">
             <input type="hidden" name="url" value="<%= target[:url] %>" />
