@@ -130,22 +130,26 @@ module UniversalTracker
 
     post "/:slug/admin/upload_targets" do
       url = params[:url].to_s.strip
-      tracker.add_upload_target(url) unless url.empty?
+      score = params[:score].to_i
+
+      tracker.add_upload_target(url, score)
+
       redirect "/#{ tracker.slug }/admin/upload_targets"
     end
 
     post "/:slug/admin/upload_targets/:action" do
       url = params[:url].to_s.strip
+      score = params[:score].to_i
 
-      unless url.empty?
-        case params[:action]
-        when "remove"
-          tracker.remove_upload_target(url)
-        when "activate"
-          tracker.activate_upload_target(url)
-        when "deactivate"
-          tracker.deactivate_upload_target(url)
-        end
+      case params[:action]
+      when "remove"
+        tracker.remove_upload_target(url)
+      when "rescore"
+        tracker.rescore_upload_target(url, score)
+      when "activate"
+        tracker.activate_upload_target(url)
+      when "deactivate"
+        tracker.deactivate_upload_target(url)
       end
 
       redirect "/#{ tracker.slug }/admin/upload_targets"

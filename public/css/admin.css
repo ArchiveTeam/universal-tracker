@@ -192,4 +192,6 @@ body {
   list-style: disc;
   margin: 0 0 0 1.5em;
 }
-
+.admin .upload-targets .target-score {
+  width: 4em;
+}
