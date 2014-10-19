@@ -1,21 +1,22 @@
 # Reads items from STDIN (one per line) and adds them to the queue.
 #
 # Example:
-#   cat users.txt | ruby script/enqueue.rb
+#   cat users.txt | ruby script/enqueue.rb myprojectname
 #
 
 require "rubygems"
 require File.expand_path("../../app.rb", __FILE__)
 
-env = ARGV[0] || "production"
+slug = ARGV[0] or raise "No slug given."
+env = ARGV[1] || "production"
 
 UniversalTracker::RedisConnection.load_config(env)
-$redis = UniversalTracker::RedisConnection.connection
-tracker = UniversalTracker::Tracker.new($redis)
-p $redis
+redis = UniversalTracker::RedisConnection.connection
+tracker_manager = UniversalTracker::TrackerManager.new(redis)
+tracker = tracker_manager.tracker_for_slug(slug)
 
 batch = []
-while line = gets
+while line = $stdin.gets
   unless line.strip.empty?
     batch << line.strip
 
