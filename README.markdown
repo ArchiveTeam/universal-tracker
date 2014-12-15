@@ -1,12 +1,6 @@
 A configurable multi-project tracker with dashboards.  [![Build Status](https://secure.travis-ci.org/ArchiveTeam/universal-tracker.png)](http://travis-ci.org/ArchiveTeam/universal-tracker)
 
 
-Terminology
-===========
-
-- `items`: users, members or another type of unit that is to be saved. Each item is identified by a unique string, e.g., the username.
-- `domains`: identify parts of an item (e.g., mobileme is is divided in web, gallery, public.me.com and homepage.mac.com). This is only used for statistics.
-
 Quick Start
 ===========
 
@@ -22,9 +16,9 @@ You'll now have an empty application. The admin pages are accessible to anyone w
 
 Create a user account and make yourself a global admin:
 
-6. Go to http://yourtracker/global-admin/
-7. Go to Users.
-8. Create a new account with global admin powers.
+1. Go to http://yourtracker/global-admin/
+2. Go to Users.
+3. Create a new account with global admin powers.
 
 From now on, you'll have to log in to access the admin pages.
 
@@ -33,6 +27,13 @@ If you ever forget your password, remove the `admins` key from the Redis databas
 For detailed step-by-step instructions, see http://archiveteam.org/index.php?title=Dev/Tracker which describes additional steps required for a full install.
 
 To run tests, use `bundle exec rake`.
+
+
+Terminology
+===========
+
+- `items`: users, members or another type of unit that is to be saved. Each item is identified by a unique string, e.g., the username.
+- `domains`: identify parts of an item (e.g., mobileme is is divided in web, gallery, public.me.com and homepage.mac.com). This is only used for statistics.
 
 
 Basics / Redis structure
