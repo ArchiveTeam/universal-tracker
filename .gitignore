@@ -1,3 +1,5 @@
 .*.sw?
 features/redis_conf.rb
+config/redis.json
 
+*~
