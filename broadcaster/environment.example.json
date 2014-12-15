@@ -1,0 +1,6 @@
+{
+    "tracker_config": {
+        "redis_pubsub_channel": "tracker-log"
+    },
+    "redis_db": 1
+}
