@@ -7,28 +7,32 @@ Terminology
 - `items`: users, members or another type of unit that is to be saved. Each item is identified by a unique string, e.g., the username.
 - `domains`: identify parts of an item (e.g., mobileme is is divided in web, gallery, public.me.com and homepage.mac.com). This is only used for statistics.
 
-Setting up
-==========
+Quick Start
+===========
 
-To start running trackers:
+To start running the Sinatra app:
 
 1. Install a recent version of Redis.
-2. Install the tracker web app.
-3. Copy `config/redis.json.example` and set the Redis parameters.
+2. Install Ruby 1.9 or 2.0 using `rvm`.
+3. Install project dependencies using `bundle install`.
+4. Copy `config/redis.json.example` and set the Redis parameters.
+5. Launch the app using something like nginx+passenger or `rackup` for development.
 
 You'll now have an empty application. The admin pages are accessible to anyone without logging in.
 
 Create a user account and make yourself a global admin:
 
-4. Go to http://yourtracker/global-admin/
-5. Go to Users.
-6. Create a new account with global admin powers.
+6. Go to http://yourtracker/global-admin/
+7. Go to Users.
+8. Create a new account with global admin powers.
 
 From now on, you'll have to log in to access the admin pages.
 
 If you ever forget your password, remove the `admins` key from the Redis database to reopen access and create a new user account.
 
-For detailed step-by-step instructions, see http://archiveteam.org/index.php?title=Dev/Tracker.
+For detailed step-by-step instructions, see http://archiveteam.org/index.php?title=Dev/Tracker which describes additional steps required for a full install.
+
+To run tests, use `bundle exec rake`.
 
 
 Basics / Redis structure
