@@ -1,19 +1,11 @@
 A configurable multi-project tracker with dashboards.  [![Build Status](https://secure.travis-ci.org/ArchiveTeam/universal-tracker.png)](http://travis-ci.org/ArchiveTeam/universal-tracker)
 
-Can run on Heroku, with a Redis server somewhere.
-
-Needs documentation.
 
 Terminology
 ===========
 
 - `items`: users, members or another type of unit that is to be saved. Each item is identified by a unique string, e.g., the username.
 - `domains`: identify parts of an item (e.g., mobileme is is divided in web, gallery, public.me.com and homepage.mac.com). This is only used for statistics.
-
-Multiple trackers with one instance
-===================================
-
-One instance can manage trackers for multiple projects. In the Redis database, the keys of each tracker are prefixed with "#{ slug }:".
 
 Setting up
 ==========
@@ -35,6 +27,9 @@ Create a user account and make yourself a global admin:
 From now on, you'll have to log in to access the admin pages.
 
 If you ever forget your password, remove the `admins` key from the Redis database to reopen access and create a new user account.
+
+For detailed step-by-step instructions, see http://archiveteam.org/index.php?title=Dev/Tracker.
+
 
 Basics / Redis structure
 ========================
@@ -78,6 +73,15 @@ Rate-limiting is implemented as follows:
 
 Downloaders can be blocked by adding the IP address to `blocked`. Blocked downloaders will not receive a username. Downloaders that send invalid requests will be blocked automatically.
 
+Multiple trackers with one instance
+-----------------------------------
+
+One instance can manage trackers for multiple projects. In the Redis database, the keys of each tracker are prefixed with "#{ slug }:".
+
+Heroku
+------
+
+Can run on Heroku, with a Redis server somewhere.
 
 HTTP API
 ========
