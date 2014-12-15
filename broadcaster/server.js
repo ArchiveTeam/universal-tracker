@@ -1,7 +1,13 @@
-var fs = require('fs');
-var env = JSON.parse(fs.readFileSync('/home/dotcloud/environment.json'));
+if (process.argv.length != 3) {
+    console.error("Specify the path of the environment.json file please!");
+    console.error("Usage: node server.js environment.json");
+    process.exit(2);
+}
 
-var trackerConfig = JSON.parse(env['tracker_config']);
+var fs = require('fs');
+var env = JSON.parse(fs.readFileSync(process.argv[2]));
+
+var trackerConfig = env['tracker_config'];
 
 var app = require('http').createServer(httpHandler),
     io = require('socket.io').listen(app),
@@ -54,7 +60,7 @@ function redisHandler(pubsubChannel, message) {
 
 
 io.configure(function() {
-  io.set("transports", ["xhr-polling"]);
+  io.set("transports", ["websocket", "xhr-polling"]);
   io.set("polling duration", 10);
 
   var path = require('path');
