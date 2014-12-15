@@ -119,7 +119,7 @@ module UniversalTracker
       process_request(request, data)
     end
 
-    get "/:slug/items/:item.json" do |item|
+    get "/:slug/items/:item.json" do |slug, item|
       content_type :json
       data = {
         :status=>tracker.item_status(item)

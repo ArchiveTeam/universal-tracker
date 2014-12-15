@@ -31,6 +31,9 @@ AfterConfiguration do
 
   UniversalTracker::App.set :redis, $redis
   UniversalTracker::App.enable :raise_errors
+  
+  $tracker_manager = UniversalTracker::TrackerManager.new($redis)
+  UniversalTracker::App.set :tracker_manager, $tracker_manager
 end
 
 Before do
