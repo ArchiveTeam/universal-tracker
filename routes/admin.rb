@@ -74,6 +74,9 @@ module UniversalTracker
       if params[:before]
         before = Time.xmlschema(params[:before])
         tracker.release_stale(before, regexp)
+      elsif params[:hours]
+        before = Time.now - params[:hours].to_i * 3600
+        tracker.release_stale(before, regexp)
       elsif params[:downloader]
         tracker.release_by_downloader(params[:downloader], regexp)
       elsif params[:item]
