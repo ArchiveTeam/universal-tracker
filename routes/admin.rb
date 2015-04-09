@@ -79,6 +79,7 @@ module UniversalTracker
       elsif params[:item]
         tracker.release_item(params[:item])
       end
+      tracker.recalculate_budgets
       redirect "/#{ tracker.slug }/admin/claims"
     end
 
