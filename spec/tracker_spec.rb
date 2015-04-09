@@ -36,6 +36,14 @@ module UniversalTracker
       @tracker.blocked?(["someone"])
     end
 
+    it "should refuse funky downloader nicks" do
+      App.valid_downloader?("a").should == false
+      App.valid_downloader?("aaa>/dev/null").should == false
+      App.valid_downloader?("aaa\u1F31D").should == false
+      App.valid_downloader?("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa").should == false
+      App.valid_downloader?("hello").should == true
+    end
+
     describe "#add_item" do
       it "should add items" do
         added = @tracker.add_items(["abc", "cde"])

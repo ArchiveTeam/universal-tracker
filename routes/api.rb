@@ -1,11 +1,16 @@
 module UniversalTracker
   class App < Sinatra::Base
+    def self.valid_downloader?(downloader)
+      return false unless downloader.is_a?(String)
+      return (downloader =~ /^[-_a-zA-Z0-9]{3,30}$/) != nil
+    end
+
     def process_done(request, data)
       downloader = data["downloader"]
       item = data["item"]
       bytes = data["bytes"]
 
-      if downloader.is_a?(String) and
+      if App.valid_downloader?(downloader) and
          item.is_a?(String) and
          bytes.is_a?(Hash) and
          bytes.all?{|k,v|k.is_a?(String) and v.is_a?(Integer)}
@@ -48,7 +53,7 @@ module UniversalTracker
       if not tracker.check_version(version)
         status 455
         ""
-      elsif downloader.is_a?(String)
+      elsif App.valid_downloader?(downloader)
         case tracker.check_not_blocked_and_request_rate_ok(request.ip, downloader)
         when :blocked
 # TODO logging
