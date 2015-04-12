@@ -327,14 +327,23 @@
     if (msg.user_agent && msg.user_agent.match(/Warrior$/)) {
       tr.className = 'warrior';
     }
-    var td = makeTD('text', msg.downloader);
-    td.className = 'downloader';
-    tr.appendChild(td);
-    tr.appendChild(makeTD('text', msg.item));
-    tr.appendChild(makeTD('num',  Math.round(msg.megabytes), 'MB'));
+    var downloaderTd = makeTD('text', msg.downloader);
+    var itemTextTd = makeTD('text', msg.item);
+    var sizeText = msg.megabytes < 1 ? Math.round(msg.megabytes * 10) / 10 : Math.round(msg.megabytes);
+    var sizeTd = makeTD('num',  sizeText, 'MB')
+    downloaderTd.className = 'downloader';
+    itemTextTd.title = msg.item;
+    tr.appendChild(downloaderTd);
+    tr.appendChild(itemTextTd);
+    tr.appendChild(sizeTd);
+
+    downloaderTd.title = '';
 
     if (msg.version) {
-      tr.title = 'Version: '+msg.version;
+      downloaderTd.title = 'Version: '+msg.version;
+    }
+    if (msg.user_agent) {
+      downloaderTd.title += ' | User Agent: '+msg.user_agent;
     }
 
     tbody.insertBefore(tr, tbody.firstChild);
