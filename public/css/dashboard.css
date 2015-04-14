@@ -217,7 +217,7 @@ body.root #how-to-help {
   padding-left: 5px;
   list-style: decimal;
 }
-#how-to-help p, #how-to-help ol, #how-to-help li {
+#how-to-help p, #how-to-help ol, #how-to-help li, #notice_board {
   font-size: 16px;
   max-width: 600px;
 }

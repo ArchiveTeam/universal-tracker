@@ -21,11 +21,24 @@
   <%== erb :how_to_help_card %>
 </div>
 
+<div id="notice_board">
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 /* <![CDATA[ */
 $(document).ready(function() {
   $.get('http://warriorhq.archiveteam.org/projects.json', null, function(data) {
+    if (data.broadcast_message) {
+      var element = document.createElement('p');
+      element.textContent = data.broadcast_message;
+      $('#notice_board').append(element);
+    }
+    if (data.tracker_banner_html) {
+      var element = document.createElement('p');
+      element.innerHTML = data.tracker_banner_html;
+      $('#notice_board').append(element);
+    }
     if (data.projects && data.projects.length > 0) {
       var div = document.createElement('div'),
     p = document.createElement('p'),
