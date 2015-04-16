@@ -217,9 +217,15 @@ body.root #how-to-help {
   padding-left: 5px;
   list-style: decimal;
 }
-#how-to-help p, #how-to-help ol, #how-to-help li, #notice_board {
+#how-to-help p, #how-to-help ol, #how-to-help li {
   font-size: 16px;
   max-width: 600px;
+}
+#notice_board {
+  width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 16px;
 }
 
 #error-404-message {

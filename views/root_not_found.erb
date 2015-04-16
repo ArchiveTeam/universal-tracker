@@ -55,7 +55,14 @@ $(document).ready(function() {
         span = document.createElement('span'),
         img = document.createElement('img');
     li.appendChild(a);
+    if (data.auto_project == data.projects[i].name) {
+      var autoProjectSpan = document.createElement('span')
+      autoProjectSpan.textContent = '\u2606';
+      autoProjectSpan.title = 'Default project';
+      a.appendChild(autoProjectSpan);
+    }
     a.href = data.projects[i].leaderboard;
+    a.title = data.projects[i].description;
     span.className = 'project-logo';
     a.appendChild(span);
     img.src = data.projects[i].logo;
