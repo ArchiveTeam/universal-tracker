@@ -2,7 +2,7 @@
   "name": "broadcaster",
   "version": "1.0.0",
   "dependencies": {
-    "socket.io": "",
+    "socket.io": "0.9.17",
     "hiredis": "",
     "redis": ""
   }
