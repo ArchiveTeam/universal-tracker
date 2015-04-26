@@ -162,7 +162,7 @@ module UniversalTracker
         if replies[0] == 1 or replies[1] == 1
           # username or ip is blocked
           :blocked
-        elsif replies[2] and replies[3] and replies[2].to_i < replies[3].to_i
+        elsif replies[2] and replies[3] and replies[2].to_i <= replies[3].to_i
           # user exceeded the budget
           :exceeded_budget
         elsif not check_request_rate
