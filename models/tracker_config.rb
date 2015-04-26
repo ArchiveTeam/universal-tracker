@@ -56,6 +56,10 @@ module UniversalTracker
                  :type=>:integer,
                  :label=>"Number of historical data points",
                  :default=>1000
+    config_field :ignore_global_blocked,
+                 :type=>:boolean,
+                 :label=>"Ignore downloader global block list",
+                 :default=>false
 
     def initialize(slug, settings = {})
       @slug = slug

@@ -36,6 +36,12 @@ module UniversalTracker
       @tracker.blocked?(["someone"])
     end
 
+    it "should globally block downloaders" do
+      @manager.config.set_downloader_global_blocked($redis, ["someone"])
+      @tracker.downloader_blocked?("someone").should == true
+      @tracker.blocked?(["someone"])
+    end
+
     it "should refuse funky downloader nicks" do
       App.valid_downloader?("a").should == false
       App.valid_downloader?("aaa>/dev/null").should == false

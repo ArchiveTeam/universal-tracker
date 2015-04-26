@@ -54,17 +54,17 @@ module UniversalTracker
       end
 
       def ip_blocked?(request_ip)
-        redis.sismember("#{ prefix }blocked", request_ip)
+        redis.sismember("#{ prefix }blocked", request_ip) or (not config.ignore_global_blocked and redis.sismember("global_blocked", request_ip))
       end
 
       def downloader_blocked?(downloader)
-        redis.sismember("#{ prefix }blocked", downloader)
+        redis.sismember("#{ prefix }blocked", downloader) or (not config.ignore_global_blocked and redis.sismember("global_blocked", downloader))
       end
 
       def blocked?(keys)
         redis.pipelined do
           keys.each do |key|
-            redis.sismember("#{ prefix }blocked", key)
+            redis.sismember("#{ prefix }blocked", key) or (not config.ignore_global_blocked and redis.sismember("global_blocked", key))
           end
         end.any?{|r|r.to_i==1}
       end
@@ -158,8 +158,11 @@ module UniversalTracker
 
           redis.hget("#{ prefix }downloader_budget", downloader)
           redis.get("#{ prefix }min_downloader_budget")
+
+          redis.sismember("global_blocked", request_ip)
+          redis.sismember("global_blocked", downloader)
         end
-        if replies[0] == 1 or replies[1] == 1
+        if replies[0] == 1 or replies[1] == 1 or (not config.ignore_global_blocked and (replies[4] == 1 or replies[5] == 1))
           # username or ip is blocked
           :blocked
         elsif replies[2] and replies[3] and replies[2].to_i <= replies[3].to_i

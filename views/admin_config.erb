@@ -18,6 +18,13 @@
         <td><input type="text" name="<%= field[:name] %>" id="f-<%= field[:name] %>" value="<%= field[:value] %>" /></td>
       </tr>
     <%
+      when :boolean
+    -%>
+      <tr>
+        <th><label for="f-<%= field[:name] %>"><%= field[:label] %>:</label></th>
+        <td><input type="checkbox" name="<%= field[:name] %>" id="f-<%= field[:name] %>" <% if field[:value] %>checked<% end %> value="yes" /></td>
+      </tr>
+    <%
 
       when :map
     -%>

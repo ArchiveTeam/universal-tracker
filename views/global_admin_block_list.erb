@@ -1,0 +1,12 @@
+<h2>Globally Blocked IPs/downloaders</h2>
+
+<p>Whitespace separated. Case-sensitive.</p>
+
+<form method="post" action="/global-admin/global-block-list">
+  <textarea class="big-text-input" name="names"><% tracker_manager.config.downloader_global_blocked(redis).sort.each do |name| -%>
+<%= name %><% end -%>
+</textarea>
+  <br/>
+  <input type="submit" value="Apply" />
+</form>
+

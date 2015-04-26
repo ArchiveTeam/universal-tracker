@@ -93,6 +93,16 @@ module UniversalTracker
       end
       redirect "/global-admin/users"
     end
+
+    get "/global-admin/global-block-list" do
+      erb :global_admin_block_list, :layout=>:admin_layout
+    end
+    
+    post "/global-admin/global-block-list" do
+      names = params[:names].to_s.scan(/\S+/)
+      tracker_manager.config.set_downloader_global_blocked(redis, names)
+      redirect "/global-admin/global-block-list"
+    end
   end
 end
 

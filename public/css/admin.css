@@ -192,4 +192,8 @@ body {
   list-style: disc;
   margin: 0 0 0 1.5em;
 }
+.big-text-input {
+  min-width: 30em;
+  min-height: 20em;
+}
 

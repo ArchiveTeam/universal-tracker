@@ -193,6 +193,8 @@ module UniversalTracker
           tracker.config[field[:name]] = params[field[:name]].strip if params[field[:name]]
         when :integer
           tracker.config[field[:name]] = params[field[:name]].strip.to_i if params[field[:name]]
+        when :boolean
+          tracker.config[field[:name]] = params[field[:name]].to_s.strip == "yes"
         when :map
           if params["#{ field[:name] }-0-key"]
             i = 0

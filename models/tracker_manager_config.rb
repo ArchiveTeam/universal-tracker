@@ -47,6 +47,23 @@ module UniversalTracker
         yield({ :value=>send(field[:name]) }.merge(field))
       end
     end
+
+    def downloader_global_blocked?(redis, name)
+      redis.sismember("global_blocked", name)
+    end
+
+    def downloader_global_blocked(redis)
+      redis.smembers("global_blocked")
+    end
+
+    def set_downloader_global_blocked(redis, names)
+      redis.multi do
+        redis.del("global_blocked")
+        names.each do |name|
+          redis.sadd("global_blocked", name)
+        end
+      end
+    end
   end
 end
 
