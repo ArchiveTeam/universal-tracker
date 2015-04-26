@@ -58,6 +58,9 @@ module UniversalTracker
         when :blocked
 # TODO logging
 #         p "Hey, blocked: #{ request.ip }"
+          status 403
+          ""
+        when :exceeded_budget
           raise Sinatra::NotFound
         when :rate_limit
           status 429

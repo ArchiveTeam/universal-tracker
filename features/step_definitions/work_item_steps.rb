@@ -15,6 +15,11 @@ When /^downloader "([^"]*)" marks item "([^"]*)" done with ([0-9]+) bytes$/ do |
        { "Content-Type" => "application/json" }
 end
 
+When /^downloader max budget is (\d+)$/ do |budget|
+  post "/test-project/admin/limits", :max_budget => budget
+  last_response.status.should == 302
+end
+
 Then /^the response has status (\d+)$/ do |status|
   last_response.status.should == status.to_i
 end

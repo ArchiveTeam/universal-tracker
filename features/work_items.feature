@@ -18,6 +18,24 @@ Feature: Work items
 
     Then the response has status 404
 
+  Scenario: When the user's budget is exceeded
+    Given the tracker has the work items
+      | item |
+      | abc1 |
+      | abc2 |
+      | abc3 |
+      | abc4 |
+
+    When downloader max budget is 1
+    
+    When I request a work item as "foobar"
+    
+    Then the response has status 200
+    
+    When I request a work item as "foobar"
+    
+    Then the response has status 404
+
   Scenario: Marking a work item done
     Given the tracker has the work items
       | item   |
@@ -39,5 +57,5 @@ Feature: Work items
 
     When I request a work item as "foobar" from ip 192.0.0.1
 
-    Then the response has status 404
+    Then the response has status 403
 

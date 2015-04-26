@@ -164,7 +164,7 @@ module UniversalTracker
           :blocked
         elsif replies[2] and replies[3] and replies[2].to_i < replies[3].to_i
           # user exceeded the budget
-          :blocked
+          :exceeded_budget
         elsif not check_request_rate
           :rate_limit
         else
