@@ -214,6 +214,10 @@ module UniversalTracker
       @admin_page = "/#{ tracker.slug }/admin/config"
       erb :admin_config_thanks, :layout=>:admin_layout
     end
+    
+    get "/:slug/admin/workarounds" do
+      erb :admin_workarounds, :layout=>:admin_layout
+    end
   end
 end
 

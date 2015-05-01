@@ -1,0 +1,21 @@
+
+<h2>Workarounds</h2>
+<p>The maintainer has left the building! :P</p>
+
+<h3>Claims</h3>
+
+<form method="post" action="/<%= tracker.slug %>/admin/claims/release">
+  <p>
+    Free items claimed since
+    <input type="number" name="hours" style="width: 4em" /> hours ago
+    matching
+    <input type="text" name="regexp" value="<%= params[:regexp] %>" style="width:130px" />
+    <input type="submit" value="Requeue" />
+  </p>
+</form>
+
+<form method="post" action="/<%= tracker.slug %>/admin/recalculate_budgets">
+  <p>
+    <input type="submit" value="Recalculate claim budgets" />
+  </p>
+</form>

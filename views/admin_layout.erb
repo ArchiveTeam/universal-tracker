@@ -35,7 +35,8 @@
               [ "/admin/blocked", "Blocked" ],
               [ "/admin/limits", "Limits" ],
               [ "/admin/upload_targets", "Uploads" ],
-              [ "/admin/config", "Configuration" ]
+              [ "/admin/config", "Configuration" ],
+              [ "/admin/workarounds", "Workarounds" ]
             ].each do |path, title|
           %>
             <li <% if @admin_page==path %>class="active"<% end %>><a href="<%= "/#{ tracker.slug }#{ path }" %>"><%= title %></a></li>
