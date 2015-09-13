@@ -1,6 +1,6 @@
 <h2>Trackers</h2>
 
-<% tracker_manager.trackers.each do |tracker| -%>
+<% tracker_manager.trackers.sort_by{|tracker|tracker.config.slug}.each do |tracker| -%>
   <h3><%= tracker.config.slug %> &mdash; <%= tracker.config.title %></h3>
   <table>
     <tbody>

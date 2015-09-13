@@ -3,7 +3,7 @@
 <h3>Trackers</h3>
 <table>
   <tbody>
-  <% tracker_manager.trackers.each do |tracker| -%>
+  <% tracker_manager.trackers.sort_by{|tracker|tracker.config.slug}.each do |tracker| -%>
     <tr>
       <th width="120"><a href="/<%= tracker.config.slug %>"><%= tracker.config.slug %></a></th>
       <td width="120"><a href="/<%= tracker.config.slug %>/admin/">Admin</a></th>
