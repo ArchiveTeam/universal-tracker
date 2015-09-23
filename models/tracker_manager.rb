@@ -1,5 +1,4 @@
 require "json"
-require "time"
 require "bcrypt"
 require "active_support/ordered_hash"
 require File.expand_path("../tracker_manager_config", __FILE__)
@@ -73,21 +72,6 @@ module UniversalTracker
       end
       redis.hdel("users", username)
       redis.srem("admins", username)
-    end
-    
-    def get_warrior_projects
-      doc = JSON.parse(redis.get("warriorhq:projects_json") || "{}")
-      return JSON.pretty_generate(doc)
-    end
-
-    def set_warrior_projects(content)
-      doc = JSON.parse(content)
-      bak_doc = {
-        "date" => Time.now.utc.iso8601,
-        "content" => content
-      }
-      redis.lpush("warriorhq:projects_json_bak", JSON.dump(bak_doc))
-      redis.set("warriorhq:projects_json", JSON.dump(doc))
     end
   end
 end

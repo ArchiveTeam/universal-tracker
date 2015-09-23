@@ -49,8 +49,7 @@
               [ "/global-admin/config", "Configuration" ],
               [ "/global-admin/global-block-list", "Global Block List" ],
               [ "/global-admin/trackers", "Trackers" ],
-              [ "/global-admin/users", "Users" ],
-              [ "/global-admin/warrior", "Warrior Projects" ]
+              [ "/global-admin/users", "Users" ]
             ].each do |path, title|
           %>
             <li <% if @global_admin_page==path %>class="active"<% end %>><a href="<%= path %>"><%= title %></a></li>
