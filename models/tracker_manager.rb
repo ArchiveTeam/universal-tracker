@@ -86,6 +86,8 @@ module UniversalTracker
         "date" => Time.now.utc.iso8601,
         "content" => content
       }
+      # TODO: We want to keep *all* edits, but they should probably be
+      # written to a file. 
       @warrior_redis.lpush("warriorhq:projects_json_bak", JSON.dump(bak_doc))
       @warrior_redis.set("warriorhq:projects_json", JSON.dump(doc))
     end

@@ -195,5 +195,6 @@ body {
 .big-text-input {
   min-width: 30em;
   min-height: 20em;
+  width: 98%;
 }
 
