@@ -7,9 +7,10 @@ module UniversalTracker
     attr_accessor :redis
     attr_accessor :config
 
-    def initialize(redis, config = nil)
+    def initialize(redis, config = nil, warrior_redis = nil)
       @redis = redis
       @config = config || TrackerManagerConfig.load_from(redis)
+      @warrior_redis = warrior_redis
     end
 
     def create_tracker(slug)
@@ -72,6 +73,21 @@ module UniversalTracker
       end
       redis.hdel("users", username)
       redis.srem("admins", username)
+    end
+    
+    def get_warrior_projects
+      doc = JSON.parse(@warrior_redis.get("warriorhq:projects_json") || "null")
+      return JSON.pretty_generate(doc)
+    end
+
+    def set_warrior_projects(content)
+      doc = JSON.parse(content)
+      bak_doc = {
+        "date" => Time.now.utc.iso8601,
+        "content" => content
+      }
+      @warrior_redis.lpush("warriorhq:projects_json_bak", JSON.dump(bak_doc))
+      @warrior_redis.set("warriorhq:projects_json", JSON.dump(doc))
     end
   end
 end

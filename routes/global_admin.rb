@@ -103,6 +103,16 @@ module UniversalTracker
       tracker_manager.config.set_downloader_global_blocked(redis, names)
       redirect "/global-admin/global-block-list"
     end
+
+    get "/global-admin/warrior" do
+      erb :global_admin_warrior, :layout=>:admin_layout
+    end
+ 
+    post "/global-admin/warrior" do
+       content = params[:content]
+       tracker_manager.set_warrior_projects(content)
+       redirect "/global-admin/warrior"
+    end
   end
 end
 

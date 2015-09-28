@@ -7,7 +7,8 @@ require "./app"
 require "./lib/fix_request_content_type"
 
 redis = UniversalTracker::RedisConnection.connection
-tracker_manager = UniversalTracker::TrackerManager.new(redis)
+warrior_redis = UniversalTracker::WarriorHQRedisConnection.connection
+tracker_manager = UniversalTracker::TrackerManager.new(redis, nil, warrior_redis)
 
 use Rack::Static,
   :urls=>["/css", "/js"],
