@@ -28,7 +28,7 @@
 <script type="text/javascript">
 /* <![CDATA[ */
 $(document).ready(function() {
-  $.get('http://warriorhq.archiveteam.org/projects.json', null, function(data) {
+  $.get(window.location.protocol + '//warriorhq.archiveteam.org/projects.json', null, function(data) {
     if (data.broadcast_message) {
       var element = document.createElement('p');
       element.textContent = data.broadcast_message;
