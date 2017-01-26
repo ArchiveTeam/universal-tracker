@@ -353,8 +353,16 @@
     }
   }
 
+  function getLogHostURL() {
+    if (document.location.protocol == 'http') {
+      return trackerConfig.logHost;
+    } else {
+      return trackerConfig.sslLogHost;
+    }
+  }
+
   function startLogClient() {
-    var socket = io.connect(document.location.protocol+'//'+trackerConfig.logHost+'/'+trackerConfig.logChannel);
+    var socket = io.connect(document.location.protocol+'//'+getLogHostURL()+'/'+trackerConfig.logChannel);
     socket.on("log_message", function(data) {
       var msg = JSON.parse(data);
       if (msg.downloader && msg.item && msg.megabytes) {
@@ -367,7 +375,7 @@
   }
 
   function initLog() {
-    jQuery.getJSON(document.location.protocol+'//'+(trackerConfig.logHost)+'/recent/'+(trackerConfig.logChannel), function(messages) {
+    jQuery.getJSON(document.location.protocol+'//'+getLogHostURL()+'/recent/'+(trackerConfig.logChannel), function(messages) {
       for (var i=0; i<messages.length; i++) {
         var msg = messages[i];
         if (msg.downloader && msg.item && msg.megabytes) {

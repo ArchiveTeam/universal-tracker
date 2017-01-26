@@ -43,6 +43,7 @@ window.trackerConfig = {
   updateStatusPath: null, // '/<%= tracker.slug %>/update-status.json',
   logChannel: '<%= tracker_config.live_log_channel %>',
   logHost: '<%= tracker_manager_config.live_log_host %>',
+  sslLogHost: '<%= tracker_manager_config.live_log_host_ssl %>',
   domains: <%== JSON.dump(tracker_config.domains) %>
 };
 </script>

@@ -32,6 +32,10 @@ module UniversalTracker
                  :type=>:string,
                  :label=>"Live logging host",
                  :default=>""
+    config_field :live_log_host_ssl,
+                 :type=>:string,
+                 :label=>"Live logging host (SSL)",
+                 :default=>""
 
     def initialize(settings = {})
       @settings = @@defaults.clone.merge(Hash[settings.map{ |k,v| [ k.to_sym, v ] }])
