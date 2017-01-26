@@ -354,7 +354,7 @@
   }
 
   function getLogHostURL() {
-    if (document.location.protocol == 'http') {
+    if (document.location.protocol == 'http:') {
       return trackerConfig.logHost;
     } else {
       return trackerConfig.sslLogHost;
