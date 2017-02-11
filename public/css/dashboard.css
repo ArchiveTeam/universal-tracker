@@ -1,6 +1,12 @@
 body {
   font-family: 'Lato', sans-serif;
   font-size: 20px;
+  /**
+   * Opt out of Chrome's Scroll Anchoring, which can cause dashboard pages
+   * to incorrectly scroll down as new lines appear in the right pane.
+   * https://github.com/WICG/interventions/blob/0063fe5d3d0e086d4f963c8bd612d12b57db0784/scroll-anchoring/explainer.md#exclusion--opt-out-api
+   */
+  overflow-anchor: none;
 }
 form {
   margin: 0;
