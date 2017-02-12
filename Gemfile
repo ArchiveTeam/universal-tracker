@@ -5,8 +5,8 @@ gem "json"
 gem "activesupport"
 gem "i18n"
 gem "erubis"
-gem "hiredis", "~> 0.3.1"
-gem "redis", "~> 2.2.0", :require => ["redis/connection/hiredis", "redis"]
+gem "hiredis"
+gem "redis", "~> 3.0", :require => ["redis/connection/hiredis", "redis"]
 gem "bcrypt-ruby"
 
 group :development do
