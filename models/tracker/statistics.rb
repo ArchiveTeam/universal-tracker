@@ -72,7 +72,7 @@ module UniversalTracker
         claims = redis.hgetall("#{ prefix }claims")
         out = redis.zrange("#{ prefix }out", 0, -1, :with_scores=>true)
         claims_per_downloader = ActiveSupport::OrderedHash.new{ |h,k| h[k] = [] }
-        out.each_slice(2) do |item, time|
+        out.each do |item, time|
           if claims[item]
             ip, downloader = claims[item].split(" ", 2)
           else

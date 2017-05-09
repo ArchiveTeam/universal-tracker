@@ -137,15 +137,15 @@ module UniversalTracker
           redis.call('incr', KEYS[4])
           redis.call('expire', KEYS[4], 300)
           return 1
-        }, 7,
-          "#{ prefix }requests_per_minute",
-          "#{ prefix }requests_per_minute:monitor",
-          "#{ prefix }requests_processed:#{ this_minute }",
-          "#{ prefix }requests_granted:#{ this_minute }",
-          "#{ prefix }requests_granted:#{ prev_minute }",
-          "#{ prefix }todo",
-          "#{ prefix }todo:secondary",
-          Time.now.sec 
+        },
+          [ "#{ prefix }requests_per_minute",
+            "#{ prefix }requests_per_minute:monitor",
+            "#{ prefix }requests_processed:#{ this_minute }",
+            "#{ prefix }requests_granted:#{ this_minute }",
+            "#{ prefix }requests_granted:#{ prev_minute }",
+            "#{ prefix }todo",
+            "#{ prefix }todo:secondary" ],
+          [ Time.now.sec ]
         )
 
         return (reply.to_i==1)
@@ -403,7 +403,7 @@ module UniversalTracker
           for i, claim in ipairs(redis.call('HVALS', KEYS[1])) do
             redis.call('HINCRBY', KEYS[2], string.match(claim, '%S+$'), -1)
           end
-        }, 2, "#{ prefix }claims", "#{ prefix }downloader_budget")
+        }, [ "#{ prefix }claims", "#{ prefix }downloader_budget" ])
       end
 
       def mark_item_done(downloader, item, bytes, done_hash)
@@ -508,15 +508,15 @@ module UniversalTracker
               redis.call('APPEND', KEYS[4], entry)
               redis.call('HSET', KEYS[1], 'total bytes', ARGV[2])
             end
-          }, 4,
-          "#{ prefix }chart:previous_timestamp",
-          "#{ prefix }chart:downloader_bytes:#{ downloader }",
-          "#{ prefix }chart:total_items",
-          "#{ prefix }chart:total_bytes",
-          downloader, minute,
-          "%013x" % downloader_bytes,
-          "%08x" % done_count,
-          "%013x" % total_bytes)
+          },
+          [ "#{ prefix }chart:previous_timestamp",
+            "#{ prefix }chart:downloader_bytes:#{ downloader }",
+            "#{ prefix }chart:total_items",
+            "#{ prefix }chart:total_bytes" ],
+          [ downloader, minute,
+            "%013x" % downloader_bytes,
+            "%08x" % done_count,
+            "%013x" % total_bytes ])
       end
     end
   end
