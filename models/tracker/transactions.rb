@@ -162,7 +162,7 @@ module UniversalTracker
           redis.sismember("global_blocked", request_ip)
           redis.sismember("global_blocked", downloader)
         end
-        if replies[0] == 1 or replies[1] == 1 or (not config.ignore_global_blocked and (replies[4] == 1 or replies[5] == 1))
+        if replies[0] or replies[1] or (not config.ignore_global_blocked and (replies[4] or replies[5]))
           # username or ip is blocked
           :blocked
         elsif replies[2] and replies[3] and replies[2].to_i <= replies[3].to_i
