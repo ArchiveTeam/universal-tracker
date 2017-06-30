@@ -230,9 +230,9 @@ module UniversalTracker
           redis.zcard("#{ prefix }out")                  # 6
         end
 
-        domain_bytes = Hash[*resp[0]]
-        downloader_bytes = Hash[*resp[1]]
-        downloader_count = Hash[*resp[2]]
+        domain_bytes = resp[0]
+        downloader_bytes = resp[1]
+        downloader_count = resp[2]
         total_items_done = resp[3].to_i
         total_items_todo = resp[4].to_i + resp[5].to_i
         total_items_out = resp[6].to_i
