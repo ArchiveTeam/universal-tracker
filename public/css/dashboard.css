@@ -27,7 +27,7 @@ table, td, th {
 li, td {
   border: none;
   font-size: 20px;
-  overflow-x: hidden;
+  overflow: hidden;
   white-space: nowrap;
 }
 td {
