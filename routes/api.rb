@@ -154,6 +154,12 @@ module UniversalTracker
         "{}"
       end
     end
+    
+    get "/:slug/targets/active" do
+      content_type :json
+      JSON.dump(tracker.active)
+    end
+    
   end
 end
 
