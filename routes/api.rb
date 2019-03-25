@@ -149,7 +149,10 @@ module UniversalTracker
 
       content_type :json
       if downloader.is_a?(String) and target = tracker.random_upload_target
-        JSON.dump(:upload_target=>target.gsub(":downloader", downloader))
+        JSON.dump({
+        :upload_target => target.gsub(":downloader", downloader),
+        :active_upload_targets => tracker.upload_targets.active.map {|url| url.gsub(":downloader", downloader)}
+       })
       else
         "{}"
       end
