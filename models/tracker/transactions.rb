@@ -179,7 +179,7 @@ module UniversalTracker
         upload_targets.random_target
       end
 
-      def upload_targets
+      def active_upload_targets
         upload_targets.active
       end
 
