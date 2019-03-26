@@ -1,0 +1,11 @@
+{
+    "development": {
+      "host": "cache",
+      "port": 6379,
+      "db":   13
+    },
+    "test": {
+      "host": "cache",
+      "port": 6379,
+      "db":   14
+    }
