@@ -155,10 +155,10 @@
         tr.appendChild(makeTD('text', trackerConfig.domains[domain]));
         tr.appendChild(makeTD('num',
                               Math.round(stats.domain_bytes[domain]/(1024*1024*1024)),
-                              'GB'));
+                              'GiB'));
         tr.appendChild(makeTD('num',
                               Math.round((stats.domain_bytes[domain]/stats.counts.done)/(1024*1024)),
-                              'MB/u'));
+                              'MiB/u'));
         tbody.appendChild(tr);
       }
     }
@@ -170,10 +170,10 @@
       tr.appendChild(makeTD('text', 'total'));
       tr.appendChild(makeTD('num',
                             Math.round(stats.total_bytes/(1024*1024*1024)),
-                            'GB'));
+                            'GiB'));
       tr.appendChild(makeTD('num',
                             Math.round((stats.total_bytes/stats.counts.done)/(1024*1024)),
-                            'MB/u'));
+                            'MiB/u'));
       tfoot.appendChild(tr);
       table.appendChild(tfoot);
     }
@@ -194,7 +194,7 @@
       tr.appendChild(makeTD('legend', downloader));
       tr.appendChild(makeTD('num',
                             Math.round(stats.downloader_bytes[downloader]/(1024*1024*1024)),
-                            'GB'));
+                            'GiB'));
       tr.appendChild(makeTD('num',
                             stats.downloader_count[downloader],
                             'items'));
@@ -330,7 +330,7 @@
     var downloaderTd = makeTD('text', msg.downloader);
     var itemTextTd = makeTD('text', msg.item);
     var sizeText = msg.megabytes < 1 ? Math.round(msg.megabytes * 10) / 10 : Math.round(msg.megabytes);
-    var sizeTd = makeTD('num',  sizeText, 'MB')
+    var sizeTd = makeTD('num',  sizeText, 'MiB')
     downloaderTd.className = 'downloader';
     itemTextTd.title = msg.item;
     tr.appendChild(downloaderTd);
@@ -413,7 +413,7 @@
     }
     stats.items_done_rate = diffSeries;
 
-    // count MB/s based on a moving interval of 10 minutes
+    // count B/s based on a moving interval of 10 minutes
     diffSeries = new DifferenceSeries(trackerConfig.movingAverageInterval * 60000, 1000);
     var perDownloaderData = [], perDownloaderIndex = [];
     for (var i in stats.downloader_chart) {
@@ -459,7 +459,7 @@
       },
       xAxis:{type:'datetime'},
       yAxis:[ { min:0, maxPadding: 0,
-                title:{text:'GB done'},
+                title:{text:'GiB done'},
                 labels:{align:'left',x:0,y:-2},
                 height: 200 },
               { min:0, maxPadding: 0,
