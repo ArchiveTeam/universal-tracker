@@ -190,7 +190,7 @@
       var downloader = downloaders[i];
       tr = document.createElement('tr');
       tr.downloader = downloader;
-      tr.style.cursor = 'pointer';
+      tr.style.cursor = 'default';
       tr.appendChild(makeTD('legend', downloader));
       tr.appendChild(makeTD('num',
                             Math.round(stats.downloader_bytes[downloader]/(1024*1024*1024)),
