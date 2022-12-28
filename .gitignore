@@ -3,3 +3,5 @@ features/redis_conf.rb
 config/redis.json
 
 *~
+node_modules/
+environment.json

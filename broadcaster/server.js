@@ -1,80 +1,67 @@
+import io from 'socket.io';
+import redis from 'redis';
+
+import { createServer } from 'http';
+import { readFileSync } from 'fs';
+
+import HTTPPolling from 'socket.io/lib/transports/http-polling.js';
+import XHRPolling from 'socket.io/lib/transports/xhr-polling.js';
+
+const httpHandler = async (request, response) => {
+  let m;
+  let output;
+
+  if (m = request.url.match(/^\/recent\/(.+)/)) {
+    let channel = m[1];
+    response.writeHead(200, {
+      "Content-Type": "text/plain; charset=UTF-8",
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'true'
+    });
+    output = JSON.stringify(recentMessages[channel] || []);
+
+  } else {
+    response.writeHead(200, {"Content-Type": "text/plain"});
+    output = "" + numberOfClients;
+  }
+
+  response.end(output);
+}
+
 if (process.argv.length != 3) {
     console.error("Specify the path of the environment.json file please!");
     console.error("Usage: node server.js environment.json");
     process.exit(2);
 }
 
-var fs = require('fs');
-var env = JSON.parse(fs.readFileSync(process.argv[2]));
+const env = JSON.parse(readFileSync(process.argv[2])),
+      trackerConfig = env['tracker_config'];
 
-var trackerConfig = env['tracker_config'];
-
-var app = require('http').createServer(httpHandler),
-    io = require('socket.io').listen(app),
-    redis = require('redis').createClient(Number(env['redis_port'] || 6379),
+const app = createServer(httpHandler),
+    ioApp = io.listen(app),
+    redisClient = redis.createClient(Number(env['redis_port'] || 6379),
                                           env['redis_host'] || '127.0.0.1',
                                           Number(env['redis_db'] || 0)),
-    numberOfClients = 0,
     recentMessages = {};
+
+await redisClient.connect();
+if (env['redis_password']) {
+  await redisClient.auth(env['redis_password']);
+}
+
+var numberOfClients = 0;
 
 app.listen(8080);
 
-redis.on("error", function (err) {
-  console.log("Error " + err);
-});
+ioApp.configure(function () {
+  ioApp.set("transports", ["websocket", "xhr-polling"]);
+  ioApp.set("polling duration", 10);
+  ioApp.set("log level", 2); // INFO
 
-redis.on("message", redisHandler);
-
-function httpHandler(request, response) {
-  var m;
-  if (m = request.url.match(/^\/recent\/(.+)/)) {
-    var channel = m[1];
-    response.writeHead(200, {"Content-Type": "text/plain; charset=UTF-8",
-                             'Access-Control-Allow-Origin': '*',
-                             'Access-Control-Allow-Credentials': 'true'});
-    output = JSON.stringify(recentMessages[channel] || []);
-    response.end(output);
-
-  } else {
-    response.writeHead(200, {"Content-Type": "text/plain"});
-    output = "" + numberOfClients;
-    response.end(output);
-  }
-}
-
-function redisHandler(pubsubChannel, message) {
-  console.log(message);
-  var msgParsed = JSON.parse(message);
-  console.log(msgParsed);
-  var channel = msgParsed['log_channel'];
-  if (!recentMessages[channel]) {
-    recentMessages[channel] = [];
-  }
-  var msgList = recentMessages[channel];
-  msgList.push(msgParsed);
-  while (msgList.length > 20) {
-    msgList.shift();
-  }
-  io.of('/'+channel).emit('log_message', message);
-}
-
-
-io.configure(function() {
-  io.set("transports", ["websocket", "xhr-polling"]);
-  io.set("polling duration", 10);
-
-  var path = require('path');
-  var HTTPPolling = require(path.join(
-    path.dirname(require.resolve('socket.io')),'lib', 'transports','http-polling')
-  );
-  var XHRPolling = require(path.join(
-    path.dirname(require.resolve('socket.io')),'lib','transports','xhr-polling')
-  );
-
-  XHRPolling.prototype.doWrite = function(data) {
+  XHRPolling.prototype.doWrite = function (data) {
     HTTPPolling.prototype.doWrite.call(this);
 
-    var headers = {
+    const headers = {
       'Content-Type': 'text/plain; charset=UTF-8',
       'Content-Length': (data && Buffer.byteLength(data)) || 0
     };
@@ -88,20 +75,33 @@ io.configure(function() {
 
     this.response.writeHead(200, headers);
     this.response.write(data);
-    // this.log.debug(this.name + ' writing', data);
   };
 });
 
-io.sockets.on('connection', function(socket) {
+ioApp.sockets.on('connection', function (socket) {
   numberOfClients++;
-  socket.on('disconnect', function() {
+  socket.on('disconnect', function () {
     numberOfClients--;
   });
 });
 
+const subscriber = redisClient.duplicate();
+await subscriber.connect();
 
-if (env['redis_password']) {
-  redis.auth(env['redis_password']);
-}
-redis.subscribe(trackerConfig['redis_pubsub_channel']);
+await subscriber.subscribe(trackerConfig['redis_pubsub_channel'], (message, channel) => {
+  const msgParsed = JSON.parse(message);
+  const logChannel = msgParsed['log_channel'];
+  if (!recentMessages[logChannel]) {
+    recentMessages[logChannel] = [];
+  }
+  const msgList = recentMessages[logChannel];
+  msgList.push(msgParsed);
+  while (msgList.length > 20) {
+    msgList.shift();
+  }
+  ioApp.of('/' + logChannel).emit('log_message', message);
+});
 
+redisClient.on("error",  (err) => {
+  console.error("redis error ", err);
+});

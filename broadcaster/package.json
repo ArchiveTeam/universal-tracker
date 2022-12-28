@@ -1,9 +1,9 @@
 {
   "name": "broadcaster",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
-    "socket.io": "0.9.17",
-    "hiredis": "",
-    "redis": ""
+    "redis": "^4.5.1",
+    "socket.io": "0.9.19"
   }
 }
